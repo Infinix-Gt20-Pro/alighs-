@@ -2,8 +2,8 @@ node_modules/
 .next/
 dist/
 build/
+*.tsbuildinfo
 .env.local
 .env
-*.log
 .DS_Store
 Thumbs.db

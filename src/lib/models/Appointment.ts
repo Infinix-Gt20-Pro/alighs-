@@ -22,15 +22,13 @@ const AppointmentSchema = new Schema<IAppointment>(
     preferredTime: { type: String, required: true },
     concern: {
       type: String,
-      enum: ["eye-checkup", "power-change", "frame-fitting", "lens-consultation", "other"],
       required: true,
     },
     concernDetails: { type: String },
     whatsappConfirm: { type: Boolean, default: true },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "completed", "cancelled"],
-      default: "pending",
+      default: "confirmed",
     },
   },
   { timestamps: true }

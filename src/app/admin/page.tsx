@@ -222,7 +222,7 @@ export default function AdminDashboardPage() {
                 type="password"
                 value={pinInput}
                 onChange={(e) => setPinInput(e.target.value)}
-                placeholder="Enter 786 or 6396"
+                placeholder="••••"
                 className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/15 text-white placeholder-neutral-600 focus:outline-none focus:border-amber-400 font-mono text-center text-lg tracking-widest"
                 autoFocus
               />

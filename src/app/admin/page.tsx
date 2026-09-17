@@ -82,12 +82,13 @@ export default function AdminDashboardPage() {
 
   const handleLogin = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (pinInput === "7217" || pinInput === "1499" || pinInput === "admin") {
+    const cleanPin = pinInput.trim();
+    if (cleanPin === "786" || cleanPin === "6396" || cleanPin === "7217" || cleanPin === "1499" || cleanPin === "admin") {
       setIsAuthenticated(true);
       localStorage.setItem("aligs_admin_authenticated", "true");
       setAuthError("");
     } else {
-      setAuthError("Incorrect Passcode. Enter 7217 or 1499 (Dr. Sheeraz)");
+      setAuthError("Incorrect Passcode. Enter 786 or 6396");
     }
   };
 
@@ -221,7 +222,7 @@ export default function AdminDashboardPage() {
                 type="password"
                 value={pinInput}
                 onChange={(e) => setPinInput(e.target.value)}
-                placeholder="Enter 7217"
+                placeholder="Enter 786 or 6396"
                 className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/15 text-white placeholder-neutral-600 focus:outline-none focus:border-amber-400 font-mono text-center text-lg tracking-widest"
                 autoFocus
               />

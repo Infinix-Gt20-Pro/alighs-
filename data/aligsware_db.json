@@ -1,20 +1,5 @@
 {
   "orders": [],
   "appointments": [],
-  "inventory": [
-    {
-      "id": "INV-1789646923666-17",
-      "name": "kashan",
-      "category": "Eyeglasses",
-      "frameShape": "Oval",
-      "brand": "ALIG'S WARE",
-      "sku": "005",
-      "price": 1999,
-      "stock": 1,
-      "lowStockThreshold": 5,
-      "colors": [],
-      "notes": "1",
-      "updatedAt": "2026-09-17T12:08:43.830Z"
-    }
-  ]
+  "inventory": []
 }

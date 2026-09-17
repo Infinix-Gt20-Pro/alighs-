@@ -77,7 +77,7 @@ export default function ExplodedSection() {
             <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
             <span>3D SCROLL EXPLODE ARCHITECTURE</span>
           </div>
-          <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-white uppercase">
+          <h2 className="font-cinzel text-2xl sm:text-4xl font-bold tracking-[0.1em] text-white uppercase">
             Engineering Breakdown
           </h2>
           <p className="text-xs sm:text-sm text-neutral-400 font-light mt-1 max-w-lg">

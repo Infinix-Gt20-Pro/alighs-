@@ -1,19 +1,31 @@
+// src/components/HeroSection.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { Sparkles, Eye, ArrowRight, ShieldCheck, Feather, Award } from "lucide-react";
+import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
+import {
+  Sparkles,
+  Eye,
+  ArrowRight,
+  ShieldCheck,
+  Feather,
+  Award,
+  ChevronDown,
+  Calendar
+} from "lucide-react";
 import { FRAME_MATERIALS } from "./GlassesModel";
 
 const GlassesHeroCanvas = dynamic(() => import("./GlassesHeroCanvas"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[360px] sm:h-[420px] md:h-[480px] flex items-center justify-center">
+    <div className="w-full h-[380px] sm:h-[440px] md:h-[500px] flex items-center justify-center">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-14 h-14 rounded-full border border-amber-500/20 border-t-amber-400 animate-spin" />
-        <span className="text-xs font-mono text-neutral-400 uppercase tracking-widest">Loading 3D Viewport...</span>
+        <div className="w-12 h-12 rounded-full border border-amber-500/20 border-t-amber-400 animate-spin" />
+        <span className="text-xs font-mono text-amber-300/80 uppercase tracking-widest">
+          Calibrating 3D Optics...
+        </span>
       </div>
     </div>
   ),
@@ -21,72 +33,100 @@ const GlassesHeroCanvas = dynamic(() => import("./GlassesHeroCanvas"), {
 
 export default function HeroSection() {
   const [selectedMaterial, setSelectedMaterial] = useState("gold");
+  const sectionRef = useRef<HTMLElement>(null);
+  const [scrollVal, setScrollVal] = useState(0);
 
-  const scrollToExplode = () => {
-    document.getElementById("explode-section")?.scrollIntoView({ behavior: "smooth" });
-  };
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
 
-  const currentMat = FRAME_MATERIALS.find((m) => m.id === selectedMaterial) || FRAME_MATERIALS[0];
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    setScrollVal(latest);
+  });
+
+  // Motion Scroll Transforms for Next-Level Parallax
+  const titleY = useTransform(scrollYProgress, [0, 1], [0, 160]);
+  const titleScale = useTransform(scrollYProgress, [0, 1], [1, 0.88]);
+  const titleOpacity = useTransform(scrollYProgress, [0, 0.75, 1], [1, 0.45, 0]);
+
+  const canvasY = useTransform(scrollYProgress, [0, 1], [0, 90]);
+  const canvasScale = useTransform(scrollYProgress, [0, 0.6, 1], [1, 1.15, 1.25]);
+
+  const subtitleY = useTransform(scrollYProgress, [0, 1], [0, 60]);
+  const subtitleOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.7, 0]);
+
+  const bgOrbY1 = useTransform(scrollYProgress, [0, 1], [0, -120]);
+  const bgOrbY2 = useTransform(scrollYProgress, [0, 1], [0, 140]);
 
   return (
-    <section className="relative min-h-[96vh] flex flex-col items-center justify-start overflow-hidden px-4 sm:px-6 pt-12 sm:pt-16 pb-20">
-      {/* Dynamic Ambient Background Aura */}
+    <section
+      ref={sectionRef}
+      className="relative min-h-[96vh] flex flex-col items-center justify-start overflow-hidden px-4 sm:px-6 pt-10 sm:pt-14 pb-20"
+    >
+      {/* Dynamic Ambient Background Aura with Parallax Motion */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[520px] bg-gradient-to-r from-amber-600/12 via-indigo-600/15 to-cyan-500/14 rounded-full blur-[150px]" />
-        <div className="absolute top-[46%] left-1/2 -translate-x-1/2 w-[650px] h-[280px] bg-cyan-500/10 rounded-full blur-[120px]" />
+        <motion.div
+          style={{ y: bgOrbY1 }}
+          className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[550px] bg-gradient-to-r from-amber-600/15 via-indigo-600/15 to-cyan-500/15 rounded-full blur-[160px]"
+        />
+        <motion.div
+          style={{ y: bgOrbY2 }}
+          className="absolute top-[52%] left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-cyan-500/12 rounded-full blur-[130px]"
+        />
+        <div className="absolute inset-0 bg-[radial-gradient(#ffffff08_1px,transparent_1px)] [background-size:32px_32px] opacity-40 pointer-events-none" />
       </div>
 
       {/* Top Heritage Optical Pill Badge */}
       <motion.div
-        initial={{ opacity: 0, y: -12 }}
+        initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="relative z-10 inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.04] border border-amber-500/30 text-xs font-mono text-amber-300 uppercase tracking-widest mb-4 shadow-[0_0_25px_rgba(212,175,55,0.15)]"
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-[#0c0d12]/90 border border-amber-400/40 text-xs font-mono text-amber-300 uppercase tracking-[0.25em] mb-4 shadow-[0_0_25px_rgba(212,175,55,0.2)] backdrop-blur-xl"
       >
-        <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-        <span>FIROZABAD ATELIER &bull; ARCHITECTURAL EYEWEAR</span>
+        <span className="text-amber-400">✦</span>
+        <span>EST. 1988 &bull; FIROZABAD ATELIER &bull; ARCHITECTURAL EYEWEAR</span>
+        <span className="text-amber-400">✦</span>
       </motion.div>
 
-      {/* 3D Hero Stage with Glowing Typography in Background */}
-      <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center justify-center my-2 sm:my-4 min-h-[420px] sm:min-h-[490px]">
-        {/* Giant Glowing Typography Heading BEHIND the Canvas */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none z-0">
-          <motion.h1
-            initial={{ opacity: 0, scale: 0.92, y: 15 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="text-6xl sm:text-8xl md:text-9xl lg:text-[10.8rem] font-black tracking-tight sm:tracking-tighter uppercase text-center leading-none text-transparent bg-clip-text bg-gradient-to-b from-white via-neutral-200 to-white/10 drop-shadow-[0_0_70px_rgba(212,175,55,0.35)]"
-          >
-            ALIGH&apos;S WARE
-          </motion.h1>
+      {/* 3D Hero Stage with Sculpted Roman Imperial Cinzel Typography */}
+      <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center justify-center my-2 sm:my-4 min-h-[440px] sm:min-h-[520px]">
+        {/* Giant Next-Level Cinzel Typography Heading BEHIND the Canvas */}
+        <motion.div
+          style={{ y: titleY, scale: titleScale, opacity: titleOpacity }}
+          className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none z-0"
+        >
+          <h1 className="font-cinzel text-5xl sm:text-7xl md:text-8xl lg:text-[9.8rem] font-bold tracking-[0.14em] sm:tracking-[0.18em] uppercase text-center leading-[0.95] text-gold-gradient gold-glow drop-shadow-[0_0_90px_rgba(212,175,55,0.45)]">
+            ALIGH&apos;S
+            <br />
+            WARE
+          </h1>
 
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25, duration: 0.7 }}
-            className="flex items-center justify-center gap-3 text-xs sm:text-sm md:text-base font-mono tracking-[0.45em] text-amber-300 uppercase mt-2 sm:mt-4 drop-shadow-[0_0_15px_rgba(212,175,55,0.6)]"
-          >
-            <span className="w-8 sm:w-16 h-[1px] bg-gradient-to-r from-transparent to-amber-400" />
-            <span>Sculpted Optics &bull; Clinical Vision</span>
-            <span className="w-8 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-amber-400" />
-          </motion.div>
-        </div>
+          <div className="flex items-center justify-center gap-4 text-xs sm:text-sm md:text-base font-mono tracking-[0.4em] text-amber-300 uppercase mt-4 sm:mt-6 drop-shadow-[0_0_20px_rgba(212,175,55,0.5)]">
+            <span className="w-12 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-amber-400" />
+            <span>SCULPTED OPTICS &bull; CLINICAL VISION</span>
+            <span className="w-12 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-amber-400" />
+          </div>
+        </motion.div>
 
-        {/* 3D Eyeglasses Canvas */}
-        <div className="relative z-10 w-full flex items-center justify-center">
-          <GlassesHeroCanvas materialId={selectedMaterial} />
-        </div>
+        {/* 3D Eyeglasses Canvas with Scroll Elevation */}
+        <motion.div
+          style={{ y: canvasY, scale: canvasScale }}
+          className="relative z-10 w-full flex items-center justify-center pointer-events-auto"
+        >
+          <GlassesHeroCanvas materialId={selectedMaterial} scrollYProgress={scrollVal} />
+        </motion.div>
 
         {/* Interactive Real-Time 3D Material Switcher */}
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.6 }}
-          className="relative z-20 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 p-1.5 sm:p-2 rounded-full bg-[#121318]/90 border border-white/15 backdrop-blur-xl shadow-[0_10px_35px_rgba(0,0,0,0.6)]"
+          transition={{ delay: 0.3, duration: 0.6 }}
+          className="relative z-20 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 p-1.5 sm:p-2 rounded-full bg-[#0c0d12]/95 border border-amber-400/30 backdrop-blur-2xl shadow-[0_15px_40px_rgba(0,0,0,0.8)]"
         >
-          <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 pl-3 pr-1 hidden sm:inline-flex items-center gap-1.5">
-            <Sparkles className="w-3 h-3 text-amber-400" />
-            Finish:
+          <span className="text-[11px] font-mono uppercase tracking-widest text-amber-300/80 pl-3 pr-1 hidden sm:inline-flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            Frame Finish:
           </span>
           {FRAME_MATERIALS.map((mat) => (
             <button
@@ -94,17 +134,17 @@ export default function HeroSection() {
               onClick={() => setSelectedMaterial(mat.id)}
               className={`cursor-pointer group flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-300 ${
                 selectedMaterial === mat.id
-                  ? "bg-gradient-to-r from-white/20 to-white/10 border border-amber-400/60 text-white shadow-[0_0_20px_rgba(212,175,55,0.35)] scale-105"
-                  : "text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent"
+                  ? "bg-gradient-to-r from-amber-400 to-amber-500 text-black font-bold shadow-[0_0_25px_rgba(212,175,55,0.45)] scale-105"
+                  : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
               }`}
             >
               <span
-                className="w-3.5 h-3.5 rounded-full border border-white/30 shadow-inner flex-shrink-0"
+                className="w-3 h-3 rounded-full border border-white/40 shadow-inner flex-shrink-0"
                 style={{ backgroundColor: mat.color }}
               />
-              <span>{mat.name.split(" ")[1] || mat.name}</span>
+              <span className="font-mono text-[11px]">{mat.name.split(" ")[1] || mat.name}</span>
               {selectedMaterial === mat.id && (
-                <span className="text-[10px] font-mono text-amber-300 px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-500/30">
+                <span className="text-[10px] font-mono text-black px-1.5 py-0.5 rounded bg-amber-200">
                   {mat.badge}
                 </span>
               )}
@@ -113,84 +153,57 @@ export default function HeroSection() {
         </motion.div>
       </div>
 
-      {/* Foreground Copy & CTAs */}
-      <div className="relative z-20 max-w-4xl w-full mx-auto flex flex-col items-center text-center mt-6">
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.6 }}
-          className="text-lg sm:text-2xl font-light text-neutral-200 mb-8 max-w-2xl leading-relaxed"
-        >
+      {/* Foreground Copy & CTAs with Motion Parallax */}
+      <motion.div
+        style={{ y: subtitleY, opacity: subtitleOpacity }}
+        className="relative z-20 max-w-4xl w-full mx-auto flex flex-col items-center text-center mt-6"
+      >
+        <p className="font-cormorant text-2xl sm:text-3xl md:text-4xl italic font-light text-neutral-200 mb-8 max-w-2xl leading-relaxed">
           Firozabad ki bharosemand offline optical legacy,{" "}
-          <span className="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-100 to-cyan-300">
+          <span className="not-italic font-medium text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-100 to-cyan-300">
             ab 3D digital luxury ke saath
           </span>
           .
-        </motion.p>
+        </p>
 
         {/* CTA Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.48, duration: 0.6 }}
-          className="flex flex-wrap items-center justify-center gap-4 mb-12"
-        >
+        <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
           <Link
             href="/shop"
-            className="cursor-pointer inline-flex items-center gap-3 px-8 py-4 rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-black font-semibold text-base shadow-[0_0_35px_rgba(212,175,55,0.45)] hover:shadow-[0_0_50px_rgba(212,175,55,0.7)] hover:scale-105 active:scale-95 transition-all duration-300"
+            className="cursor-pointer inline-flex items-center gap-3 px-8 py-4 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-black font-bold text-sm tracking-wider uppercase shadow-[0_0_35px_rgba(212,175,55,0.45)] hover:shadow-[0_0_50px_rgba(212,175,55,0.7)] hover:scale-105 active:scale-95 transition-all duration-300"
           >
-            <Eye className="w-5 h-5 text-black" />
+            <Eye className="w-4 h-4" />
             <span>Explore Collection</span>
-            <ArrowRight className="w-4 h-4 text-black/80" />
+            <ArrowRight className="w-4 h-4" />
           </Link>
 
           <Link
             href="/appointment"
-            className="cursor-pointer inline-flex items-center gap-2.5 px-8 py-4 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/20 text-white font-medium text-base hover:border-amber-400/40 hover:scale-105 active:scale-95 transition-all duration-300 backdrop-blur-md"
+            className="cursor-pointer inline-flex items-center gap-2.5 px-8 py-4 rounded-full bg-white/[0.04] hover:bg-white/[0.08] text-white font-semibold text-sm border border-white/15 hover:border-amber-400/50 backdrop-blur-xl transition-all duration-300 hover:scale-105"
           >
-            <Sparkles className="w-4 h-4 text-amber-400" />
+            <Calendar className="w-4 h-4 text-amber-400" />
             <span>Book Clinic Appointment</span>
           </Link>
-        </motion.div>
+        </div>
 
-        {/* Triple Luxury Metrics Cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.55, duration: 0.6 }}
-          className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-3xl"
-        >
-          <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-md text-left flex items-start gap-3.5 hover:border-amber-400/30 transition-colors">
-            <div className="w-9 h-9 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center flex-shrink-0">
-              <ShieldCheck className="w-5 h-5 text-amber-400" />
-            </div>
-            <div>
-              <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider block">Lens Protection</span>
-              <span className="text-sm font-semibold text-white mt-0.5 block">Anti-Glare Sapphire 420nm</span>
-            </div>
+        {/* Trust Badges Bar with Glass Pills */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-2xl">
+          <div className="flex items-center justify-center gap-2.5 p-3 rounded-2xl bg-white/[0.03] border border-white/10 text-xs font-mono text-neutral-300 backdrop-blur-lg">
+            <Feather className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>18g Featherweight Titanium</span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-md text-left flex items-start gap-3.5 hover:border-cyan-400/30 transition-colors">
-            <div className="w-9 h-9 rounded-xl bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-center flex-shrink-0">
-              <Feather className="w-5 h-5 text-cyan-400" />
-            </div>
-            <div>
-              <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider block">Weight Index</span>
-              <span className="text-sm font-semibold text-white mt-0.5 block">12.4g Pure Featherweight</span>
-            </div>
+          <div className="flex items-center justify-center gap-2.5 p-3 rounded-2xl bg-white/[0.03] border border-white/10 text-xs font-mono text-neutral-300 backdrop-blur-lg">
+            <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0" />
+            <span>420nm Blue-Cut Sapphire</span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-md text-left flex items-start gap-3.5 hover:border-emerald-400/30 transition-colors">
-            <div className="w-9 h-9 rounded-xl bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center flex-shrink-0">
-              <Award className="w-5 h-5 text-emerald-400" />
-            </div>
-            <div>
-              <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider block">Clinical Authority</span>
-              <span className="text-sm font-semibold text-white mt-0.5 block">AMU-Certified Optometry</span>
-            </div>
+          <div className="flex items-center justify-center gap-2.5 p-3 rounded-2xl bg-white/[0.03] border border-white/10 text-xs font-mono text-neutral-300 backdrop-blur-lg">
+            <Award className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>AMU Clinical Optometry</span>
           </div>
-        </motion.div>
-      </div>
+        </div>
+      </motion.div>
     </section>
   );
 }

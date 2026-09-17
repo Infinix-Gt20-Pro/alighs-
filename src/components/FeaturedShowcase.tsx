@@ -54,7 +54,7 @@ export default function FeaturedShowcase() {
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span>Curated Atelier Collection</span>
           </div>
-          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white">
+          <h2 className="font-cinzel text-3xl sm:text-5xl font-bold tracking-[0.06em] text-white">
             Signature Optical Frames
           </h2>
           <p className="text-neutral-400 mt-2 max-w-xl text-sm sm:text-base font-light">

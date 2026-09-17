@@ -123,3 +123,32 @@ body {
 .animate-float-2 {
   animation: floatOrb2 20s ease-in-out infinite;
 }
+
+/* Luxury Typography Utilities */
+.font-cinzel {
+  font-family: var(--font-cinzel), serif;
+}
+
+.font-cormorant {
+  font-family: var(--font-cormorant), serif;
+}
+
+.font-editorial {
+  font-family: var(--font-cormorant), var(--font-cinzel), serif;
+}
+
+.text-gold-gradient {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F5E6C4 28%, #D4AF37 68%, #8C6D23 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-silver-gradient {
+  background: linear-gradient(180deg, #FFFFFF 0%, #E2E8F0 40%, #94A3B8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-glow {
+  text-shadow: 0 0 40px rgba(212, 175, 55, 0.45), 0 0 80px rgba(212, 175, 55, 0.2);
+}

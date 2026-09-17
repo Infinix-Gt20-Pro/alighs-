@@ -46,7 +46,7 @@ export default function Navbar() {
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="text-lg font-black tracking-wider uppercase text-white group-hover:text-amber-300 transition-colors font-sans">
+              <span className="font-cinzel text-base sm:text-lg font-bold tracking-[0.14em] uppercase text-white group-hover:text-amber-300 transition-colors">
                 ALIGH&apos;S WARE
               </span>
               <span className="text-[9px] font-mono text-neutral-400 tracking-[0.25em] uppercase -mt-1">

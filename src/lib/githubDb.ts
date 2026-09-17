@@ -13,10 +13,27 @@ const REPO = 'Infinix-Gt20-Pro/Aligh-s---Ware';
 const DB_PATH = 'data/aligsware_db.json';
 const API_BASE = 'https://api.github.com';
 
+interface InventoryItem {
+  id: string;
+  name: string;
+  category: string;
+  frameShape?: string;
+  brand?: string;
+  sku?: string;
+  price: number;
+  stock: number;
+  lowStockThreshold: number;
+  colors?: string[];
+  notes?: string;
+  updatedAt: string;
+}
+
 interface DbData {
   orders: Record<string, unknown>[];
   appointments: Record<string, unknown>[];
+  inventory: InventoryItem[];
 }
+
 
 interface GithubFileResponse {
   sha: string;
@@ -116,4 +133,52 @@ export async function dbUpdateAppointmentStatus(appointmentId: string, status: s
   );
   const newData: DbData = { ...file.data, appointments };
   return writeFileContent(newData, file.sha, `apt: update status ${appointmentId} -> ${status}`);
+}
+
+// ─── INVENTORY FUNCTIONS ──────────────────────────────────────────────────────
+
+/** Export the InventoryItem type for use in other files */
+export type { InventoryItem };
+
+/** Get all inventory items */
+export async function dbGetInventory(): Promise<InventoryItem[]> {
+  const file = await getFileInfo();
+  if (!file) return [];
+  return file.data.inventory || [];
+}
+
+/** Save (add or update) an inventory item */
+export async function dbSaveInventoryItem(item: InventoryItem): Promise<boolean> {
+  const file = await getFileInfo();
+  if (!file) return false;
+  const existing = file.data.inventory || [];
+  const idx = existing.findIndex((i) => i.id === item.id);
+  let inventory: InventoryItem[];
+  if (idx >= 0) {
+    inventory = existing.map((i) => (i.id === item.id ? { ...item, updatedAt: new Date().toISOString() } : i));
+  } else {
+    inventory = [{ ...item, updatedAt: new Date().toISOString() }, ...existing];
+  }
+  const newData: DbData = { ...file.data, inventory };
+  return writeFileContent(newData, file.sha, `inv: upsert ${item.name}`);
+}
+
+/** Delete an inventory item by id */
+export async function dbDeleteInventoryItem(id: string): Promise<boolean> {
+  const file = await getFileInfo();
+  if (!file) return false;
+  const inventory = (file.data.inventory || []).filter((i) => i.id !== id);
+  const newData: DbData = { ...file.data, inventory };
+  return writeFileContent(newData, file.sha, `inv: delete ${id}`);
+}
+
+/** Update stock quantity only (quick adjustment) */
+export async function dbUpdateInventoryStock(id: string, stock: number): Promise<boolean> {
+  const file = await getFileInfo();
+  if (!file) return false;
+  const inventory = (file.data.inventory || []).map((i) =>
+    i.id === id ? { ...i, stock, updatedAt: new Date().toISOString() } : i
+  );
+  const newData: DbData = { ...file.data, inventory };
+  return writeFileContent(newData, file.sha, `inv: stock update ${id} -> ${stock}`);
 }

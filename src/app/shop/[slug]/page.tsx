@@ -148,15 +148,32 @@ export default function ProductDetailPage() {
                 style={{ backgroundColor: activeColorHex }}
               />
 
-              {/* Central Optical Motif with Authentic Frame Silhouette */}
-              <div className="relative filter drop-shadow-[0_0_25px_rgba(212,175,55,0.4)] my-8 flex items-center justify-center">
-                <FrameSilhouette
-                  shape={product.frameShape || "rectangle"}
-                  frameType={(product as any).frameType || "full-rim"}
-                  color={activeColorHex}
-                  isSunglass={product.category === "sunglasses"}
-                  className="w-64 sm:w-80 h-32 sm:h-40"
-                />
+              {/* Central Real Studio Photo Showcase */}
+              <div className="relative my-6 flex flex-col items-center justify-center w-full min-h-[240px]">
+                {product.images && product.images[0] ? (
+                  <div className="relative z-10 w-full h-56 sm:h-72 flex items-center justify-center p-4">
+                    <img
+                      src={product.images[0]}
+                      alt={product.name}
+                      className="max-h-full max-w-full object-contain filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.9)] transition-transform duration-500 hover:scale-105"
+                      onError={(e) => {
+                        if (product.images && product.images[1] && e.currentTarget.src !== product.images[1]) {
+                          e.currentTarget.src = product.images[1];
+                        }
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="relative filter drop-shadow-[0_0_25px_rgba(212,175,55,0.4)] my-8 flex items-center justify-center">
+                    <FrameSilhouette
+                      shape={product.frameShape || "rectangle"}
+                      frameType={(product as any).frameType || "full-rim"}
+                      color={activeColorHex}
+                      isSunglass={product.category === "sunglasses"}
+                      className="w-64 sm:w-80 h-32 sm:h-40"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="relative text-center">

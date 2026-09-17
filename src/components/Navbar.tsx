@@ -6,7 +6,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, ShoppingBag, Menu, X, Sparkles, Phone, Calendar, ArrowRight, MessageCircle } from "lucide-react";
+import { Eye, ShoppingBag, Menu, X, Sparkles, Phone, Calendar, ArrowRight, MessageCircle, Smartphone } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 
 function InstagramIcon({ className = "w-4 h-4" }: { className?: string }) {
@@ -129,6 +129,17 @@ export default function Navbar() {
               <InstagramIcon className="w-4 h-4" />
             </a>
 
+            {/* Android App (APK) Download */}
+            <a
+              href="/downloads/aligsware.apk"
+              download="ALIGS_WARE.apk"
+              title="Download Official Android App (APK)"
+              aria-label="Download Official Android App"
+              className="cursor-pointer relative p-2.5 rounded-full bg-white/[0.05] hover:bg-amber-400/20 border border-white/15 hover:border-amber-400/40 text-neutral-200 hover:text-amber-300 transition-all duration-300 shadow-sm"
+            >
+              <Smartphone className="w-4 h-4 text-amber-400" />
+            </a>
+
             {/* Slide-in Cart Trigger Button */}
             <button
               onClick={openCart}
@@ -217,6 +228,13 @@ export default function Navbar() {
                   className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-[#f09433]/20 via-[#dc2743]/20 to-[#bc1888]/20 hover:from-[#f09433]/30 hover:via-[#dc2743]/30 hover:to-[#bc1888]/30 border border-[#dc2743]/40 text-xs font-mono text-pink-300 transition-colors"
                 >
                   <InstagramIcon className="w-4 h-4 text-pink-400" /> Follow @aligsware on Instagram
+                </a>
+                <a
+                  href="/downloads/aligsware.apk"
+                  download="ALIGS_WARE.apk"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-xs font-mono text-amber-300 transition-colors"
+                >
+                  <Smartphone className="w-4 h-4 text-amber-400" /> Download Android App (APK)
                 </a>
                 <div className="grid grid-cols-2 gap-2 mt-1">
                   <a

@@ -132,23 +132,39 @@ export default function ProductCard({ product }: ProductProps) {
         )}
       </div>
 
-      {/* Visual Frame Silhouette Presentation */}
+      {/* Visual Presentation: Real Studio Photo with Silhouette Fallback */}
       <Link
         href={`/shop/${product.slug}`}
         className="block relative my-4 text-center group-hover:scale-105 transition-transform duration-500"
       >
-        <div className="w-full h-44 sm:h-48 rounded-2xl bg-gradient-to-br from-neutral-950 via-[#0c0d12] to-black border border-white/5 flex flex-col items-center justify-center relative overflow-hidden p-4">
+        <div className="w-full h-48 sm:h-52 rounded-2xl bg-gradient-to-br from-neutral-950 via-[#0c0d12] to-black border border-white/5 flex flex-col items-center justify-center relative overflow-hidden p-3">
           <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/10 to-indigo-500/10 opacity-20 group-hover:opacity-60 transition-opacity duration-500" />
           
-          <div className="relative z-10 filter drop-shadow-[0_0_15px_rgba(212,175,55,0.3)]">
-            <FrameSilhouette
-              shape={product.frameShape || "rectangle"}
-              frameType={product.frameType || "full-rim"}
-              color={activeColorHex}
-              isSunglass={isSunglass}
-              className="w-44 sm:w-52 h-20 sm:h-24"
-            />
-          </div>
+          {product.images && product.images[0] ? (
+            <div className="relative z-10 w-full h-32 sm:h-36 flex items-center justify-center p-2">
+              <img
+                src={product.images[0]}
+                alt={product.name}
+                className="max-h-full max-w-full object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.85)] group-hover:scale-110 transition-transform duration-500"
+                loading="lazy"
+                onError={(e) => {
+                  if (product.images && product.images[1] && e.currentTarget.src !== product.images[1]) {
+                    e.currentTarget.src = product.images[1];
+                  }
+                }}
+              />
+            </div>
+          ) : (
+            <div className="relative z-10 filter drop-shadow-[0_0_15px_rgba(212,175,55,0.3)]">
+              <FrameSilhouette
+                shape={product.frameShape || "rectangle"}
+                frameType={product.frameType || "full-rim"}
+                color={activeColorHex}
+                isSunglass={isSunglass}
+                className="w-44 sm:w-52 h-20 sm:h-24"
+              />
+            </div>
+          )}
           
           <div className="relative z-10 flex items-center gap-2 mt-2">
             <span className="text-[10px] font-mono text-amber-300/90 uppercase tracking-wider">

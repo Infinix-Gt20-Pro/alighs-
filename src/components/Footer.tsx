@@ -4,7 +4,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Phone, MessageCircle, MapPin, ExternalLink, ShieldCheck } from "lucide-react";
+import { Phone, MessageCircle, MapPin, ExternalLink, ShieldCheck, Download } from "lucide-react";
 
 function InstagramIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
@@ -75,6 +75,15 @@ export default function Footer() {
               >
                 <MessageCircle className="w-3.5 h-3.5" />
                 <span>WhatsApp</span>
+              </a>
+
+              <a
+                href="/downloads/aligsware.apk"
+                download="ALIGS_WARE.apk"
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 hover:border-amber-400 text-amber-300 text-xs font-mono transition-all"
+              >
+                <Download className="w-3.5 h-3.5 text-amber-400" />
+                <span>Download Android APK</span>
               </a>
             </div>
           </div>

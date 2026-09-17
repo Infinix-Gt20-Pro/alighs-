@@ -109,21 +109,25 @@ export default function FeaturedShowcase() {
                 )}
               </div>
 
-              {/* Visual Display Mock / Frame Silhouette */}
+              {/* Real Studio Photo Presentation */}
               <Link href={`/shop/${product.slug}`} className="block relative my-6 text-center group-hover:scale-105 transition-transform duration-500">
-                <div className="w-full h-40 rounded-2xl bg-gradient-to-br from-neutral-900 via-neutral-950 to-black flex items-center justify-center relative overflow-hidden border border-white/5">
-                  {/* Subtle ambient lighting inside card */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/10 to-cyan-500/10 opacity-40 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="w-full h-44 rounded-2xl bg-gradient-to-br from-neutral-900 via-neutral-950 to-black flex items-center justify-center relative overflow-hidden border border-white/5 p-3">
+                  <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/10 to-cyan-500/10 opacity-30 group-hover:opacity-70 transition-opacity duration-500" />
                   
-                  {/* Stylized Optical Representation */}
-                  <div className="relative flex flex-col items-center">
-                    <div className="text-4xl filter drop-shadow-[0_0_15px_rgba(212,175,55,0.4)]">
-                      👓
+                  {product.images && product.images[0] ? (
+                    <img
+                      src={product.images[0]}
+                      alt={product.name}
+                      className="max-h-full max-w-full object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.9)] group-hover:scale-110 transition-transform duration-500 relative z-10"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="relative flex flex-col items-center z-10">
+                      <span className="text-xs font-mono text-amber-300 uppercase tracking-widest">
+                        {product.frameShape} Frame
+                      </span>
                     </div>
-                    <span className="text-[11px] font-mono text-amber-300/80 uppercase tracking-widest mt-2">
-                      {product.frameShape} contour
-                    </span>
-                  </div>
+                  )}
                 </div>
               </Link>
 

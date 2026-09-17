@@ -97,7 +97,7 @@ export default function HeroSection() {
         {/* =========================================================================
             STAGE 1: EDITORIAL CAMPAIGN OPENING (Headline, Sub-line, Luxury CTAs)
            ========================================================================= */}
-        <div className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 md:pt-32 flex flex-col items-center text-center pointer-events-none">
+        <div className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-26 md:pt-30 flex flex-col items-center text-center pointer-events-none">
           
           <motion.div
             style={{
@@ -108,18 +108,18 @@ export default function HeroSection() {
             className="flex flex-col items-center will-change-transform"
           >
             {/* Small Brand Eyebrow */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 border border-[#C6A463]/25 text-[10px] sm:text-[11px] font-mono tracking-[0.26em] text-[#3C2415] uppercase mb-4 sm:mb-6 shadow-[0_2px_15px_rgba(60,36,21,0.04)] backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/85 border border-[#C6A463]/25 text-[10px] sm:text-[11px] font-mono tracking-[0.24em] text-[#3C2415] uppercase mb-3 sm:mb-4 shadow-[0_2px_12px_rgba(60,36,21,0.04)] backdrop-blur-md">
               <span className="w-1.5 h-1.5 rounded-full bg-[#C6A463] animate-pulse" />
-              <span>ALIG&apos;S WARE &bull; FIROZABAD</span>
+              <span>ALIGSWARE &bull; FIROZABAD</span>
             </div>
 
             {/* Monumental Fashion Campaign Headline */}
-            <h1 className="font-cinzel text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-[0.06em] text-[#3C2415] leading-[1.04] mb-2 sm:mb-3 drop-shadow-sm">
+            <h1 className="font-cinzel text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-[0.06em] text-[#3C2415] leading-[1.04] mb-1.5 sm:mb-2 drop-shadow-sm">
               SCULPTED VISION.
             </h1>
 
             {/* Poetic Second Line */}
-            <p className="font-cormorant italic text-2xl sm:text-4xl md:text-5xl font-normal text-[#8B7355] tracking-wide mb-6 sm:mb-8">
+            <p className="font-cormorant italic text-xl sm:text-3xl md:text-4xl font-normal text-[#8B7355] tracking-wide mb-4 sm:mb-6">
               Made to be seen.
             </p>
           </motion.div>
@@ -130,19 +130,19 @@ export default function HeroSection() {
               opacity: ctaOpacity,
               y: ctaY,
             }}
-            className="pointer-events-auto flex flex-wrap items-center justify-center gap-3.5 sm:gap-4 will-change-transform"
+            className="pointer-events-auto flex flex-wrap items-center justify-center gap-3 sm:gap-4 will-change-transform"
           >
             <Link
               href="/shop"
-              className="cursor-pointer px-7 sm:px-8 py-3.5 sm:py-4 rounded-full bg-[#C6A463] hover:bg-[#A8884A] text-white font-semibold text-xs sm:text-sm tracking-[0.14em] uppercase transition-all duration-300 shadow-[0_4px_25px_rgba(198,164,99,0.35)] hover:shadow-[0_6px_35px_rgba(198,164,99,0.5)] active:scale-[0.98] flex items-center gap-2.5 group"
+              className="cursor-pointer px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-[#C6A463] hover:bg-[#A8884A] text-white font-semibold text-[11px] sm:text-xs tracking-[0.14em] uppercase transition-all duration-300 shadow-[0_4px_20px_rgba(198,164,99,0.35)] hover:shadow-[0_6px_30px_rgba(198,164,99,0.45)] active:scale-[0.98] flex items-center gap-2 group"
             >
               <span>EXPLORE COLLECTION</span>
-              <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+              <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
 
             <Link
               href="/appointment"
-              className="cursor-pointer px-7 sm:px-8 py-3.5 sm:py-4 rounded-full bg-white/90 hover:bg-white border border-[#C6A463]/30 hover:border-[#C6A463] text-[#3C2415] text-xs sm:text-sm font-medium tracking-[0.12em] uppercase transition-all duration-300 shadow-sm backdrop-blur-md"
+              className="cursor-pointer px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-white/90 hover:bg-white border border-[#C6A463]/30 hover:border-[#C6A463] text-[#3C2415] text-[11px] sm:text-xs font-medium tracking-[0.12em] uppercase transition-all duration-300 shadow-sm backdrop-blur-md"
             >
               <span>BOOK A TRY-ON</span>
             </Link>

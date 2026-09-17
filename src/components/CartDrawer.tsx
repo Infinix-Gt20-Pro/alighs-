@@ -14,7 +14,7 @@ export default function CartDrawer() {
   const progressPercent = Math.min(100, Math.round((cartTotal / freeShippingThreshold) * 100));
 
   const generateWhatsAppOrderLink = () => {
-    let msg = "Hi ALIGH'S WARE! I want to order the following items:\n";
+    let msg = "Hi ALIGSWARE! I want to order the following items:\n";
     items.forEach((item, idx) => {
       msg += `${idx + 1}. ${item.name} (${item.color}) - Qty: ${item.quantity} - ₹${item.price * item.quantity}\n`;
     });

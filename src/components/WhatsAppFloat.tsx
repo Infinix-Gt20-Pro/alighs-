@@ -14,7 +14,7 @@ export default function WhatsAppFloat() {
       <div className="relative group">
         <div className="absolute -inset-2 bg-[#25D366] rounded-full opacity-40 group-hover:opacity-60 blur-md animate-pulse"></div>
         <motion.a
-          href="https://wa.me/917217371499?text=Hi%20ALIGH'S%20WARE!%20I'm%20interested%20in%20your%20premium%20eyewear%20collection."
+          href="https://wa.me/917217371499?text=Hi%20ALIGSWARE!%20I'm%20interested%20in%20your%20premium%20eyewear%20collection."
           target="_blank"
           rel="noopener noreferrer"
           whileHover={{ scale: 1.1 }}

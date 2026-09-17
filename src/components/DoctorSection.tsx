@@ -77,7 +77,7 @@ export default function DoctorSection() {
 
             <div className="flex items-center gap-3 text-[#8B7355] text-sm mb-8 p-4 rounded-xl bg-[#FFFDF5] border border-[#C6A463]/10">
               <MapPin className="w-5 h-5 text-[#C6A463] shrink-0" />
-              <span>ALIGH&apos;S WARE Main Clinic, Firozabad, Uttar Pradesh</span>
+              <span>ALIGSWARE Main Clinic, Firozabad, Uttar Pradesh</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-auto">

@@ -86,7 +86,7 @@ export default function Preloader({ onComplete, isLoading = true }: PreloaderPro
               <span>FIROZABAD &bull; EST. QUALITY</span>
             </div>
             <h2 className="text-3xl sm:text-5xl font-cinzel font-bold tracking-[0.14em] text-[#3C2415] uppercase">
-              ALIG&apos;S <span className="font-light text-[#C6A463]">WARE</span>
+              ALIGS<span className="font-light text-[#C6A463]">WARE</span>
             </h2>
             <p className="text-xs font-mono tracking-[0.32em] text-[#8B7355] uppercase mt-2">
               Sculpted Vision &bull; 3D Studio

@@ -100,7 +100,7 @@ export default function ProductDetailClient() {
   };
 
   const handleWhatsAppBuy = () => {
-    const msg = `Hi Dr. Sheeraz & ALIGH'S WARE Team! I am interested in ordering the ${product.name} (Finish: ${activeColor}, Lens: ${lensType}, Qty: ${quantity}). Please guide me with power verification.`;
+    const msg = `Hi Dr. Sheeraz & ALIGSWARE Team! I am interested in ordering the ${product.name} (Finish: ${activeColor}, Lens: ${lensType}, Qty: ${quantity}). Please guide me with power verification.`;
     window.open(`https://wa.me/917217371499?text=${encodeURIComponent(msg)}`, "_blank");
   };
 

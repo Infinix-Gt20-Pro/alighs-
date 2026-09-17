@@ -459,7 +459,7 @@ export default function LeadGenSection() {
           Find Your Perfect Match
         </h2>
         <p className="text-sm sm:text-base text-neutral-300 font-normal mt-2.5 max-w-xl mx-auto leading-relaxed">
-          Lenskart ki tarha advanced face geometry analysis, custom frame dimensions aur Firozabad craft precision se apna exact frame discover karein.
+          Discover your exact optical frame with advanced facial geometry analysis, custom frame dimensions, and Firozabad craftsmanship.
         </p>
       </div>
 
@@ -560,7 +560,7 @@ export default function LeadGenSection() {
                           <span>Step 1: Face Shape &amp; Sizing Geometry</span>
                         </h3>
                         <p className="text-xs sm:text-sm text-neutral-300 mt-0.5 font-light">
-                          Face shape aur frame width select karein taaki glasses temple par snug fit baithay.
+                          Select face shape and frame width to ensure your glasses sit snugly on temples.
                         </p>
                       </div>
 
@@ -690,7 +690,7 @@ export default function LeadGenSection() {
                         Step 2: Frame Architecture &amp; Handcrafted Finish
                       </h3>
                       <p className="text-xs sm:text-sm text-neutral-300 mt-0.5 font-light">
-                        Firozabad workshop handcrafted styles aur aerospace titanium finishes me se chunein.
+                        Choose between handcrafted Firozabad workshop styles and aerospace titanium finishes.
                       </p>
                     </div>
 
@@ -1053,7 +1053,7 @@ export default function LeadGenSection() {
                 TOKEN ID: <strong className="text-cyan-400">{tokenId || "#ALIGH-8821"}</strong>
               </div>
               <a
-                href={`https://wa.me/917217371499?text=Hello%20Aligh's%20Ware,%20mera%20Token%20ID%20${tokenId}%20hai.%20Maine%20${formData.silhouette}%20frame%20select%20kiya%20hai.`}
+                href={`https://wa.me/917217371499?text=Hello%20ALIGSWARE,%20my%20Token%20ID%20is%20${tokenId}.%20I%20have%20selected%20the%20${formData.silhouette}%20frame.`}
                 target="_blank"
                 rel="noreferrer"
                 className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-mono font-semibold flex items-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all cursor-pointer"
@@ -1067,14 +1067,25 @@ export default function LeadGenSection() {
                   setSubmitted(false);
                   setStep(1);
                 }}
-                className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-mono text-white flex items-center gap-2 transition-all cursor-pointer"
+                className="px-4 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-neutral-300 text-xs font-mono border border-white/10 transition-colors cursor-pointer"
               >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Change Selections</span>
+                Scan Another Profile
               </button>
             </div>
           </motion.div>
         )}
+      </div>
+
+      {/* Trust & Early Access Badge */}
+      <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 text-center text-xs font-mono text-neutral-400">
+        <div className="flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <span>Firozabad Workshop Priority Booking</span>
+        </div>
+        <span className="hidden sm:inline">&bull;</span>
+        <p>
+          Waitlist members receive priority access to the early APK release and digital 3D try-on features.
+        </p>
       </div>
 
       {/* ======================================================================

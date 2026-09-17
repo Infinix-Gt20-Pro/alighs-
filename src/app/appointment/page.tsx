@@ -102,7 +102,7 @@ export default function AppointmentPage() {
 
   const handleWhatsAppConfirm = () => {
     const text = encodeURIComponent(
-      `*ALIGH'S WARE — New Consultation Booking* 🩺👁️\n\n` +
+      `*ALIGSWARE — New Consultation Booking* 🩺👁️\n\n` +
         `*Appointment ID:* ${appointmentId}\n` +
         `*Patient Name:* ${formData.name}\n` +
         `*Phone Number:* +91 ${formData.phone}\n` +

@@ -168,7 +168,7 @@ export default function InstagramPage() {
             <div className="flex-1 flex flex-col justify-center">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-3 justify-center md:justify-start">
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-black font-cinzel tracking-wider text-white">
-                  ALIG&apos;S WARE
+                  ALIGSWARE
                 </h1>
                 <div className="flex items-center gap-2 justify-center">
                   <span className="text-xs font-mono font-bold text-amber-300 bg-amber-400/10 border border-amber-400/30 px-3 py-1 rounded-full">
@@ -183,7 +183,7 @@ export default function InstagramPage() {
               {/* Bio Highlights */}
               <div className="text-neutral-300 text-xs sm:text-sm leading-relaxed max-w-2xl font-sans mb-5 space-y-1">
                 <p className="font-medium text-white">
-                  👓 Firozabad ki bharosemand offline quality, ab online.
+                  👓 Firozabad&apos;s trusted heritage craftsmanship, now online.
                 </p>
                 <p>
                   🔬 AMU-Certified Optometry &amp; Eye Health by Dr. Sheeraz Ahmad.
@@ -210,7 +210,7 @@ export default function InstagramPage() {
                 </a>
 
                 <a
-                  href="https://wa.me/917217371499?text=Hi%20ALIG'S%20WARE!%20I'm%20visiting%20your%20Instagram%20page%20and%20interested%20in%20your%20eyewear."
+                  href="https://wa.me/917217371499?text=Hi%20ALIGSWARE!%20I'm%20visiting%20your%20Instagram%20page%20and%20interested%20in%20your%20eyewear."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/40 text-[#25D366] font-semibold text-xs font-mono transition-colors"
@@ -407,7 +407,7 @@ export default function InstagramPage() {
               Follow @aligsware Now
             </a>
             <a
-              href="https://wa.me/917217371499?text=Hi%20ALIG'S%20WARE!%20I'm%20interested%20in%20your%20eyewear."
+              href="https://wa.me/917217371499?text=Hi%20ALIGSWARE!%20I'm%20interested%20in%20your%20eyewear."
               target="_blank"
               rel="noopener noreferrer"
               className="px-6 py-3.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-mono text-sm transition-colors"

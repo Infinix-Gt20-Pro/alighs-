@@ -720,7 +720,7 @@ export default function AdminDashboardPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
-                        <a href={`https://wa.me/91${apt.phone}?text=Hello%20${encodeURIComponent(apt.name)},%20confirming%20your%20appointment%20with%20Dr.%20Sheeraz%20Ahmad%20at%20ALIG'S%20WARE%20Clinic.`}
+                        <a href={`https://wa.me/91${apt.phone}?text=Hello%20${encodeURIComponent(apt.name)},%20confirming%20your%20appointment%20with%20Dr.%20Sheeraz%20Ahmad%20at%20ALIGSWARE%20Clinic.`}
                           target="_blank" rel="noopener noreferrer"
                           className="px-3 py-1.5 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/40 text-[#25D366] text-xs font-mono flex items-center gap-1.5">
                           <MessageCircle className="w-3.5 h-3.5" /><span>WhatsApp</span>
@@ -799,7 +799,7 @@ export default function AdminDashboardPage() {
                       <p className="text-xs text-neutral-400 font-mono mt-0.5">
                         {wpStatus?.config?.lastSync
                           ? `Last synced: ${new Date(wpStatus.config.lastSync).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}`
-                          : "WordPress / WooCommerce app se products aur stock manage karein, website par auto-sync hoga."}
+                          : "Manage products and inventory from your WordPress / WooCommerce mobile app, synced automatically with this website."}
                       </p>
                     </div>
                   </div>
@@ -954,9 +954,9 @@ export default function AdminDashboardPage() {
                       <Sparkles className="w-3.5 h-3.5" /> Free WordPress Setup Guide:
                     </div>
                     <div className="pl-2 space-y-1 text-neutral-400">
-                      <div>1. Apne WordPress Admin mein jayein aur free <span className="text-white">WooCommerce</span> plugin install karein.</div>
-                      <div>2. <span className="text-white">WooCommerce &rarr; Settings &rarr; Advanced &rarr; REST API</span> mein jayein aur &quot;Add Key&quot; par click karein.</div>
-                      <div>3. Permissions mein <code className="text-amber-300 bg-white/[0.05] px-1 py-0.5 rounded">Read/Write</code> select karke Consumer Key aur Secret neeche paste karein.</div>
+                      <div>1. Go to your WordPress Admin and install the free <span className="text-white">WooCommerce</span> plugin.</div>
+                      <div>2. Navigate to <span className="text-white">WooCommerce &rarr; Settings &rarr; Advanced &rarr; REST API</span> and click &quot;Add Key&quot;.</div>
+                      <div>3. Under Permissions, select <code className="text-amber-300 bg-white/[0.05] px-1 py-0.5 rounded">Read/Write</code>, then copy and paste the Consumer Key and Secret below.</div>
                     </div>
                   </div>
 
@@ -1043,9 +1043,9 @@ export default function AdminDashboardPage() {
                       <Sparkles className="w-3.5 h-3.5" /> 3 Step Free Setup Guide:
                     </div>
                     <div className="pl-2 space-y-1 text-neutral-400">
-                      <div>1. <a href="https://airtable.com" target="_blank" rel="noopener noreferrer" className="text-teal-400 underline">airtable.com</a> par free account banayein aur ek Base banayein.</div>
-                      <div>2. Table ka naam <code className="text-amber-300 bg-white/[0.05] px-1 py-0.5 rounded">Inventory</code> rakhein with columns: <span className="text-white">Name, Category, Price, Stock, SKU</span>.</div>
-                      <div>3. <a href="https://airtable.com/create/tokens" target="_blank" rel="noopener noreferrer" className="text-teal-400 underline">airtable.com/create/tokens</a> se Access Token generate karke neeche paste karein.</div>
+                      <div>1. Create a free account on <a href="https://airtable.com" target="_blank" rel="noopener noreferrer" className="text-teal-400 underline">airtable.com</a> and create a new Base.</div>
+                      <div>2. Name the table <code className="text-amber-300 bg-white/[0.05] px-1 py-0.5 rounded">Inventory</code> with columns: <span className="text-white">Name, Category, Price, Stock, SKU</span>.</div>
+                      <div>3. Generate a Personal Access Token at <a href="https://airtable.com/create/tokens" target="_blank" rel="noopener noreferrer" className="text-teal-400 underline">airtable.com/create/tokens</a> and paste it below.</div>
                     </div>
                   </div>
 

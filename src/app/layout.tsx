@@ -28,13 +28,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ALIGH'S WARE — Firozabad's Luxury Eyewear & Clinical Optics",
+  title: "ALIGSWARE — Luxury Eyewear & Clinical Optics from Firozabad",
   description:
-    "Dr. Sheeraz Ahmad (AMU-Certified) ke saath Firozabad ki bharosemand quality ab online. Premium titanium eyeglasses, blue-cut lenses, free home try-on, aur expert eye care consultation.",
+    "Trusted heritage craftsmanship from Firozabad with Dr. Sheeraz Ahmad (AMU-Certified). Premium titanium eyeglasses, 420nm blue-cut lenses, free home try-on, and expert eye care consultation.",
   keywords: [
-    "Aligh's Ware",
+    "Aligsware",
     "Firozabad eyewear",
-    "premium glasses",
+    "luxury glasses",
     "blue cut lenses",
     "titanium frames",
     "Dr. Sheeraz Ahmad",
@@ -43,9 +43,9 @@ export const metadata: Metadata = {
     "online glasses India",
   ],
   openGraph: {
-    title: "ALIGH'S WARE — Premium Eyewear from Firozabad",
+    title: "ALIGSWARE — Luxury Eyewear from Firozabad",
     description:
-      "Firozabad ki bharosemand offline quality, ab online. Premium titanium frames, 420nm blue-cut crystal clarity, aur AMU-certified optometrist ki eye care.",
+      "Firozabad's trusted heritage craftsmanship, now online. Premium titanium frames, 420nm blue-cut crystal clarity, and AMU-certified clinical optometry.",
     type: "website",
   },
   icons: {

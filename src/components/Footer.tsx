@@ -44,7 +44,7 @@ export default function Footer() {
               </div>
               <div className="flex flex-col">
                 <span className="text-xl font-bold font-cinzel tracking-wider text-white group-hover:text-amber-300 transition-colors">
-                  ALIG&apos;S WARE
+                  ALIGSWARE
                 </span>
                 <span className="text-[10px] font-mono text-neutral-400 tracking-widest uppercase">
                   @aligsware &bull; Firozabad
@@ -52,7 +52,7 @@ export default function Footer() {
               </div>
             </Link>
             <p className="text-gray-400 font-sans text-sm leading-relaxed max-w-sm">
-              Firozabad ki bharosemand quality, ab online. Handcrafted luxury eyewear, 420nm sapphire blue-cut lenses, and AMU clinical optometry care.
+              Firozabad&apos;s trusted heritage craftsmanship, now online. Handcrafted luxury eyewear, 420nm sapphire blue-cut lenses, and AMU clinical optometry care.
             </p>
 
             {/* Social Follow Pill */}
@@ -68,7 +68,7 @@ export default function Footer() {
               </a>
 
               <a
-                href="https://wa.me/917217371499?text=Hi%20ALIG'S%20WARE!%20I'm%20interested%20in%20your%20eyewear%20collection."
+                href="https://wa.me/917217371499?text=Hi%20ALIGSWARE!%20I'm%20interested%20in%20your%20eyewear%20collection."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#25D366]/10 border border-[#25D366]/30 hover:border-[#25D366] text-[#25D366] text-xs font-mono transition-all"
@@ -151,7 +151,7 @@ export default function Footer() {
               </li>
               <li>
                 <a 
-                  href="https://wa.me/917217371499?text=Hi%20ALIG'S%20WARE!%20I'm%20interested%20in%20your%20premium%20eyewear%20collection."
+                  href="https://wa.me/917217371499?text=Hi%20ALIGSWARE!%20I'm%20interested%20in%20your%20premium%20eyewear%20collection."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-gray-300 hover:text-[#25D366] transition-colors text-sm font-mono"
@@ -188,7 +188,7 @@ export default function Footer() {
             </div>
             <div>
               <h4 className="text-sm sm:text-base font-bold text-white font-cinzel">
-                Join the ALIG&apos;S WARE Community on Instagram
+                Join the ALIGSWARE Community on Instagram
               </h4>
               <p className="text-xs text-neutral-400 font-mono mt-0.5">
                 Daily drops, runway reels, and clinical optometry updates &bull; <span className="text-amber-300">@aligsware</span>
@@ -208,7 +208,7 @@ export default function Footer() {
         {/* Bottom Copyright */}
         <div className="pt-6 border-t border-[#C6A463]/20 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
           <p className="text-gray-500 text-xs font-mono">
-            &copy; 2026 ALIG&apos;S WARE &bull; Firozabad, Uttar Pradesh &bull; All Rights Reserved.
+            &copy; 2026 ALIGSWARE &bull; Firozabad, Uttar Pradesh &bull; All Rights Reserved.
           </p>
           <div className="flex items-center gap-4 text-xs font-mono text-gray-500">
             <a href="https://www.instagram.com/aligsware/" target="_blank" rel="noopener noreferrer" className="hover:text-pink-400 transition-colors">

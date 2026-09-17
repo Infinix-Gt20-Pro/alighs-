@@ -2,26 +2,35 @@
 "use client";
 
 import React, { Suspense, useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { ContactShadows, Environment } from "@react-three/drei";
 import GlassesModel from "./GlassesModel";
 import { useInViewFast } from "@/hooks/useInViewFast";
 import * as THREE from "three";
 
 function DynamicStudioRig({ scrollProgress }: { scrollProgress: number }) {
+  const { size } = useThree();
   const dirLightRef = useRef<THREE.DirectionalLight>(null);
   const rimLightRef = useRef<THREE.PointLight>(null);
 
   useFrame((state, delta) => {
     const t = THREE.MathUtils.clamp(scrollProgress, 0, 1);
+    const isMobile = state.size.width < 768;
 
-    // Camera cinematic path:
-    // 0.0: Far center, majestic full view
-    // 0.4: Close approach, shifting right to leave space for left specs
-    // 0.8: Profile inspection angle with macro focus
-    const startPos = new THREE.Vector3(0, 0.12, 4.4);
-    const midPos = new THREE.Vector3(0.55, 0.08, 3.2);
-    const endPos = new THREE.Vector3(1.1, 0.15, 2.7);
+    // Responsive Camera Path:
+    // Mobile: backed up to z=5.6, centered at y=-0.08 so frame is visible with generous margins
+    // Desktop: z=5.0, centered at y=0.02
+    const startPos = isMobile
+      ? new THREE.Vector3(0, -0.08, 5.6)
+      : new THREE.Vector3(0, 0.02, 5.0);
+
+    const midPos = isMobile
+      ? new THREE.Vector3(0.25, -0.06, 4.8)
+      : new THREE.Vector3(0.48, 0.04, 4.0);
+
+    const endPos = isMobile
+      ? new THREE.Vector3(0.45, -0.02, 4.2)
+      : new THREE.Vector3(0.95, 0.08, 3.4);
 
     let targetCamPos: THREE.Vector3;
     if (t < 0.5) {
@@ -34,16 +43,16 @@ function DynamicStudioRig({ scrollProgress }: { scrollProgress: number }) {
 
     state.camera.position.lerp(targetCamPos, 0.08);
 
-    // Dynamic camera target
+    // Look target shifts gently with scroll
     const targetLook = new THREE.Vector3(
-      THREE.MathUtils.lerp(0, -0.2, t),
-      THREE.MathUtils.lerp(0.04, 0.06, t),
+      THREE.MathUtils.lerp(0, isMobile ? -0.1 : -0.2, t),
+      THREE.MathUtils.lerp(isMobile ? -0.2 : -0.12, isMobile ? -0.15 : -0.08, t),
       0
     );
     state.camera.lookAt(targetLook);
     state.camera.updateProjectionMatrix();
 
-    // Natural shifting lighting rig based on user scroll
+    // Natural shifting lighting rig based on scroll
     if (dirLightRef.current) {
       dirLightRef.current.position.x = THREE.MathUtils.lerp(4, -3, t);
       dirLightRef.current.position.y = THREE.MathUtils.lerp(6, 4.5, t);
@@ -97,7 +106,7 @@ export default function GlassesHeroCanvas({
       style={{ touchAction: "none" }}
     >
       <Canvas
-        camera={{ position: [0, 0.12, 4.4], fov: 34 }}
+        camera={{ position: [0, 0.02, 5.0], fov: 34 }}
         frameloop={isInView ? "always" : "never"}
         gl={{
           antialias: true,
@@ -113,7 +122,7 @@ export default function GlassesHeroCanvas({
         <Suspense fallback={null}>
           <Environment preset="studio" />
 
-          {/* Luxury 3D Eyewear Model with Scroll-Driven Rotation */}
+          {/* Luxury 3D Eyewear Model with Responsive Mobile Sizing */}
           <GlassesModel
             materialId={materialId}
             viewAngle="orbit"
@@ -123,9 +132,9 @@ export default function GlassesHeroCanvas({
 
           {/* Soft Ground Contact Shadow */}
           <ContactShadows
-            position={[0, -0.62, 0]}
-            opacity={0.36}
-            scale={5.8}
+            position={[0, -0.72, 0]}
+            opacity={0.34}
+            scale={5.0}
             blur={2.4}
             far={2.5}
             color="#5C3D2E"

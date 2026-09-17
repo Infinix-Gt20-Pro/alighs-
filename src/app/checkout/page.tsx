@@ -141,7 +141,7 @@ export default function CheckoutPage() {
       .join("\n");
 
     const text = encodeURIComponent(
-      `*ALIGH'S WARE — New Order Confirmation* 👓✨\n\n` +
+      `*ALIGSWARE — New Order Confirmation* 👓✨\n\n` +
         `*Order ID:* ${orderId}\n` +
         `*Client:* ${formData.fullName}\n` +
         `*Contact:* +91 ${formData.phone}\n` +

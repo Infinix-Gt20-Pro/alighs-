@@ -93,7 +93,7 @@ export default function InstagramSection() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <h2 className="font-cinzel text-xl sm:text-2xl md:text-3xl font-bold tracking-wider text-[#3C2415]">
-                ALIG&apos;S WARE
+                ALIGSWARE
               </h2>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 flex items-center gap-1">
                 <CheckCircle2 className="w-3 h-3" /> Official

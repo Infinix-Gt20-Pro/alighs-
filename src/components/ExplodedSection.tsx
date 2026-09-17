@@ -147,9 +147,9 @@ export default function ExplodedSection() {
                 Layer 01 &bull; Optics
               </span>
             </div>
-            <h3 className="font-semibold text-white text-base">Blue-Cut Technology (Screens ke liye)</h3>
+            <h3 className="font-semibold text-white text-base">Blue-Cut Technology (Digital Screen Optics)</h3>
             <p className="text-xs text-neutral-300 font-light mt-1.5 leading-relaxed">
-              Mobile, laptop aur monitors ki 420nm harmful blue-light ko absorb karke aankhon ki thakan aur dryness se protect karta hai.
+              Absorbs 420nm high-energy blue light from phones, laptops, and monitors to protect your eyes from fatigue and dryness.
             </p>
             <div className="flex items-center gap-2 mt-3 pt-2.5 border-t border-white/10 text-[11px] font-mono text-neutral-400">
               <span className="text-cyan-400 font-semibold">Zero Eye Strain</span>
@@ -174,7 +174,7 @@ export default function ExplodedSection() {
             </div>
             <h3 className="font-semibold text-white text-base">Anti-Glare Coating</h3>
             <p className="text-xs text-neutral-300 font-light mt-1.5 leading-relaxed">
-              9-layer hydrophobic reflection shield jo night driving ke waqt headlights aur bright ambient glare ko zero kar deta hai.
+              9-layer hydrophobic reflection shield that eliminates headlights and bright ambient glare during night driving.
             </p>
             <div className="flex items-center justify-end sm:justify-start gap-2 mt-3 pt-2.5 border-t border-white/10 text-[11px] font-mono text-neutral-400">
               <span className="text-cyan-300 font-semibold">99.8% Transmittance</span>
@@ -199,7 +199,7 @@ export default function ExplodedSection() {
             </div>
             <h3 className="font-semibold text-white text-base">Ultra-Lightweight Frames</h3>
             <p className="text-xs text-neutral-300 font-light mt-1.5 leading-relaxed">
-              Sirf 14.2 grams aerospace titanium aur memory alloy, jisse poora din pehanne par bhi kaan ya naak par koi wazan mehsoos nahi hota.
+              Crafted from 14.2 grams of aerospace titanium and memory alloy for effortless all-day wear without pressure on ears or nose.
             </p>
             <div className="flex items-center gap-2 mt-3 pt-2.5 border-t border-white/10 text-[11px] font-mono text-neutral-400">
               <span className="text-emerald-400 font-semibold">14.2g Total Weight</span>
@@ -224,7 +224,7 @@ export default function ExplodedSection() {
             </div>
             <h3 className="font-semibold text-white text-base">Marks-Free Silicone Suspension</h3>
             <p className="text-xs text-neutral-300 font-light mt-1.5 leading-relaxed">
-              Dual-pivot medical silicone nose pads jo nose bridge par pressure marks chhodhe baghair perfect grip banaye rakhte hain.
+              Dual-pivot medical silicone nose pads engineered to eliminate pressure marks while maintaining secure ergonomic balance.
             </p>
             <div className="flex items-center justify-end sm:justify-start gap-2 mt-3 pt-2.5 border-t border-white/10 text-[11px] font-mono text-neutral-400">
               <span className="text-amber-300 font-semibold">Hypoallergenic</span>
@@ -243,8 +243,8 @@ export default function ExplodedSection() {
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>LAYER 01</span>
                 </div>
-                <h4 className="text-sm font-semibold text-white">Blue-Cut Technology (Screens ke liye)</h4>
-                <p className="text-xs text-neutral-300 mt-0.5">Mobiles &amp; laptops ki 420nm harmful blue-light ko block karta hai.</p>
+                <h4 className="text-sm font-semibold text-white">Blue-Cut Technology (Digital Screen Optics)</h4>
+                <p className="text-xs text-neutral-300 mt-0.5">Blocks 420nm harmful blue light from phones and digital displays.</p>
               </div>
             ) : mobileTier === 1 ? (
               <div>
@@ -253,7 +253,7 @@ export default function ExplodedSection() {
                   <span>LAYER 02</span>
                 </div>
                 <h4 className="text-sm font-semibold text-white">Anti-Glare Coating</h4>
-                <p className="text-xs text-neutral-300 mt-0.5">Headlights aur bright light reflections ko zero karta hai.</p>
+                <p className="text-xs text-neutral-300 mt-0.5">Eliminates headlights and harsh ambient glare.</p>
               </div>
             ) : (
               <div>

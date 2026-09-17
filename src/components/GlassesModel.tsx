@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useRef, useMemo } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { Float } from "@react-three/drei";
 import * as THREE from "three";
 
@@ -283,26 +283,41 @@ export default function GlassesModel({
     };
   }, []);
 
+  // Responsive calculations: ensure glasses fit phone UI with side margins and don't clash with text
+  const { viewport, size } = useThree();
+  const isMobile = size.width < 768;
+
+  const responsiveScale = useMemo(() => {
+    if (isMobile) {
+      // Fit within 72% of phone screen width
+      return Math.min(Math.max((viewport.width * 0.72) / 3.1, 0.38), 0.62);
+    }
+    // Desktop: refined, elegant scale (approx 45% of view width)
+    return 0.82;
+  }, [viewport.width, isMobile]);
+
+  const baseY = isMobile ? -0.24 : -0.12;
+
   // Studio Turntable Rotation & View Presets
   const targetRotation = useRef({ x: 0.05, y: -0.25, z: 0 });
-  const targetPosition = useRef({ x: 0, y: 0.05, z: 0 });
-  const targetScale = useRef(1.42);
+  const targetPosition = useRef({ x: 0, y: -0.12, z: 0 });
+  const targetScale = useRef(0.82);
 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
 
     if (viewAngle === "front") {
       targetRotation.current = { x: 0.0, y: 0, z: 0 };
-      targetPosition.current = { x: 0, y: 0.02, z: 0.1 };
-      targetScale.current = 1.48;
+      targetPosition.current = { x: 0, y: baseY, z: 0.1 };
+      targetScale.current = responsiveScale * 1.05;
     } else if (viewAngle === "profile") {
       targetRotation.current = { x: 0.08, y: -0.75, z: 0.02 };
-      targetPosition.current = { x: 0.05, y: 0.05, z: 0.05 };
-      targetScale.current = 1.44;
+      targetPosition.current = { x: 0.05, y: baseY, z: 0.05 };
+      targetScale.current = responsiveScale * 1.02;
     } else if (viewAngle === "macro") {
       targetRotation.current = { x: 0.12, y: -1.2, z: 0.04 };
-      targetPosition.current = { x: 0.5, y: 0.0, z: 0.7 };
-      targetScale.current = 1.95;
+      targetPosition.current = { x: 0.3, y: baseY + 0.1, z: 0.4 };
+      targetScale.current = responsiveScale * 1.35;
     } else {
       // orbit mode: scroll-driven or gentle turntable
       if (typeof scrollProgress === "number") {
@@ -316,11 +331,11 @@ export default function GlassesModel({
       } else if (autoRotate) {
         groupRef.current.rotation.y += delta * 0.28;
       }
-      const mouseX = state.pointer.x * 0.14;
-      const mouseY = state.pointer.y * 0.08;
-      targetRotation.current.x = 0.06 - mouseY;
-      targetPosition.current = { x: 0, y: 0.05, z: 0 };
-      targetScale.current = 1.42;
+      const mouseX = state.pointer.x * 0.12;
+      const mouseY = state.pointer.y * 0.06;
+      targetRotation.current.x = 0.05 - mouseY;
+      targetPosition.current = { x: 0, y: baseY, z: 0 };
+      targetScale.current = responsiveScale;
     }
 
     if (viewAngle !== "orbit") {
@@ -335,8 +350,8 @@ export default function GlassesModel({
   });
 
   return (
-    <Float speed={1.2} rotationIntensity={0.08} floatIntensity={0.15} floatingRange={[-0.02, 0.02]}>
-      <group ref={groupRef} position={[0, 0.05, 0]} scale={1.42}>
+    <Float speed={1.2} rotationIntensity={0.06} floatIntensity={0.1} floatingRange={[-0.015, 0.015]}>
+      <group ref={groupRef} position={[0, baseY, 0]} scale={responsiveScale}>
         {/* Slender Titanium Wire Rims */}
         <mesh geometry={leftRimGeo} material={materials.frame} castShadow receiveShadow />
         <mesh geometry={rightRimGeo} material={materials.frame} castShadow receiveShadow />

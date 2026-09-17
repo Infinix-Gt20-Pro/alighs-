@@ -81,7 +81,7 @@ export default function LensRevealSection() {
             Experience Crystal Clarity
           </h2>
           <p className="text-sm sm:text-base text-neutral-300 font-normal mt-2 max-w-xl">
-            Hover karein aur asli difference dekhein.
+            Hover over the lens to experience the authentic optical difference.
           </p>
         </div>
 

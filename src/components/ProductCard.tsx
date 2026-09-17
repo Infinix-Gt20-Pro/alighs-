@@ -261,7 +261,7 @@ export default function ProductCard({ product }: ProductProps) {
           </button>
 
           <a
-            href={`https://wa.me/917217371499?text=Hi%20ALIG'S%20WARE!%20I'm%20interested%20in%20ordering%20${encodeURIComponent(product.name)}%20(${encodeURIComponent(activeColorName)}).%20Please%20guide%20me.`}
+            href={`https://wa.me/917217371499?text=Hi%20ALIGSWARE!%20I'm%20interested%20in%20ordering%20${encodeURIComponent(product.name)}%20(${encodeURIComponent(activeColorName)}).%20Please%20guide%20me.`}
             target="_blank"
             rel="noopener noreferrer"
             className="cursor-pointer w-full flex items-center justify-center gap-1 py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-lg sm:rounded-xl bg-white/[0.04] hover:bg-white/[0.1] text-neutral-300 hover:text-white text-[10px] sm:text-xs font-medium border border-white/15 transition-all"

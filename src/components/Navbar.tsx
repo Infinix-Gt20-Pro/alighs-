@@ -73,7 +73,7 @@ export default function Navbar() {
             </div>
             <div className="flex flex-col">
               <span className="font-cinzel text-base sm:text-lg font-bold tracking-[0.14em] uppercase text-[#3C2415] group-hover:text-[#C6A463] transition-colors">
-                ALIG&apos;S WARE
+                ALIGSWARE
               </span>
               <span className="text-[9px] font-mono text-[#8B7355] tracking-[0.22em] uppercase -mt-0.5">
                 Firozabad &bull; @aligsware
@@ -190,34 +190,26 @@ export default function Navbar() {
             >
               <div>
                 <div className="flex items-center justify-between pb-6 border-b border-[#C6A463]/15">
-                  <span className="font-cinzel text-base font-bold tracking-wider text-[#3C2415]">ALIGH&apos;S WARE</span>
+                  <span className="text-base font-bold tracking-wider text-[#3C2415]">ALIGSWARE</span>
                   <button
                     onClick={() => setIsMobileMenuOpen(false)}
-                    aria-label="Close Menu"
-                    className="p-2 text-[#8B7355] hover:text-[#3C2415] rounded-full hover:bg-[#C6A463]/10 transition-colors"
+                    className="p-2 text-[#8B7355] hover:text-[#3C2415] rounded-full hover:bg-[#FAF7F0]"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
                 <div className="flex flex-col gap-2 mt-6">
-                  {navLinks.map((link) => {
-                    const isActive = pathname === link.href;
-                    return (
-                      <Link
-                        key={link.name}
-                        href={link.href}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`px-4 py-3 rounded-2xl text-base font-medium transition-colors ${
-                          isActive
-                            ? "bg-[#C6A463]/15 text-[#3C2415] font-semibold"
-                            : "text-[#5C3D2E] hover:text-[#3C2415] hover:bg-[#C6A463]/10"
-                        }`}
-                      >
-                        {link.name}
-                      </Link>
-                    );
-                  })}
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="px-4 py-3 rounded-2xl text-base font-medium text-[#5C3D2E] hover:text-[#3C2415] hover:bg-[#FAF7F0] transition-colors"
+                    >
+                      {link.name}
+                    </Link>
+                  ))}
                 </div>
               </div>
 
@@ -225,7 +217,7 @@ export default function Navbar() {
                 <Link
                   href="/appointment"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full text-center py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-black font-semibold text-sm shadow-[0_4px_15px_rgba(198,164,99,0.3)]"
+                  className="w-full text-center py-3.5 rounded-xl bg-gradient-to-r from-[#C6A463] to-[#A8884A] text-white font-semibold text-sm shadow-[0_4px_20px_rgba(198,164,99,0.35)]"
                 >
                   Book Doctor Appointment
                 </Link>
@@ -233,31 +225,31 @@ export default function Navbar() {
                   href="https://www.instagram.com/aligsware/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-[#f09433]/15 via-[#dc2743]/15 to-[#bc1888]/15 hover:from-[#f09433]/25 hover:via-[#dc2743]/25 hover:to-[#bc1888]/25 border border-[#dc2743]/30 text-xs font-mono text-[#C2185B] transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-[#f09433]/15 via-[#dc2743]/15 to-[#bc1888]/15 hover:from-[#f09433]/25 hover:via-[#dc2743]/25 hover:to-[#bc1888]/25 border border-[#dc2743]/30 text-xs font-mono text-[#dc2743] transition-colors"
                 >
-                  <InstagramIcon className="w-4 h-4 text-[#C2185B]" /> Follow @aligsware on Instagram
+                  <InstagramIcon className="w-4 h-4 text-[#dc2743]" /> Follow @aligsware on Instagram
                 </a>
                 <a
                   href="/downloads/aligsware.apk"
                   download="ALIGS_WARE.apk"
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#C6A463]/15 hover:bg-[#C6A463]/25 border border-[#C6A463]/30 text-xs font-mono text-[#5C3D2E] transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#C6A463]/10 hover:bg-[#C6A463]/20 border border-[#C6A463]/30 text-xs font-mono text-[#3C2415] transition-colors"
                 >
                   <Smartphone className="w-4 h-4 text-[#C6A463]" /> Download Android App (APK)
                 </a>
                 <div className="grid grid-cols-2 gap-2 mt-1">
                   <a
                     href="tel:+917217371499"
-                    className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-[#FAF7F0] hover:bg-[#C6A463]/10 border border-[#C6A463]/15 text-xs font-mono text-[#3C2415] hover:text-[#C6A463] transition-colors"
+                    className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-[#FAF7F0] hover:bg-[#FAF7F0]/80 border border-[#C6A463]/15 text-xs font-mono text-[#3C2415] hover:text-[#C6A463] transition-colors"
                   >
                     <Phone className="w-3.5 h-3.5 text-[#C6A463]" /> Call Doctor
                   </a>
                   <a
-                    href="https://wa.me/917217371499?text=Hi%20ALIGH'S%20WARE!%20I'm%20interested%20in%20your%20premium%20eyewear."
+                    href="https://wa.me/917217371499?text=Hi%20ALIGSWARE!%20I'm%20interested%20in%20your%20premium%20eyewear."
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/30 text-xs font-mono text-[#1E7E34] transition-colors"
+                    className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/25 text-xs font-mono text-[#25D366] transition-colors"
                   >
-                    <MessageCircle className="w-3.5 h-3.5 text-[#1E7E34]" /> WhatsApp
+                    <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
                   </a>
                 </div>
                 <div className="text-center text-xs text-[#8B7355] font-mono">

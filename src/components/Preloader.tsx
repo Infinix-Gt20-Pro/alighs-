@@ -1,7 +1,7 @@
+// src/components/Preloader.tsx
 "use client";
 
 import Image from "next/image";
-
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -36,10 +36,10 @@ export default function Preloader({ onComplete, isLoading = true }: PreloaderPro
           clearInterval(interval);
           return 100;
         }
-        const step = Math.floor(Math.random() * 12) + 6;
+        const step = Math.floor(Math.random() * 14) + 8;
         return Math.min(prev + step, 100);
       });
-    }, 70);
+    }, 60);
 
     return () => {
       clearInterval(interval);
@@ -51,7 +51,7 @@ export default function Preloader({ onComplete, isLoading = true }: PreloaderPro
       const timer = setTimeout(() => {
         setIsDone(true);
         if (onComplete) onComplete();
-      }, 450);
+      }, 400);
       return () => clearTimeout(timer);
     }
   }, [progress, isDone, onComplete]);
@@ -66,43 +66,43 @@ export default function Preloader({ onComplete, isLoading = true }: PreloaderPro
           initial={{ opacity: 1 }}
           exit={{
             opacity: 0,
-            scale: 1.03,
-            filter: "blur(12px)",
-            transition: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
+            scale: 1.02,
+            filter: "blur(10px)",
+            transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
           }}
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0a0a0a] text-white selection:bg-none"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#FFFDF5] text-[#3C2415] selection:bg-none"
         >
-          {/* Subtle Ambient Radial Glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-indigo-500/10 via-purple-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+          {/* Warm Champagne Radial Glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-gradient-to-tr from-[#C6A463]/15 via-[#E2C485]/10 to-transparent rounded-full blur-3xl pointer-events-none" />
 
-          {/* Brand Header: ALIG'S WARE at Starting Screen */}
+          {/* Brand Header */}
           <motion.div
             initial={{ opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
             className="flex flex-col items-center mb-6 z-10 text-center px-4"
           >
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full glass-pill border border-white/15 text-[11px] font-mono text-cyan-300 uppercase tracking-widest mb-3 shadow-[0_0_20px_rgba(6,182,212,0.3)]">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FAF7F0] border border-[#C6A463]/25 text-[11px] font-mono text-[#C6A463] uppercase tracking-[0.2em] mb-3 shadow-sm">
               <span>FIROZABAD &bull; EST. QUALITY</span>
             </div>
-            <h2 className="text-3xl sm:text-5xl font-black tracking-wider sm:tracking-[0.18em] text-white uppercase drop-shadow-[0_0_35px_rgba(6,182,212,0.7)]">
-              ALIG&apos;S <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400 font-light">WARE</span>
+            <h2 className="text-3xl sm:text-5xl font-cinzel font-bold tracking-[0.14em] text-[#3C2415] uppercase">
+              ALIG&apos;S <span className="font-light text-[#C6A463]">WARE</span>
             </h2>
-            <p className="text-xs font-mono tracking-[0.35em] text-neutral-400 uppercase mt-2">
-              Luxury Eyewear &bull; 3D Optics
+            <p className="text-xs font-mono tracking-[0.32em] text-[#8B7355] uppercase mt-2">
+              Sculpted Vision &bull; 3D Studio
             </p>
           </motion.div>
 
-          {/* Central Animated Official ALIG'S WARE Insignia */}
+          {/* Central Rotating Insignia */}
           <div className="relative mb-8 flex items-center justify-center">
-            {/* Outer Rotating Gold Calibration Ring */}
+            {/* Outer Rotating Gold Ring */}
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ repeat: Infinity, duration: 5, ease: "linear" }}
-              className="w-28 h-28 rounded-full border border-amber-500/20 border-t-amber-400 border-r-amber-500/50 shadow-[0_0_30px_rgba(212,175,55,0.3)]"
+              className="w-28 h-28 rounded-full border border-[#C6A463]/25 border-t-[#C6A463] border-r-[#C6A463]/60 shadow-[0_0_25px_rgba(198,164,99,0.25)]"
             />
             {/* Centered Official Logo */}
-            <div className="absolute w-16 h-16 rounded-full overflow-hidden border border-amber-500/40 bg-black flex items-center justify-center shadow-2xl">
+            <div className="absolute w-16 h-16 rounded-full overflow-hidden border border-[#C6A463]/40 bg-[#3C2415] flex items-center justify-center shadow-lg">
               <Image
                 src="/images/aligsware-logo.png"
                 alt="ALIG'S WARE"
@@ -117,21 +117,11 @@ export default function Preloader({ onComplete, isLoading = true }: PreloaderPro
             <motion.div
               animate={{ rotate: -360 }}
               transition={{ repeat: Infinity, duration: 6, ease: "linear" }}
-              className="absolute w-16 h-16 rounded-full border border-white/10 border-b-cyan-400/80 border-l-purple-500/50"
+              className="absolute w-16 h-16 rounded-full border border-[#C6A463]/15 border-b-[#C6A463] border-l-[#E2C485]"
             />
-
-            {/* Frosted Center Core */}
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0.5 }}
-              animate={{ scale: [0.8, 1, 0.8], opacity: [0.5, 0.9, 0.5] }}
-              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-              className="absolute w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-inner"
-            >
-              <div className="w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_10px_#fff]" />
-            </motion.div>
           </div>
 
-          {/* Text & Status Container */}
+          {/* Status & Counter */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -139,33 +129,33 @@ export default function Preloader({ onComplete, isLoading = true }: PreloaderPro
             className="flex flex-col items-center gap-3 z-10"
           >
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-xs font-mono tracking-[0.25em] text-neutral-400 uppercase">
-                Systems Initializing
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C6A463] animate-pulse" />
+              <span className="text-xs font-mono tracking-[0.24em] text-[#8B7355] uppercase">
+                Calibrating Studio
               </span>
             </div>
 
-            {/* Digital Percentage Counter */}
-            <div className="text-3xl font-light tracking-tight font-mono text-white">
+            {/* Digital Percentage */}
+            <div className="text-3xl font-light tracking-tight font-mono text-[#3C2415]">
               {progress}
-              <span className="text-sm text-neutral-500 ml-1">%</span>
+              <span className="text-sm text-[#8B7355] ml-1">%</span>
             </div>
 
-            {/* Progress Bar Container in Frosted Pill */}
-            <div className="w-64 h-1.5 bg-white/5 border border-white/10 rounded-full overflow-hidden backdrop-blur-sm p-[1px]">
+            {/* Warm Gold Progress Bar */}
+            <div className="w-64 h-1.5 bg-[#FAF7F0] border border-[#C6A463]/20 rounded-full overflow-hidden p-[1px]">
               <motion.div
-                className="h-full bg-gradient-to-r from-blue-500 via-indigo-400 to-purple-400 rounded-full shadow-[0_0_12px_rgba(99,102,241,0.6)]"
+                className="h-full bg-gradient-to-r from-[#C6A463] via-[#E2C485] to-[#A8884A] rounded-full shadow-[0_0_10px_rgba(198,164,99,0.5)]"
                 initial={{ width: "0%" }}
                 animate={{ width: `${progress}%` }}
                 transition={{ ease: [0.16, 1, 0.3, 1], duration: 0.2 }}
               />
             </div>
 
-            <p className="text-[11px] text-neutral-500 font-mono mt-1">
-              {progress < 30 && "Loading motion physics..."}
-              {progress >= 30 && progress < 70 && "Compiling frosted glass shader..."}
-              {progress >= 70 && progress < 100 && "Synchronizing telemetry..."}
-              {progress === 100 && "Ready"}
+            <p className="text-[11px] text-[#8B7355] font-mono mt-1">
+              {progress < 40 && "Loading optical refraction..."}
+              {progress >= 40 && progress < 80 && "Aligning titanium reflections..."}
+              {progress >= 80 && progress < 100 && "Readying luxury campaign..."}
+              {progress === 100 && "Vision Sculpted"}
             </p>
           </motion.div>
         </motion.div>

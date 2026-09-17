@@ -1,30 +1,19 @@
 // src/components/HeroSection.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import Image from "next/image";
-import {
-  Sparkles,
-  RotateCw,
-  ArrowRight,
-  Eye,
-  CheckCircle2,
-  Sliders,
-  Maximize2,
-  ShieldCheck
-} from "lucide-react";
-import { FRAME_MATERIALS } from "./GlassesModel";
-import { useCart } from "@/context/CartContext";
+import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
+import { ArrowRight, ChevronDown, Sparkles, ShieldCheck, Eye, Compass } from "lucide-react";
 
 const GlassesHeroCanvas = dynamic(() => import("./GlassesHeroCanvas"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[320px] sm:h-[400px] md:h-[460px] flex items-center justify-center">
+    <div className="absolute inset-0 flex items-center justify-center bg-[#FFFDF5]">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-10 h-10 rounded-full border border-amber-500/20 border-t-amber-400 animate-spin" />
-        <span className="text-[11px] font-mono text-amber-300 uppercase tracking-widest">
+        <div className="w-10 h-10 rounded-full border border-[#C6A463]/30 border-t-[#C6A463] animate-spin" />
+        <span className="text-[11px] font-mono text-[#8B7355] uppercase tracking-[0.25em]">
           Calibrating Optical Studio...
         </span>
       </div>
@@ -32,280 +21,232 @@ const GlassesHeroCanvas = dynamic(() => import("./GlassesHeroCanvas"), {
   ),
 });
 
-const REAL_FRAME_PHOTOS: Record<string, { name: string; image: string; brand: string; subtitle: string; price: number; originalPrice: number }> = {
-  gold: {
-    name: "Vincent Chase Sleek Steel Titanium",
-    image: "/images/products/gold-rimless-rectangle-vincent-chase-sleek-steel-vc-e17135-c1-218257.jpg",
-    brand: "Vincent Chase Atelier",
-    subtitle: "24K Champagne Gold • Ultra-Light Beta-Titanium",
-    price: 2499,
-    originalPrice: 4299,
-  },
-  onyx: {
-    name: "Rich Matte Onyx Square Rim",
-    image: "/images/products/black-silver-square-full-rim-200430.jpg",
-    brand: "Signature Acetate",
-    subtitle: "Matte Onyx Black • Italian Handcrafted Acetate",
-    price: 2199,
-    originalPrice: 3999,
-  },
-  silver: {
-    name: "Gunmetal Classic Titanium Round",
-    image: "/images/products/gunmetal-full-rim-round-150798.jpg",
-    brand: "Lenskart Air Classics",
-    subtitle: "Pure Arctic Chrome • Japanese Wireframe Silhouette",
-    price: 1999,
-    originalPrice: 3499,
-  },
-  rose: {
-    name: "Rose Mirage Air-Pop Edition",
-    image: "/images/products/gradient-transparent-dark-pink-to-clear-gunmental-full-rim-cat-eye-lenskart-air-air-pop-la-e17025-242248.jpg",
-    brand: "Lenskart Air Pop",
-    subtitle: "Rose Gold Mirage • Dual-Tone Gradient Titanium",
-    price: 2299,
-    originalPrice: 3899,
-  },
-  emerald: {
-    name: "John Jacobs Celestia Heritage",
-    image: "/images/products/brown-full-rim-clubmaster-john-jacobs-celestia-jj-e70250-239316.jpg",
-    brand: "John Jacobs Heritage",
-    subtitle: "Firozabad Heritage Edition • Hand-Polished Tortoise & Gold",
-    price: 2899,
-    originalPrice: 4999,
-  },
-};
-
 export default function HeroSection() {
-  const [displayMode, setDisplayMode] = useState<"real" | "3d">("real");
-  const [selectedMaterial, setSelectedMaterial] = useState("gold");
-  const [viewAngle, setViewAngle] = useState<"orbit" | "front" | "profile">("orbit");
-  const { addToCart, openCart } = useCart();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scrollVal, setScrollVal] = useState(0);
 
-  const activeReal = REAL_FRAME_PHOTOS[selectedMaterial] || REAL_FRAME_PHOTOS.gold;
-  const activeMat = FRAME_MATERIALS.find((m) => m.id === selectedMaterial) || FRAME_MATERIALS[0];
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  });
 
-  const handleQuickAdd = () => {
-    addToCart(
-      {
-        productId: `hero-${selectedMaterial}`,
-        name: activeReal.name,
-        slug: "gold-rimless-rectangle-vincent-chase-sleek-steel-vc-e17135-c1-218257",
-        price: activeReal.price,
-        originalPrice: activeReal.originalPrice,
-        color: activeMat.name,
-        colorHex: activeMat.color,
-        image: activeReal.image,
-        weight: "18.4g",
-      },
-      1
-    );
-    openCart();
-  };
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    setScrollVal(latest);
+  });
+
+  // Layer 1: Opening Monumental Typography (0.0 -> 0.32)
+  const heroTextOpacity = useTransform(scrollYProgress, [0.0, 0.22, 0.32], [1, 0.8, 0]);
+  const heroTextY = useTransform(scrollYProgress, [0.0, 0.32], [0, -60]);
+  const heroTextScale = useTransform(scrollYProgress, [0.0, 0.32], [1, 0.94]);
+
+  // Layer 2: CTA Buttons (fade slightly earlier for clean inspection)
+  const ctaOpacity = useTransform(scrollYProgress, [0.0, 0.16, 0.26], [1, 0.9, 0]);
+  const ctaY = useTransform(scrollYProgress, [0.0, 0.26], [0, 25]);
+
+  // Layer 3: Scroll Indicator (visible at start, fades quickly)
+  const scrollIndicatorOpacity = useTransform(scrollYProgress, [0.0, 0.12], [1, 0]);
+
+  // Layer 4: Architectural Technical Annotations (appear as glasses rotate & shift)
+  const spec1Opacity = useTransform(scrollYProgress, [0.28, 0.42, 0.68, 0.82], [0, 1, 1, 0]);
+  const spec1X = useTransform(scrollYProgress, [0.28, 0.42, 0.68, 0.82], [-30, 0, 0, -20]);
+
+  const spec2Opacity = useTransform(scrollYProgress, [0.35, 0.48, 0.72, 0.85], [0, 1, 1, 0]);
+  const spec2X = useTransform(scrollYProgress, [0.35, 0.48, 0.72, 0.85], [30, 0, 0, 20]);
+
+  const spec3Opacity = useTransform(scrollYProgress, [0.42, 0.54, 0.76, 0.88], [0, 1, 1, 0]);
+  const spec3Y = useTransform(scrollYProgress, [0.42, 0.54, 0.76, 0.88], [25, 0, 0, 20]);
+
+  // Dynamic warm background ambient shifts
+  const bgGlowLeft = useTransform(scrollYProgress, [0, 1], ["25%", "65%"]);
+  const bgGlowOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.12, 0.22, 0.15]);
 
   return (
-    <section className="relative flex flex-col items-center justify-start overflow-hidden px-4 sm:px-6 pt-28 sm:pt-32 md:pt-36 pb-12 sm:pb-16 bg-[#070709] w-full max-w-full">
-      {/* Subtle Ambient Vignette */}
-      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-gradient-to-b from-amber-500/10 via-indigo-500/5 to-transparent rounded-full blur-[160px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(#ffffff06_1px,transparent_1px)] [background-size:32px_32px] opacity-50" />
-      </div>
+    <section
+      ref={containerRef}
+      className="relative h-[260vh] sm:h-[280vh] w-full max-w-full bg-[#FFFDF5] selection:bg-[#C6A463]/30"
+    >
+      {/* Sticky Viewport Stage: Full-Screen 3D Studio Canvas */}
+      <div className="sticky top-0 h-screen w-full flex flex-col justify-between overflow-hidden">
+        
+        {/* Shifting Warm Champagne Ambient Lighting Atmosphere */}
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+          {/* Subtle warm cream & ivory base gradients */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#FFFDF5] via-[#FAF7F0]/90 to-[#F5EFE0]" />
+          
+          {/* Dynamic shifting golden sun glow */}
+          <motion.div
+            style={{ left: bgGlowLeft, opacity: bgGlowOpacity }}
+            className="absolute top-1/4 -translate-x-1/2 w-[550px] sm:w-[850px] h-[550px] sm:h-[850px] rounded-full bg-gradient-to-br from-[#C6A463]/25 via-[#E2C485]/15 to-transparent blur-[140px] sm:blur-[180px]"
+          />
+          
+          <div className="absolute -bottom-32 right-1/4 w-[400px] h-[400px] rounded-full bg-[#D4AF37]/10 blur-[130px]" />
+          <div className="absolute top-1/2 -left-32 w-[350px] h-[350px] rounded-full bg-[#FAF7F0] blur-[100px]" />
+          
+          {/* Subtle architectural luxury vignette */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_45%,rgba(60,36,21,0.04)_100%)]" />
+        </div>
 
-      {/* 1. Minimal Luxury Eyebrow */}
-      <div className="relative z-10 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-[11px] font-mono tracking-widest text-amber-300/90 uppercase mb-5 backdrop-blur-xl shadow-sm">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-        <span>ALIG&apos;S WARE &bull; FIROZABAD ATELIER</span>
-      </div>
+        {/* 3D Photorealistic Eyewear Canvas (Full Screen, Scroll-Driven) */}
+        <div className="absolute inset-0 z-10">
+          <GlassesHeroCanvas
+            materialId="gold"
+            scrollProgress={scrollVal}
+          />
+        </div>
 
-      {/* 2. Editorial Clean Typography */}
-      <div className="relative z-10 text-center max-w-4xl mx-auto mb-4 px-2">
-        <h1 className="font-cinzel text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-light tracking-[0.03em] text-white leading-[1.08] mb-3">
-          Sculpted Titanium. <span className="italic font-cormorant font-normal text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-100 to-white">Clinical Vision.</span>
-        </h1>
-        <p className="font-sans text-xs sm:text-sm md:text-base text-neutral-400 font-light max-w-xl mx-auto leading-relaxed">
-          AMU-certified ophthalmic optics meets Japanese Beta-Titanium. Calibrated with 420nm Sapphire Blue-Cut clarity in Firozabad.
-        </p>
-      </div>
-
-      {/* 3. Primary Focused CTA Buttons */}
-      <div className="relative z-10 flex flex-wrap items-center justify-center gap-3 mb-8">
-        <Link
-          href="/shop"
-          className="cursor-pointer px-6 py-3 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-black font-semibold text-xs sm:text-sm tracking-wide hover:brightness-110 active:scale-98 transition-all shadow-[0_0_25px_rgba(212,175,55,0.35)] flex items-center gap-2"
-        >
-          <span>Explore Collection</span>
-          <ArrowRight className="w-4 h-4" />
-        </Link>
-        <Link
-          href="/appointment"
-          className="cursor-pointer px-6 py-3 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/15 text-neutral-300 hover:text-white text-xs sm:text-sm font-medium transition-all"
-        >
-          <span>Book Free Try-On</span>
-        </Link>
-      </div>
-
-      {/* 4. Centerpiece Mode Switcher (Real 4K Photo vs 360° 3D) */}
-      <div className="relative z-10 flex items-center gap-1.5 p-1 rounded-full bg-white/[0.04] border border-white/10 mb-6 backdrop-blur-xl">
-        <button
-          onClick={() => setDisplayMode("real")}
-          className={`cursor-pointer px-4 py-1.5 rounded-full text-xs font-mono transition-all flex items-center gap-1.5 ${
-            displayMode === "real"
-              ? "bg-gradient-to-r from-amber-400 to-amber-500 text-black font-bold shadow-[0_0_15px_rgba(212,175,55,0.35)]"
-              : "text-neutral-400 hover:text-white"
-          }`}
-        >
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Real Studio Photo (4K)</span>
-        </button>
-        <button
-          onClick={() => setDisplayMode("3d")}
-          className={`cursor-pointer px-4 py-1.5 rounded-full text-xs font-mono transition-all flex items-center gap-1.5 ${
-            displayMode === "3d"
-              ? "bg-gradient-to-r from-amber-400 to-amber-500 text-black font-bold shadow-[0_0_15px_rgba(212,175,55,0.35)]"
-              : "text-neutral-400 hover:text-white"
-          }`}
-        >
-          <RotateCw className="w-3.5 h-3.5" />
-          <span>360&deg; 3D Inspection</span>
-        </button>
-      </div>
-
-      {/* 5. Central Hero Product Stage (Clean, Spacious, Minimalist) */}
-      <div className="relative z-10 w-full max-w-4xl mx-auto flex flex-col items-center">
-        {displayMode === "real" ? (
-          /* REAL STUDIO PHOTOGRAPHY SHOWCASE */
-          <div className="relative w-full max-w-2xl min-h-[300px] sm:min-h-[380px] md:min-h-[420px] rounded-3xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10 p-6 sm:p-10 flex flex-col items-center justify-center shadow-2xl backdrop-blur-xl group overflow-hidden">
-            {/* Subtle soft backdrop radial glow */}
-            <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 via-transparent to-transparent pointer-events-none" />
-
-            <div className="relative z-10 w-full flex items-center justify-center py-4">
-              <img
-                src={activeReal.image}
-                alt={activeReal.name}
-                className="max-h-[220px] sm:max-h-[280px] md:max-h-[320px] w-auto object-contain filter drop-shadow-[0_20px_35px_rgba(0,0,0,0.85)] transition-transform duration-500 group-hover:scale-105"
-              />
+        {/* =========================================================================
+            STAGE 1: EDITORIAL CAMPAIGN OPENING (Headline, Sub-line, Luxury CTAs)
+           ========================================================================= */}
+        <div className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 md:pt-32 flex flex-col items-center text-center pointer-events-none">
+          
+          <motion.div
+            style={{
+              opacity: heroTextOpacity,
+              y: heroTextY,
+              scale: heroTextScale,
+            }}
+            className="flex flex-col items-center will-change-transform"
+          >
+            {/* Small Brand Eyebrow */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 border border-[#C6A463]/25 text-[10px] sm:text-[11px] font-mono tracking-[0.26em] text-[#3C2415] uppercase mb-4 sm:mb-6 shadow-[0_2px_15px_rgba(60,36,21,0.04)] backdrop-blur-md">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C6A463] animate-pulse" />
+              <span>ALIG&apos;S WARE &bull; FIROZABAD</span>
             </div>
 
-            {/* Product Meta */}
-            <div className="relative z-10 text-center mt-2">
-              <span className="text-[10px] sm:text-xs font-mono text-amber-400 tracking-wider uppercase block mb-1">
-                {activeReal.brand} &bull; {activeReal.subtitle}
-              </span>
-              <h2 className="text-lg sm:text-xl font-cinzel font-bold text-white mb-2">
-                {activeReal.name}
-              </h2>
-              <div className="flex items-center justify-center gap-3">
-                <span className="text-xl sm:text-2xl font-bold font-mono text-amber-300">
-                  ₹{activeReal.price.toLocaleString()}
-                </span>
-                <span className="text-xs sm:text-sm font-mono text-neutral-500 line-through">
-                  ₹{activeReal.originalPrice.toLocaleString()}
-                </span>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono">
-                  In Stock &bull; Free Try-On
-                </span>
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* 3D INTERACTIVE EYEWEAR CANVAS (Slender, Physically Proportioned, No Cartoon Elements) */
-          <div className="relative w-full max-w-3xl flex flex-col items-center justify-center">
-            <GlassesHeroCanvas
-              materialId={selectedMaterial}
-              viewAngle={viewAngle}
-            />
+            {/* Monumental Fashion Campaign Headline */}
+            <h1 className="font-cinzel text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-[0.06em] text-[#3C2415] leading-[1.04] mb-2 sm:mb-3 drop-shadow-sm">
+              SCULPTED VISION.
+            </h1>
 
-            {/* 3D Angle Pills */}
-            <div className="relative -mt-6 sm:-mt-8 z-20 flex items-center gap-1.5 bg-[#0c0d12]/95 p-1 rounded-full border border-white/15 backdrop-blur-2xl shadow-xl">
-              <button
-                onClick={() => setViewAngle("orbit")}
-                className={`cursor-pointer px-3 py-1 rounded-full text-[11px] font-mono transition-all flex items-center gap-1 ${
-                  viewAngle === "orbit"
-                    ? "bg-amber-400 text-black font-bold shadow-md"
-                    : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                <RotateCw className="w-3 h-3" />
-                <span>360&deg; Orbit</span>
-              </button>
-              <button
-                onClick={() => setViewAngle("front")}
-                className={`cursor-pointer px-3 py-1 rounded-full text-[11px] font-mono transition-all flex items-center gap-1 ${
-                  viewAngle === "front"
-                    ? "bg-amber-400 text-black font-bold shadow-md"
-                    : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                <Eye className="w-3 h-3" />
-                <span>Front</span>
-              </button>
-              <button
-                onClick={() => setViewAngle("profile")}
-                className={`cursor-pointer px-3 py-1 rounded-full text-[11px] font-mono transition-all flex items-center gap-1 ${
-                  viewAngle === "profile"
-                    ? "bg-amber-400 text-black font-bold shadow-md"
-                    : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                <Sliders className="w-3 h-3" />
-                <span>45&deg;</span>
-              </button>
-            </div>
-
-            <p className="text-[10px] sm:text-[11px] font-mono text-zinc-500 uppercase tracking-widest mt-2">
-              ✦ Drag to Rotate in Real-Time 3D ✦
+            {/* Poetic Second Line */}
+            <p className="font-cormorant italic text-2xl sm:text-4xl md:text-5xl font-normal text-[#8B7355] tracking-wide mb-6 sm:mb-8">
+              Made to be seen.
             </p>
-          </div>
-        )}
+          </motion.div>
 
-        {/* 6. Minimalist Finish Selector Dots */}
-        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 mt-6 mb-4">
-          {FRAME_MATERIALS.map((mat) => (
-            <button
-              key={mat.id}
-              onClick={() => setSelectedMaterial(mat.id)}
-              className={`cursor-pointer flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono transition-all duration-200 ${
-                selectedMaterial === mat.id
-                  ? "bg-white/15 text-white border border-amber-400/50 shadow-[0_0_15px_rgba(212,175,55,0.25)]"
-                  : "bg-white/[0.03] text-neutral-400 hover:text-white border border-white/10 hover:bg-white/[0.07]"
-              }`}
+          {/* Luxury CTA Action Buttons */}
+          <motion.div
+            style={{
+              opacity: ctaOpacity,
+              y: ctaY,
+            }}
+            className="pointer-events-auto flex flex-wrap items-center justify-center gap-3.5 sm:gap-4 will-change-transform"
+          >
+            <Link
+              href="/shop"
+              className="cursor-pointer px-7 sm:px-8 py-3.5 sm:py-4 rounded-full bg-[#C6A463] hover:bg-[#A8884A] text-white font-semibold text-xs sm:text-sm tracking-[0.14em] uppercase transition-all duration-300 shadow-[0_4px_25px_rgba(198,164,99,0.35)] hover:shadow-[0_6px_35px_rgba(198,164,99,0.5)] active:scale-[0.98] flex items-center gap-2.5 group"
             >
-              <span
-                className="w-3 h-3 rounded-full border border-white/30 shrink-0 shadow-inner"
-                style={{ backgroundColor: mat.color }}
+              <span>EXPLORE COLLECTION</span>
+              <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+
+            <Link
+              href="/appointment"
+              className="cursor-pointer px-7 sm:px-8 py-3.5 sm:py-4 rounded-full bg-white/90 hover:bg-white border border-[#C6A463]/30 hover:border-[#C6A463] text-[#3C2415] text-xs sm:text-sm font-medium tracking-[0.12em] uppercase transition-all duration-300 shadow-sm backdrop-blur-md"
+            >
+              <span>BOOK A TRY-ON</span>
+            </Link>
+          </motion.div>
+        </div>
+
+        {/* =========================================================================
+            STAGE 2: ARCHITECTURAL TECHNICAL SPECIFICATIONS (Surrounding the 3D Model)
+           ========================================================================= */}
+        <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-between px-4 sm:px-8 lg:px-16 max-w-7xl mx-auto">
+          
+          {/* Spec Card 1: Left Chassis Architecture */}
+          <motion.div
+            style={{ opacity: spec1Opacity, x: spec1X }}
+            className="w-64 sm:w-80 glass-card p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-[#C6A463]/25 bg-white/95 backdrop-blur-xl shadow-[0_15px_45px_rgba(60,36,21,0.08)] will-change-transform pointer-events-auto"
+          >
+            <div className="flex items-center gap-2 text-[10px] font-mono text-[#C6A463] uppercase tracking-widest mb-1.5 font-bold">
+              <Compass className="w-3.5 h-3.5 text-[#C6A463]" />
+              <span>01 &bull; CHASSIS ANATOMY</span>
+            </div>
+            <h3 className="font-cinzel text-base sm:text-lg font-bold text-[#3C2415] mb-1">
+              Japanese Beta-Titanium
+            </h3>
+            <p className="text-[11px] sm:text-xs text-[#8B7355] leading-relaxed mb-2.5">
+              0.8mm slender wireframe geometry engineered for weightless balance. Memory-flex temples that never pinch.
+            </p>
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#FAF7F0] border border-[#C6A463]/20 text-[10px] font-mono text-[#3C2415]">
+              <span className="font-bold text-[#C6A463]">18.4g</span>
+              <span>Ultra-Lightweight</span>
+            </div>
+          </motion.div>
+
+          {/* Right Column: Spec Cards 2 & 3 */}
+          <div className="flex flex-col gap-4 sm:gap-6 items-end">
+            
+            {/* Spec Card 2: Top Right Lens Optics */}
+            <motion.div
+              style={{ opacity: spec2Opacity, x: spec2X }}
+              className="w-64 sm:w-80 glass-card p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-[#C6A463]/25 bg-white/95 backdrop-blur-xl shadow-[0_15px_45px_rgba(60,36,21,0.08)] will-change-transform pointer-events-auto text-right"
+            >
+              <div className="flex items-center justify-end gap-2 text-[10px] font-mono text-[#C6A463] uppercase tracking-widest mb-1.5 font-bold">
+                <span>02 &bull; OPTICAL REFRACTION</span>
+                <Eye className="w-3.5 h-3.5 text-[#C6A463]" />
+              </div>
+              <h3 className="font-cinzel text-base sm:text-lg font-bold text-[#3C2415] mb-1">
+                420nm Sapphire Crystal
+              </h3>
+              <p className="text-[11px] sm:text-xs text-[#8B7355] leading-relaxed mb-2.5">
+                Multi-layer anti-reflective coating with high-transmission blue light filtration and scratch-resistant hydrophobic shield.
+              </p>
+              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#FAF7F0] border border-[#C6A463]/20 text-[10px] font-mono text-[#3C2415]">
+                <span className="font-bold text-[#C6A463]">IOR 1.52</span>
+                <span>Zero Visual Distortion</span>
+              </div>
+            </motion.div>
+
+            {/* Spec Card 3: Bottom Right Clinical Heritage */}
+            <motion.div
+              style={{ opacity: spec3Opacity, y: spec3Y }}
+              className="w-64 sm:w-80 glass-card p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-[#C6A463]/25 bg-white/95 backdrop-blur-xl shadow-[0_15px_45px_rgba(60,36,21,0.08)] will-change-transform pointer-events-auto text-right hidden sm:block"
+            >
+              <div className="flex items-center justify-end gap-2 text-[10px] font-mono text-[#C6A463] uppercase tracking-widest mb-1.5 font-bold">
+                <span>03 &bull; CLINICAL OPTOMETRY</span>
+                <ShieldCheck className="w-3.5 h-3.5 text-[#C6A463]" />
+              </div>
+              <h3 className="font-cinzel text-base sm:text-lg font-bold text-[#3C2415] mb-1">
+                AMU Clinical Heritage
+              </h3>
+              <p className="text-[11px] sm:text-xs text-[#8B7355] leading-relaxed mb-2.5">
+                Individually inspected and calibrated by Dr. Sheeraz Ahmad in Firozabad for ocular comfort and custom pupillary distance.
+              </p>
+              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#FAF7F0] border border-[#C6A463]/20 text-[10px] font-mono text-[#3C2415]">
+                <span>Certified AMU Optometry</span>
+              </div>
+            </motion.div>
+
+          </div>
+        </div>
+
+        {/* =========================================================================
+            STAGE 3: BOTTOM SCROLL INSPECT INDICATOR & TELEMETRY
+           ========================================================================= */}
+        <div className="relative z-20 w-full pb-6 sm:pb-8 flex flex-col items-center pointer-events-none">
+          <motion.div
+            style={{ opacity: scrollIndicatorOpacity }}
+            className="flex flex-col items-center gap-2 will-change-transform"
+          >
+            <span className="text-[10px] sm:text-[11px] font-mono tracking-[0.24em] text-[#8B7355] uppercase">
+              SCROLL TO INSPECT
+            </span>
+            <motion.div
+              animate={{ y: [0, 6, 0] }}
+              transition={{ repeat: Infinity, duration: 2.0, ease: "easeInOut" }}
+              className="w-5 h-8 rounded-full border border-[#C6A463]/40 flex items-start justify-center p-1 bg-white/60 backdrop-blur-sm"
+            >
+              <motion.div
+                animate={{ y: [0, 10, 0] }}
+                transition={{ repeat: Infinity, duration: 2.0, ease: "easeInOut" }}
+                className="w-1.5 h-2 rounded-full bg-[#C6A463]"
               />
-              <span>{mat.name.split(" ")[1] || mat.name}</span>
-            </button>
-          ))}
+            </motion.div>
+          </motion.div>
         </div>
 
-        {/* Quick Add / Purchase Button */}
-        <button
-          onClick={handleQuickAdd}
-          className="cursor-pointer mt-1 px-8 py-3 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-xs font-mono text-neutral-200 hover:text-white transition-all flex items-center gap-2 group"
-        >
-          <span className="text-amber-400 group-hover:scale-110 transition-transform">✦</span>
-          <span>Add This Frame to Cart &bull; ₹{activeReal.price.toLocaleString()}</span>
-        </button>
-      </div>
-
-      {/* 7. Quiet Minimal Specs Bar (Clean, no sci-fi box clutter) */}
-      <div className="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-3 w-full max-w-4xl mx-auto mt-12 pt-8 border-t border-white/10">
-        <div className="text-center p-2">
-          <span className="text-xs font-mono text-amber-300 font-bold block">18.4g Ultra-Light</span>
-          <span className="text-[11px] text-neutral-500 font-sans">Japanese Beta-Titanium</span>
-        </div>
-        <div className="text-center p-2">
-          <span className="text-xs font-mono text-cyan-300 font-bold block">420nm Sapphire</span>
-          <span className="text-[11px] text-neutral-500 font-sans">Anti-Glare Blue-Cut</span>
-        </div>
-        <div className="text-center p-2">
-          <span className="text-xs font-mono text-emerald-300 font-bold block">AMU Optometry</span>
-          <span className="text-[11px] text-neutral-500 font-sans">Dr. Sheeraz Verified</span>
-        </div>
-        <div className="text-center p-2">
-          <span className="text-xs font-mono text-white font-bold block">Firozabad Atelier</span>
-          <span className="text-[11px] text-neutral-500 font-sans">Custom Fit &amp; Try-On</span>
-        </div>
       </div>
     </section>
   );

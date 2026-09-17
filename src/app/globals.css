@@ -1,10 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --color-primary: #3b82f6;
-  --color-accent: #a855f7;
+  --background: #FFFDF5;
+  --foreground: #2A1F14;
+  --color-primary: #C6A463;
+  --color-accent: #A8884A;
+  --color-espresso: #3C2415;
+  --color-gold: #C6A463;
+  --color-cream: #FAF7F0;
+  --color-ivory: #FFFDF5;
 }
 
 @theme inline {
@@ -19,82 +23,82 @@
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
-  background-color: #0a0a0a;
-  color: #ededed;
+  background-color: #FFFDF5;
+  color: #2A1F14;
   font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
   min-height: 100vh;
 }
 
 /* ==========================================================================
-   Reusable Glassmorphism (Frosted Glass) Utilities
+   Reusable Glassmorphism (Frosted Glass) Utilities — Warm Champagne Theme
    ========================================================================== */
 
 /* Standard Frosted Glass Layer */
 .glass {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 253, 245, 0.7);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(198, 164, 99, 0.15);
   border-radius: 1rem;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  box-shadow: 0 8px 32px 0 rgba(60, 36, 21, 0.06);
 }
 
 /* Glass Card with enhanced depth and sheen */
 .glass-card {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.07) 0%,
-    rgba(255, 255, 255, 0.02) 100%
+    rgba(255, 253, 245, 0.85) 0%,
+    rgba(250, 247, 240, 0.6) 100%
   );
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(198, 164, 99, 0.15);
   border-radius: 1rem;
   box-shadow: 
-    0 8px 32px 0 rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+    0 8px 32px 0 rgba(60, 36, 21, 0.06),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card:hover {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.04) 100%
+    rgba(255, 253, 245, 0.95) 0%,
+    rgba(250, 247, 240, 0.75) 100%
   );
-  border-color: rgba(255, 255, 255, 0.22);
+  border-color: rgba(198, 164, 99, 0.3);
   box-shadow: 
-    0 16px 40px 0 rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+    0 16px 40px 0 rgba(60, 36, 21, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
 }
 
 /* Deep Panel Glass (Sidebars, modals, floating navbars) */
 .glass-panel {
-  background-color: rgba(10, 10, 10, 0.7);
+  background-color: rgba(255, 253, 245, 0.85);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(198, 164, 99, 0.12);
+  box-shadow: 0 24px 48px -12px rgba(60, 36, 21, 0.08);
 }
 
 /* Glass Pill / Badges */
 .glass-pill {
-  background-color: rgba(255, 255, 255, 0.06);
+  background-color: rgba(250, 247, 240, 0.8);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(198, 164, 99, 0.15);
   border-radius: 9999px;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-pill:hover {
-  background-color: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.25);
+  background-color: rgba(250, 247, 240, 0.95);
+  border-color: rgba(198, 164, 99, 0.35);
 }
 
 /* Subtle glowing pulse animations for background ambiance */
@@ -138,19 +142,19 @@ body {
 }
 
 .text-gold-gradient {
-  background: linear-gradient(180deg, #FFFFFF 0%, #F5E6C4 28%, #D4AF37 68%, #8C6D23 100%);
+  background: linear-gradient(180deg, #3C2415 0%, #8B7355 28%, #C6A463 68%, #A8884A 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .text-silver-gradient {
-  background: linear-gradient(180deg, #FFFFFF 0%, #E2E8F0 40%, #94A3B8 100%);
+  background: linear-gradient(180deg, #3C2415 0%, #5C3D2E 40%, #8B7355 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .gold-glow {
-  text-shadow: 0 0 40px rgba(212, 175, 55, 0.45), 0 0 80px rgba(212, 175, 55, 0.2);
+  text-shadow: 0 0 40px rgba(198, 164, 99, 0.35), 0 0 80px rgba(198, 164, 99, 0.15);
 }
 
 

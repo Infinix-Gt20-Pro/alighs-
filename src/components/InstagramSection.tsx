@@ -72,13 +72,13 @@ export default function InstagramSection() {
   return (
     <section className="relative py-12 sm:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto overflow-hidden">
       {/* Background Soft Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-amber-500/10 rounded-full blur-[130px] pointer-events-none -z-10" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-r from-pink-500/5 via-purple-500/5 to-amber-500/5 rounded-full blur-[130px] pointer-events-none -z-10" />
 
       {/* Header Profile Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 pb-6 border-b border-white/10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 pb-6 border-b border-[#C6A463]/15">
         <div className="flex items-center gap-4">
           <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden p-0.5 bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] shadow-[0_0_25px_rgba(220,39,67,0.35)] shrink-0">
-            <div className="relative w-full h-full rounded-[14px] overflow-hidden bg-black flex items-center justify-center">
+            <div className="relative w-full h-full rounded-[14px] overflow-hidden bg-[#3C2415] flex items-center justify-center">
               <Image
                 src="/images/aligsware-logo.png"
                 alt="ALIG'S WARE Official Logo"
@@ -92,19 +92,19 @@ export default function InstagramSection() {
 
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <h2 className="font-cinzel text-xl sm:text-2xl md:text-3xl font-bold tracking-wider text-white">
+              <h2 className="font-cinzel text-xl sm:text-2xl md:text-3xl font-bold tracking-wider text-[#3C2415]">
                 ALIG&apos;S WARE
               </h2>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center gap-1">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 flex items-center gap-1">
                 <CheckCircle2 className="w-3 h-3" /> Official
               </span>
             </div>
-            <p className="text-xs sm:text-sm font-mono text-neutral-400">
+            <p className="text-xs sm:text-sm font-mono text-[#8B7355]">
               <a
                 href="https://www.instagram.com/aligsware/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-amber-300 hover:text-amber-200 transition-colors font-semibold"
+                className="text-[#C6A463] hover:text-[#A8884A] transition-colors font-semibold"
               >
                 @aligsware
               </a>{" "}
@@ -136,7 +136,7 @@ export default function InstagramSection() {
             href="https://www.instagram.com/aligsware/"
             target="_blank"
             rel="noopener noreferrer"
-            className="group relative rounded-2xl overflow-hidden border border-white/10 bg-[#0c0d12]/90 hover:border-pink-500/40 transition-all duration-300 hover:shadow-[0_15px_35px_rgba(220,39,67,0.25)] flex flex-col cursor-pointer"
+            className="group relative rounded-2xl overflow-hidden border border-[#C6A463]/12 bg-white hover:border-pink-500/40 transition-all duration-300 hover:shadow-[0_15px_35px_rgba(220,39,67,0.15)] flex flex-col cursor-pointer"
           >
             <div className="relative h-64 sm:h-72 w-full overflow-hidden">
               <Image
@@ -149,12 +149,12 @@ export default function InstagramSection() {
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
 
               {/* Tag pill */}
-              <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-[10px] font-mono text-amber-300">
+              <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#3C2415]/80 backdrop-blur-md border border-[#C6A463]/20 text-[10px] font-mono text-[#E2C485]">
                 {post.tag}
               </div>
 
               {/* Instagram icon badge */}
-              <div className="absolute top-3 right-3 w-7 h-7 rounded-full bg-black/70 backdrop-blur-md border border-white/15 flex items-center justify-center text-white/80 group-hover:text-pink-400 transition-colors">
+              <div className="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/90 backdrop-blur-md border border-[#C6A463]/15 flex items-center justify-center text-[#3C2415]/80 group-hover:text-pink-500 transition-colors">
                 <InstagramIcon className="w-3.5 h-3.5" />
               </div>
 
@@ -174,17 +174,17 @@ export default function InstagramSection() {
             {/* Post Meta */}
             <div className="p-4 flex flex-col justify-between flex-grow">
               <div>
-                <h3 className="font-cinzel text-sm font-bold text-white group-hover:text-pink-300 transition-colors">
+                <h3 className="font-cinzel text-sm font-bold text-[#3C2415] group-hover:text-pink-500 transition-colors">
                   {post.title}
                 </h3>
-                <p className="text-[11px] text-zinc-400 font-sans mt-1 line-clamp-2 leading-relaxed">
+                <p className="text-[11px] text-[#8B7355] font-sans mt-1 line-clamp-2 leading-relaxed">
                   {post.subtitle}
                 </p>
               </div>
 
-              <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between text-[10px] font-mono text-neutral-400">
+              <div className="mt-3 pt-3 border-t border-[#C6A463]/10 flex items-center justify-between text-[10px] font-mono text-[#8B7355]">
                 <span className="text-pink-400">View on Instagram</span>
-                <ExternalLink className="w-3 h-3 text-neutral-500 group-hover:text-pink-400 transition-colors" />
+                <ExternalLink className="w-3 h-3 text-[#8B7355] group-hover:text-pink-400 transition-colors" />
               </div>
             </div>
           </a>
@@ -192,16 +192,16 @@ export default function InstagramSection() {
       </div>
 
       {/* Bottom Sub-Banner */}
-      <div className="mt-8 p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-white/[0.04] via-white/[0.02] to-white/[0.04] border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+      <div className="mt-8 p-4 sm:p-6 rounded-2xl bg-[#FAF7F0] border border-[#C6A463]/15 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400 shrink-0">
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-xs sm:text-sm font-semibold text-white font-cinzel block">
+            <span className="text-xs sm:text-sm font-semibold text-[#3C2415] font-cinzel block">
               Tag @aligsware to be featured on our official page
             </span>
-            <span className="text-[11px] text-neutral-400 font-mono">
+            <span className="text-[11px] text-[#8B7355] font-mono">
               Share your look with #AligsWare #FirozabadEyewear #TitaniumOptics
             </span>
           </div>
@@ -211,7 +211,7 @@ export default function InstagramSection() {
           href="https://www.instagram.com/aligsware/"
           target="_blank"
           rel="noopener noreferrer"
-          className="px-4 py-2 rounded-xl border border-white/20 hover:border-pink-400 text-xs font-mono text-zinc-300 hover:text-white transition-colors flex items-center gap-2"
+          className="px-4 py-2 rounded-xl border border-[#C6A463]/20 hover:border-pink-400 text-xs font-mono text-[#8B7355] hover:text-[#3C2415] transition-colors flex items-center gap-2"
         >
           <InstagramIcon className="w-3.5 h-3.5 text-pink-400" />
           <span>instagram.com/aligsware</span>

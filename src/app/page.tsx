@@ -17,31 +17,30 @@ export default function Home() {
 
   return (
     <>
-      {/* Sleek Dark Preloader */}
+      {/* Sleek Preloader */}
       <Preloader
         isLoading={showPreloader}
         onComplete={() => setShowPreloader(false)}
       />
 
-      <main className="relative min-h-screen max-w-full overflow-x-hidden bg-[#070709] text-white selection:bg-amber-500/30 selection:text-white">
-        {/* Dynamic Ambient Color Orbs with seamless vertical coverage */}
+      <main className="relative min-h-screen max-w-full overflow-x-hidden bg-[#FFFDF5] text-[#2A1F14] selection:bg-[#C6A463]/30 selection:text-[#3C2415]">
+        {/* Warm Ambient Golden Orbs */}
         <div className="pointer-events-none fixed inset-0 overflow-hidden z-0">
-          <div className="animate-float-1 absolute -top-24 -left-20 w-[350px] sm:w-[550px] h-[350px] sm:h-[550px] rounded-full bg-gradient-to-br from-amber-600/15 via-indigo-600/15 to-transparent blur-[100px] sm:blur-[130px]" />
-          <div className="animate-float-2 absolute top-1/3 -right-32 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] rounded-full bg-gradient-to-bl from-purple-600/15 via-amber-600/10 to-transparent blur-[100px] sm:blur-[140px]" />
-          <div className="animate-float-1 absolute -bottom-32 left-1/4 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] rounded-full bg-gradient-to-tr from-cyan-600/12 via-emerald-600/10 to-transparent blur-[100px] sm:blur-[130px]" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff04_1px,transparent_1px),linear-gradient(to_bottom,#ffffff04_1px,transparent_1px)] bg-[size:3rem_3rem] sm:bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-35" />
+          <div className="animate-float-1 absolute -top-24 -left-20 w-[350px] sm:w-[550px] h-[350px] sm:h-[550px] rounded-full bg-gradient-to-br from-[#C6A463]/10 via-[#E8D5B0]/8 to-transparent blur-[100px] sm:blur-[130px]" />
+          <div className="animate-float-2 absolute top-1/3 -right-32 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] rounded-full bg-gradient-to-bl from-[#D4C4A0]/10 via-[#C6A463]/6 to-transparent blur-[100px] sm:blur-[140px]" />
+          <div className="animate-float-1 absolute -bottom-32 left-1/4 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] rounded-full bg-gradient-to-tr from-[#E2C485]/8 via-[#C6A463]/5 to-transparent blur-[100px] sm:blur-[130px]" />
         </div>
 
-        {/* Liquid Glass Navigation Bar */}
+        {/* Navigation Bar */}
         <Navbar />
 
-        {/* 1. ENTERPRISE HERO SHOWROOM: 360 Studio, Pantos Beta-Titanium & Cockpit HUD */}
+        {/* 1. IMMERSIVE 3D HERO — Scroll-Driven Fashion Campaign */}
         <HeroSection />
 
-        {/* 2. FEATURED ATELIER SHOWCASE: Signature 3D Eyewear Curation */}
+        {/* 2. FEATURED ATELIER SHOWCASE: Signature Eyewear Curation */}
         <FeaturedShowcase />
 
-        {/* 3. 3D EDITORIAL MODEL SCROLL EXPERIENCE: Real Fashion Icons & Motion Capture Reel */}
+        {/* 3. EDITORIAL MODEL SCROLL EXPERIENCE */}
         <ModelScrollExperience />
 
         {/* 4. INSTAGRAM COMMUNITY & REELS SHOWCASE: @aligsware */}
@@ -50,7 +49,7 @@ export default function Home() {
         {/* 5. DOCTOR SECTION: Dr. Sheeraz Ahmad — AMU-Certified Optometrist */}
         <DoctorSection />
 
-        {/* 5. Luxury Atelier Footer */}
+        {/* 6. Luxury Atelier Footer */}
         <Footer />
       </main>
 

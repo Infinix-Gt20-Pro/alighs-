@@ -26,7 +26,7 @@ function InstagramIcon({ className = "w-4 h-4" }: { className?: string }) {
 
 export default function Footer() {
   return (
-    <footer className="w-full glass-panel border-t border-white/10 bg-[#070709] pt-16 pb-10">
+    <footer className="w-full border-t border-[#C6A463]/20 bg-[#3C2415] shadow-[inset_0_1px_0_0_rgba(198,164,99,0.1)] pt-16 pb-10">
       <div className="container mx-auto px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
           
@@ -91,7 +91,7 @@ export default function Footer() {
           {/* Navigation Links */}
           <div className="flex flex-col items-start md:items-center">
             <div>
-              <h3 className="text-sm font-semibold text-white mb-5 font-cinzel uppercase tracking-widest text-amber-300">
+              <h3 className="text-sm font-semibold text-amber-300 mb-5 font-cinzel uppercase tracking-widest">
                 Atelier Directory
               </h3>
               <ul className="flex flex-col gap-3.5">
@@ -136,7 +136,7 @@ export default function Footer() {
 
           {/* Contact & Clinic Details */}
           <div className="flex flex-col items-start">
-            <h3 className="text-sm font-semibold text-white mb-5 font-cinzel uppercase tracking-widest text-amber-300">
+            <h3 className="text-sm font-semibold text-amber-300 mb-5 font-cinzel uppercase tracking-widest">
               Direct Contact
             </h3>
             <ul className="flex flex-col gap-3.5">
@@ -206,7 +206,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom Copyright */}
-        <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+        <div className="pt-6 border-t border-[#C6A463]/20 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
           <p className="text-gray-500 text-xs font-mono">
             &copy; 2026 ALIG&apos;S WARE &bull; Firozabad, Uttar Pradesh &bull; All Rights Reserved.
           </p>

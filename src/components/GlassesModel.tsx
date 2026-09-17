@@ -74,10 +74,12 @@ export default function GlassesModel({
   materialId = "gold",
   viewAngle = "orbit",
   autoRotate = true,
+  scrollProgress,
 }: {
   materialId?: string;
   viewAngle?: "orbit" | "front" | "profile" | "macro";
   autoRotate?: boolean;
+  scrollProgress?: number;
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const leftLensRef = useRef<THREE.Mesh>(null);
@@ -302,8 +304,16 @@ export default function GlassesModel({
       targetPosition.current = { x: 0.5, y: 0.0, z: 0.7 };
       targetScale.current = 1.95;
     } else {
-      // orbit mode: Gentle slow luxury turntable spin
-      if (autoRotate) {
+      // orbit mode: scroll-driven or gentle turntable
+      if (typeof scrollProgress === "number") {
+        // Scroll drives full 360° rotation
+        groupRef.current.rotation.y = THREE.MathUtils.damp(
+          groupRef.current.rotation.y,
+          scrollProgress * Math.PI * 2,
+          4.0,
+          delta
+        );
+      } else if (autoRotate) {
         groupRef.current.rotation.y += delta * 0.28;
       }
       const mouseX = state.pointer.x * 0.14;

@@ -1,120 +1,21 @@
 // src/components/ModelScrollExperience.tsx
 "use client";
 
-import React, { useRef, useState, useSyncExternalStore } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, Environment } from "@react-three/drei";
-import { motion, useScroll, useTransform, useMotionValueEvent, AnimatePresence } from "framer-motion";
-import * as THREE from "three";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import {
   Sparkles,
   Eye,
   ShoppingBag,
   CheckCircle2,
-  RotateCw,
   Zap,
-  Film
+  Film,
+  ShieldCheck,
+  ChevronDown
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
-import { useInViewFast } from "@/hooks/useInViewFast";
-
-const emptySubscribe = () => () => {};
-
-function InteractiveScrollGlasses({
-  scrollProgress,
-  finishColor = "#D4AF37",
-  metalness = 0.95,
-  roughness = 0.15
-}: {
-  scrollProgress: React.MutableRefObject<number>;
-  finishColor?: string;
-  metalness?: number;
-  roughness?: number;
-}) {
-  const groupRef = useRef<THREE.Group>(null);
-  const leftLensRef = useRef<THREE.Mesh>(null);
-  const rightLensRef = useRef<THREE.Mesh>(null);
-
-  const lensMaterial = React.useMemo(() => {
-    return new THREE.MeshPhysicalMaterial({
-      color: "#e0f2fe",
-      transmission: 0.94,
-      opacity: 0.95,
-      transparent: true,
-      roughness: 0.04,
-      ior: 1.54,
-      reflectivity: 0.9,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.05,
-      attenuationColor: new THREE.Color("#38bdf8"),
-      attenuationDistance: 0.6
-    });
-  }, []);
-
-  const frameMaterial = React.useMemo(() => {
-    return new THREE.MeshStandardMaterial({
-      color: finishColor,
-      metalness,
-      roughness,
-      envMapIntensity: 2.5
-    });
-  }, [finishColor, metalness, roughness]);
-
-  useFrame((state, delta) => {
-    if (!groupRef.current) return;
-    const p = scrollProgress.current;
-
-    const targetRotX = p < 0.35 ? THREE.MathUtils.lerp(0.4, 0.0, p / 0.35) : THREE.MathUtils.lerp(0.0, -0.15, (p - 0.35) / 0.65);
-    const targetRotY = p < 0.5 ? THREE.MathUtils.lerp(-0.7, 0.0, p / 0.5) : THREE.MathUtils.lerp(0.0, 0.4, (p - 0.5) / 0.5);
-    const targetScale = p < 0.4 ? THREE.MathUtils.lerp(1.5, 1.25, p / 0.4) : THREE.MathUtils.lerp(1.25, 1.45, (p - 0.4) / 0.6);
-    const targetPosY = p < 0.5 ? THREE.MathUtils.lerp(0.3, 0.15, p / 0.5) : THREE.MathUtils.lerp(0.15, -0.05, (p - 0.5) / 0.5);
-
-    groupRef.current.rotation.x = THREE.MathUtils.damp(groupRef.current.rotation.x, targetRotX, 4, delta);
-    groupRef.current.rotation.y = THREE.MathUtils.damp(groupRef.current.rotation.y, targetRotY, 4, delta);
-    groupRef.current.position.y = THREE.MathUtils.damp(groupRef.current.position.y, targetPosY, 4, delta);
-    groupRef.current.scale.setScalar(THREE.MathUtils.damp(groupRef.current.scale.x, targetScale, 4, delta));
-  });
-
-  return (
-    <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.25}>
-      <group ref={groupRef} position={[0, 0.2, 0]}>
-        <mesh position={[-0.95, 0, 0]} material={frameMaterial}>
-          <torusGeometry args={[0.72, 0.045, 18, 44]} />
-        </mesh>
-        <mesh ref={leftLensRef} position={[-0.95, 0, 0]} material={lensMaterial}>
-          <cylinderGeometry args={[0.7, 0.7, 0.02, 32]} />
-        </mesh>
-
-        <mesh position={[0.95, 0, 0]} material={frameMaterial}>
-          <torusGeometry args={[0.72, 0.045, 18, 44]} />
-        </mesh>
-        <mesh ref={rightLensRef} position={[0.95, 0, 0]} material={lensMaterial}>
-          <cylinderGeometry args={[0.7, 0.7, 0.02, 32]} />
-        </mesh>
-
-        <mesh position={[0, 0.25, 0.02]} rotation={[0, 0, Math.PI / 2]} material={frameMaterial}>
-          <cylinderGeometry args={[0.038, 0.038, 0.48, 16]} />
-        </mesh>
-
-        <mesh position={[-1.7, 0.12, -1.0]} rotation={[0, 0.18, 0]} material={frameMaterial}>
-          <boxGeometry args={[0.04, 0.04, 2.0]} />
-        </mesh>
-        <mesh position={[1.7, 0.12, -1.0]} rotation={[0, -0.18, 0]} material={frameMaterial}>
-          <boxGeometry args={[0.04, 0.04, 2.0]} />
-        </mesh>
-
-        <mesh position={[-1.68, 0.12, 0]} material={frameMaterial}>
-          <sphereGeometry args={[0.065, 14, 14]} />
-        </mesh>
-        <mesh position={[1.68, 0.12, 0]} material={frameMaterial}>
-          <sphereGeometry args={[0.065, 14, 14]} />
-        </mesh>
-      </group>
-    </Float>
-  );
-}
 
 const MODELS = [
   {
@@ -165,59 +66,40 @@ const MODELS = [
 export default function ModelScrollExperience() {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const progressRef = useRef(0);
   const [activeModelIdx, setActiveModelIdx] = useState(0);
   const [blueCutActive, setBlueCutActive] = useState(true);
   const { addToCart, openCart } = useCart();
-
-  const isInView = useInViewFast(containerRef, "300px");
-
-  const mounted = useSyncExternalStore(
-    emptySubscribe,
-    () => true,
-    () => false
-  );
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"]
   });
 
-  const targetTimeRef = useRef(0);
-  const rafSeekRef = useRef<number | null>(null);
-
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    progressRef.current = latest;
-
+  // Ensure video plays smoothly without seek stutter
+  useEffect(() => {
     const v = videoRef.current;
-    if (v && MODELS[activeModelIdx].video && v.duration) {
-      targetTimeRef.current = latest * v.duration;
-
-      if (!rafSeekRef.current) {
-        rafSeekRef.current = requestAnimationFrame(() => {
-          rafSeekRef.current = null;
-          const vid = videoRef.current;
-          if (!vid || vid.seeking || isNaN(targetTimeRef.current)) return;
-          if (Math.abs(vid.currentTime - targetTimeRef.current) > 0.07) {
-            vid.currentTime = targetTimeRef.current;
-          }
-        });
-      }
+    if (v && MODELS[activeModelIdx].video) {
+      v.currentTime = 0;
+      v.play().catch(() => {});
     }
-  });
+  }, [activeModelIdx]);
 
-  const modelScale = useTransform(scrollYProgress, [0, 0.45, 1], [1.0, 1.05, 1.12]);
-  const modelOpacity = useTransform(scrollYProgress, [0, 0.1, 0.85, 1], [0.85, 1, 1, 0.75]);
-  const overlayDarkness = useTransform(scrollYProgress, [0, 0.4, 0.85], [0.2, 0.35, 0.6]);
+  // Subtle cinematic zooms & lighting depth during scroll (no GPU seek hitches)
+  const modelScale = useTransform(scrollYProgress, [0, 0.5, 1], [1.0, 1.04, 1.09]);
+  const modelOpacity = useTransform(scrollYProgress, [0, 0.08, 0.88, 1], [0.92, 1, 1, 0.8]);
+  const overlayDarkness = useTransform(scrollYProgress, [0, 0.45, 0.85], [0.15, 0.3, 0.5]);
 
-  const phase1Opacity = useTransform(scrollYProgress, [0.04, 0.2, 0.35], [0, 1, 0]);
-  const phase1Y = useTransform(scrollYProgress, [0.05, 0.22, 0.35], [20, 0, -15]);
+  // Scrollytelling Phase 1: Atelier Silhouette
+  const phase1Opacity = useTransform(scrollYProgress, [0.04, 0.18, 0.34], [0, 1, 0]);
+  const phase1Y = useTransform(scrollYProgress, [0.04, 0.18, 0.34], [25, 0, -15]);
 
-  const phase2Opacity = useTransform(scrollYProgress, [0.36, 0.52, 0.68], [0, 1, 0]);
-  const phase2Y = useTransform(scrollYProgress, [0.38, 0.55, 0.72], [20, 0, -15]);
+  // Scrollytelling Phase 2: Bespoke Craftsmanship & Optical Clarity
+  const phase2Opacity = useTransform(scrollYProgress, [0.38, 0.52, 0.68], [0, 1, 0]);
+  const phase2Y = useTransform(scrollYProgress, [0.38, 0.52, 0.68], [25, 0, -15]);
 
-  const phase3Opacity = useTransform(scrollYProgress, [0.72, 0.88, 1.0], [0, 1, 1]);
-  const phase3Y = useTransform(scrollYProgress, [0.75, 0.9, 1.0], [20, 0, 0]);
+  // Scrollytelling Phase 3: Wear The Runway Look CTA
+  const phase3Opacity = useTransform(scrollYProgress, [0.72, 0.86, 1.0], [0, 1, 1]);
+  const phase3Y = useTransform(scrollYProgress, [0.72, 0.86, 1.0], [25, 0, 0]);
 
   const activeModel = MODELS[activeModelIdx];
 
@@ -240,9 +122,12 @@ export default function ModelScrollExperience() {
   };
 
   return (
-    <section ref={containerRef} className="relative h-[200vh] sm:h-[220vh] bg-[#070709] gpu-layer w-full max-w-full overflow-hidden">
-      {/* Sticky Fullscreen Container */}
-      <div className="sticky top-0 h-[100dvh] w-full flex items-center justify-center overflow-hidden">
+    <section
+      ref={containerRef}
+      className="relative h-[200vh] sm:h-[220vh] bg-[#070709] w-full max-w-full overflow-hidden"
+    >
+      {/* Sticky Viewport Container */}
+      <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
         
         {/* Background Ambient Glows */}
         <div className="pointer-events-none absolute inset-0 z-0">
@@ -250,30 +135,34 @@ export default function ModelScrollExperience() {
           <div className="absolute bottom-1/4 right-1/4 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] rounded-full bg-cyan-500/10 blur-[120px]" />
         </div>
 
-        {/* Section Top Header & Step Progress Bar */}
+        {/* Section Top Header & Model Switcher Bar */}
         <div className="absolute top-4 sm:top-8 z-40 w-full px-3 sm:px-4 max-w-5xl mx-auto flex flex-col items-center pointer-events-none">
-          <div className="pointer-events-auto inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-amber-500/30 bg-[#0c0d12]/90 backdrop-blur-md mb-2 shadow-[0_0_15px_rgba(212,175,55,0.2)]">
+          <div className="pointer-events-auto inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full border border-amber-500/30 bg-[#0c0d12]/90 backdrop-blur-md mb-2 shadow-[0_0_15px_rgba(212,175,55,0.2)]">
             <Sparkles className="w-3 h-3 text-amber-400" />
             <span className="text-[10px] sm:text-[11px] font-mono tracking-widest text-amber-300 uppercase">
-              3D Editorial Showcase
+              Editorial Runway Showcase
             </span>
           </div>
 
           {/* Model Switcher Buttons */}
-          <div className="pointer-events-auto flex items-center gap-1.5 bg-black/80 p-1 sm:p-1.5 rounded-full border border-white/10 backdrop-blur-xl shadow-2xl max-w-full overflow-x-auto">
+          <div className="pointer-events-auto flex items-center gap-1.5 bg-black/85 p-1 sm:p-1.5 rounded-full border border-white/10 backdrop-blur-xl shadow-2xl max-w-full overflow-x-auto">
             {MODELS.map((m, idx) => {
               const isSelected = activeModelIdx === idx;
               return (
                 <button
                   key={m.id}
                   onClick={() => setActiveModelIdx(idx)}
-                  className={`px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                  className={`px-3.5 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                     isSelected
                       ? "bg-gradient-to-r from-amber-400 to-amber-500 text-black font-bold shadow-[0_0_12px_rgba(212,175,55,0.4)]"
-                      : "text-zinc-400 hover:text-white"
+                      : "text-zinc-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
-                  {m.video ? <Film className="w-3 h-3 text-amber-400" /> : <span className="w-2 h-2 rounded-full" style={{ backgroundColor: m.finishColor }} />}
+                  {m.video ? (
+                    <Film className="w-3 h-3 text-amber-400" />
+                  ) : (
+                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: m.finishColor }} />
+                  )}
                   {m.name}
                 </button>
               );
@@ -281,11 +170,11 @@ export default function ModelScrollExperience() {
           </div>
         </div>
 
-        {/* REAL EDITORIAL MODEL PHOTO OR MOTION VIDEO */}
+        {/* AUTHENTIC EDITORIAL PHOTOGRAPHY & 1080P MOTION REEL */}
         <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
           <motion.div
             style={{ scale: modelScale, opacity: modelOpacity }}
-            className="relative w-full h-full max-w-5xl mx-auto flex items-center justify-center gpu-layer"
+            className="relative w-full h-full max-w-5xl mx-auto flex items-center justify-center will-change-transform"
           >
             <AnimatePresence mode="wait">
               <motion.div
@@ -293,16 +182,18 @@ export default function ModelScrollExperience() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.35 }}
-                className="relative w-full h-full max-h-[82vh] sm:max-h-[90vh] rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.9)]"
+                transition={{ duration: 0.3 }}
+                className="relative w-full h-full max-h-[84vh] sm:max-h-[90vh] rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.9)]"
               >
                 {activeModel.video ? (
                   <video
                     ref={videoRef}
+                    autoPlay
+                    loop
                     muted
                     playsInline
                     preload="auto"
-                    className="w-full h-full object-cover object-center brightness-90 contrast-105 will-change-transform"
+                    className="w-full h-full object-cover object-center brightness-95 contrast-105 will-change-transform"
                   >
                     <source src={activeModel.video} type="video/mp4" />
                   </video>
@@ -317,7 +208,7 @@ export default function ModelScrollExperience() {
                   />
                 )}
 
-                {/* Dark Vignette and Gradient Overlays */}
+                {/* Dark Vignette & Gradient Overlays for Cinematic Atmosphere */}
                 <motion.div
                   style={{ opacity: overlayDarkness }}
                   className="absolute inset-0 bg-black pointer-events-none"
@@ -328,8 +219,8 @@ export default function ModelScrollExperience() {
                 {/* Blue-Cut Sapphire Optical Sheen Simulation */}
                 {blueCutActive && (
                   <motion.div
-                    animate={{ opacity: [0.35, 0.65, 0.35] }}
-                    transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                    animate={{ opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut" }}
                     className="absolute inset-0 bg-radial-at-c from-cyan-400/10 via-transparent to-transparent pointer-events-none mix-blend-screen"
                   />
                 )}
@@ -338,46 +229,12 @@ export default function ModelScrollExperience() {
           </motion.div>
         </div>
 
-        {/* 3D REAL-TIME GLASSES CANVAS */}
-        <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
-          <div className="w-full h-full max-w-4xl mx-auto">
-            {mounted && (
-              <Canvas
-                camera={{ position: [0, 0, 4.8], fov: 38 }}
-                frameloop={isInView ? "always" : "never"}
-                gl={{
-                  antialias: true,
-                  alpha: true,
-                  powerPreference: "high-performance",
-                  stencil: false,
-                  depth: true
-                }}
-                dpr={typeof window !== "undefined" ? Math.min(window.devicePixelRatio, 1.5) : 1}
-              >
-                <ambientLight intensity={1.6} />
-                <directionalLight position={[5, 6, 6]} intensity={3.0} />
-                <directionalLight position={[-5, -4, -3]} intensity={1.5} color="#38bdf8" />
-                <pointLight position={[0, 1, 3]} intensity={1.2} color="#fbbf24" />
-
-                <InteractiveScrollGlasses
-                  scrollProgress={progressRef}
-                  finishColor={activeModel.finishColor}
-                  metalness={activeModel.id === "elena" ? 0.96 : 0.82}
-                  roughness={activeModel.id === "elena" ? 0.12 : 0.35}
-                />
-
-                <Environment preset="city" />
-              </Canvas>
-            )}
-          </div>
-        </div>
-
-        {/* Stage 1: The Icon & Editorial Reveal */}
+        {/* Phase 1: Atelier Silhouette & Anatomy */}
         <motion.div
           style={{ opacity: phase1Opacity, y: phase1Y }}
-          className="absolute left-4 right-4 sm:right-auto sm:left-12 bottom-12 sm:bottom-20 z-30 max-w-sm sm:max-w-md mx-auto sm:mx-0 pointer-events-none gpu-layer"
+          className="absolute left-4 right-4 sm:right-auto sm:left-12 bottom-12 sm:bottom-20 z-30 max-w-sm sm:max-w-md mx-auto sm:mx-0 pointer-events-none"
         >
-          <div className="glass-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-white/10 bg-[#0c0d12]/90 backdrop-blur-2xl shadow-2xl">
+          <div className="glass-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-white/10 bg-[#0c0d12]/92 backdrop-blur-2xl shadow-2xl">
             <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-mono text-amber-400 mb-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
               <span>01 • ATELIER SILHOUETTE</span>
@@ -386,37 +243,37 @@ export default function ModelScrollExperience() {
               {activeModel.name}
             </h3>
             <p className="text-[11px] sm:text-xs text-zinc-300 leading-relaxed mb-3">
-              {activeModel.tagline}. Designed to mold gracefully to distinct Indian facial bone structures.
+              {activeModel.tagline}. Calibrated to harmonize with Indian facial profiles without slipping or cheek contact.
             </p>
             <div className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-400 border-t border-white/5 pt-2">
               <Eye className="w-3 h-3 text-cyan-400" />
-              <span>Scroll down to control frame placement</span>
+              <span>Scroll down to inspect lens craftsmanship</span>
             </div>
           </div>
         </motion.div>
 
-        {/* Stage 2: 3D Glasses Sync */}
+        {/* Phase 2: Bespoke Craftsmanship & Optical Clarity */}
         <motion.div
           style={{ opacity: phase2Opacity, y: phase2Y }}
-          className="absolute left-4 right-4 sm:left-auto sm:right-12 bottom-12 sm:top-28 z-30 max-w-sm sm:max-w-md mx-auto sm:mx-0 pointer-events-none gpu-layer"
+          className="absolute left-4 right-4 sm:left-auto sm:right-12 bottom-12 sm:top-28 z-30 max-w-sm sm:max-w-md mx-auto sm:mx-0 pointer-events-none"
         >
-          <div className="glass-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-cyan-500/30 bg-[#0c0d12]/90 backdrop-blur-2xl shadow-[0_0_40px_rgba(6,182,212,0.15)]">
+          <div className="glass-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-cyan-500/30 bg-[#0c0d12]/92 backdrop-blur-2xl shadow-[0_0_40px_rgba(6,182,212,0.15)]">
             <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-mono text-cyan-400 mb-1.5">
-              <RotateCw className="w-3 h-3 animate-spin" />
-              <span>02 • 3D OPTICAL ALIGNMENT</span>
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>02 • SAPPHIRE OPTICAL CLARITY</span>
             </div>
             <h3 className="font-cinzel text-lg sm:text-2xl font-bold text-white mb-1">
               {activeModel.frameName}
             </h3>
             <p className="text-[11px] sm:text-xs text-zinc-300 leading-relaxed mb-3">
-              Real-time PBR physical shaders simulating precision hand-polished bevels and sapphire anti-glare filtration.
+              Precision hand-beveled optics with multi-layer sapphire anti-glare filtration and 420nm high-energy blue protection.
             </p>
             <div className="grid grid-cols-2 gap-2 text-[10px] sm:text-[11px] font-mono text-zinc-400">
-              <div className="p-1.5 rounded-lg bg-white/5 border border-white/5">
+              <div className="p-2 rounded-xl bg-white/5 border border-white/5">
                 <span className="text-zinc-500 block text-[9px]">BLUE-CUT</span>
                 <span className="text-cyan-300 font-bold">420nm Sapphire</span>
               </div>
-              <div className="p-1.5 rounded-lg bg-white/5 border border-white/5">
+              <div className="p-2 rounded-xl bg-white/5 border border-white/5">
                 <span className="text-zinc-500 block text-[9px]">MASS</span>
                 <span className="text-amber-300 font-bold">18g Feather</span>
               </div>
@@ -424,10 +281,10 @@ export default function ModelScrollExperience() {
           </div>
         </motion.div>
 
-        {/* Stage 3: Wear The Runway Look CTA */}
+        {/* Phase 3: Wear The Runway Look CTA */}
         <motion.div
           style={{ opacity: phase3Opacity, y: phase3Y }}
-          className="absolute bottom-6 sm:bottom-10 z-40 w-full px-3 sm:px-4 max-w-2xl mx-auto flex flex-col items-center gpu-layer"
+          className="absolute bottom-6 sm:bottom-10 z-40 w-full px-3 sm:px-4 max-w-2xl mx-auto flex flex-col items-center"
         >
           <div className="w-full glass-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-amber-400/40 bg-[#0c0d12]/95 backdrop-blur-2xl shadow-[0_0_50px_rgba(212,175,55,0.25)] flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-center sm:text-left w-full sm:w-auto">
@@ -454,7 +311,7 @@ export default function ModelScrollExperience() {
             <div className="flex items-center gap-2.5 w-full sm:w-auto">
               <button
                 onClick={handleQuickAdd}
-                className="flex-1 sm:flex-none bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-black font-bold px-5 py-3 rounded-xl shadow-[0_0_20px_rgba(212,175,55,0.4)] flex items-center justify-center gap-2 text-xs sm:text-sm uppercase tracking-wider cursor-pointer"
+                className="flex-1 sm:flex-none bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-black font-bold px-5 py-3 rounded-xl shadow-[0_0_20px_rgba(212,175,55,0.4)] flex items-center justify-center gap-2 text-xs sm:text-sm uppercase tracking-wider cursor-pointer hover:brightness-110 transition-all"
               >
                 <ShoppingBag className="w-4 h-4" /> Add to Bag
               </button>

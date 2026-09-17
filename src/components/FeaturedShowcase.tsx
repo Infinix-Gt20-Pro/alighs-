@@ -63,7 +63,7 @@ export default function FeaturedShowcase() {
         </div>
 
         {/* Filter Chips */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex items-center gap-2 overflow-x-auto max-w-full py-1">
           {filters.map((f) => (
             <button
               key={f.id}

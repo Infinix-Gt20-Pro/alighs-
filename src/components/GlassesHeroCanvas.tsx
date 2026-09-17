@@ -25,7 +25,7 @@ export default function GlassesHeroCanvas({
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-[460px] sm:h-[540px] md:h-[580px] flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
+      className="relative w-full h-[320px] sm:h-[420px] md:h-[540px] flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
     >
       <Canvas
         camera={{ position: [0, 0.35, 4.6], fov: 38 }}

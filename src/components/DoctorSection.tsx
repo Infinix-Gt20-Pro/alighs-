@@ -54,17 +54,17 @@ export default function DoctorSection() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="glass-card p-8 rounded-3xl border border-white/10 bg-white/5 flex flex-col h-full"
+            className="glass-card p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-white/10 bg-white/5 flex flex-col h-full"
           >
-            <div className="flex items-start gap-6 mb-8">
-              <div className="w-24 h-24 shrink-0 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 border border-white/10 flex items-center justify-center relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-6 mb-6 sm:mb-8">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 border border-white/10 flex items-center justify-center relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                <Stethoscope className="w-10 h-10 text-white relative z-10 drop-shadow-lg" />
+                <Stethoscope className="w-8 h-8 sm:w-10 sm:h-10 text-white relative z-10 drop-shadow-lg" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-white font-sans mb-2">Dr. Sheeraz Ahmad</h3>
-                <p className="text-cyan-400 font-medium mb-3">AMU-Certified Optometrist & Eye Care Specialist</p>
-                <div className="flex flex-wrap gap-2">
+                <h3 className="text-xl sm:text-2xl font-bold text-white font-sans mb-1.5">Dr. Sheeraz Ahmad</h3>
+                <p className="text-cyan-400 font-medium text-xs sm:text-sm mb-2.5">AMU-Certified Optometrist & Eye Care Specialist</p>
+                <div className="flex flex-wrap justify-center sm:justify-start gap-2">
                   <span className="glass-pill px-3 py-1 rounded-full text-xs font-mono text-gray-300 bg-white/5 border border-white/10">MBBS</span>
                   <span className="glass-pill px-3 py-1 rounded-full text-xs font-mono text-gray-300 bg-white/5 border border-white/10">DOMS</span>
                 </div>

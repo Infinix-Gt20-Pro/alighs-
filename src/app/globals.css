@@ -184,3 +184,16 @@ html.lenis, html.lenis body {
 .will-change-transform {
   will-change: transform;
 }
+
+
+/* Mobile Viewport Guard */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden !important;
+}
+
+@media (max-width: 640px) {
+  .glass-card {
+    border-radius: 1.25rem;
+  }
+}

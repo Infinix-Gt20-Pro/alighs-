@@ -22,7 +22,6 @@ import { useInViewFast } from "@/hooks/useInViewFast";
 
 const emptySubscribe = () => () => {};
 
-// 3D Procedural Glasses Model that rotates and tilts based on scroll progress
 function InteractiveScrollGlasses({
   scrollProgress,
   finishColor = "#D4AF37",
@@ -184,7 +183,6 @@ export default function ModelScrollExperience() {
     offset: ["start start", "end end"]
   });
 
-  // RAF-throttled smooth seek without blocking UI/compositor thread
   const targetTimeRef = useRef(0);
   const rafSeekRef = useRef<number | null>(null);
 
@@ -208,18 +206,18 @@ export default function ModelScrollExperience() {
     }
   });
 
-  const modelScale = useTransform(scrollYProgress, [0, 0.45, 1], [1.0, 1.06, 1.14]);
+  const modelScale = useTransform(scrollYProgress, [0, 0.45, 1], [1.0, 1.05, 1.12]);
   const modelOpacity = useTransform(scrollYProgress, [0, 0.1, 0.85, 1], [0.85, 1, 1, 0.75]);
   const overlayDarkness = useTransform(scrollYProgress, [0, 0.4, 0.85], [0.2, 0.35, 0.6]);
 
   const phase1Opacity = useTransform(scrollYProgress, [0.05, 0.22, 0.35], [0, 1, 0]);
-  const phase1Y = useTransform(scrollYProgress, [0.05, 0.22, 0.35], [30, 0, -20]);
+  const phase1Y = useTransform(scrollYProgress, [0.05, 0.22, 0.35], [20, 0, -15]);
 
   const phase2Opacity = useTransform(scrollYProgress, [0.38, 0.55, 0.72], [0, 1, 0]);
-  const phase2Y = useTransform(scrollYProgress, [0.38, 0.55, 0.72], [30, 0, -20]);
+  const phase2Y = useTransform(scrollYProgress, [0.38, 0.55, 0.72], [20, 0, -15]);
 
   const phase3Opacity = useTransform(scrollYProgress, [0.75, 0.9, 1.0], [0, 1, 1]);
-  const phase3Y = useTransform(scrollYProgress, [0.75, 0.9, 1.0], [30, 0, 0]);
+  const phase3Y = useTransform(scrollYProgress, [0.75, 0.9, 1.0], [20, 0, 0]);
 
   const activeModel = MODELS[activeModelIdx];
 
@@ -242,36 +240,36 @@ export default function ModelScrollExperience() {
   };
 
   return (
-    <section ref={containerRef} className="relative h-[340vh] bg-[#070709] gpu-layer">
+    <section ref={containerRef} className="relative h-[300vh] sm:h-[340vh] bg-[#070709] gpu-layer w-full max-w-full overflow-hidden">
       {/* Sticky Fullscreen Container */}
-      <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
+      <div className="sticky top-0 h-[100dvh] w-full flex items-center justify-center overflow-hidden">
         
         {/* Background Ambient Glows */}
         <div className="pointer-events-none absolute inset-0 z-0">
-          <div className="absolute top-1/3 left-1/4 w-[600px] h-[600px] rounded-full bg-amber-500/10 blur-[140px]" />
-          <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] rounded-full bg-cyan-500/10 blur-[150px]" />
+          <div className="absolute top-1/3 left-1/4 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] rounded-full bg-amber-500/10 blur-[110px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] rounded-full bg-cyan-500/10 blur-[120px]" />
         </div>
 
         {/* Section Top Header & Step Progress Bar */}
-        <div className="absolute top-6 sm:top-8 z-40 w-full px-4 max-w-5xl mx-auto flex flex-col items-center pointer-events-none">
-          <div className="pointer-events-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-amber-500/30 bg-[#0c0d12]/90 backdrop-blur-md mb-2 shadow-[0_0_15px_rgba(212,175,55,0.2)]">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span className="text-[11px] font-mono tracking-widest text-amber-300 uppercase">
-              3D Interactive Editorial Showcase
+        <div className="absolute top-4 sm:top-8 z-40 w-full px-3 sm:px-4 max-w-5xl mx-auto flex flex-col items-center pointer-events-none">
+          <div className="pointer-events-auto inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-amber-500/30 bg-[#0c0d12]/90 backdrop-blur-md mb-2 shadow-[0_0_15px_rgba(212,175,55,0.2)]">
+            <Sparkles className="w-3 h-3 text-amber-400" />
+            <span className="text-[10px] sm:text-[11px] font-mono tracking-widest text-amber-300 uppercase">
+              3D Editorial Showcase
             </span>
           </div>
 
           {/* Model Switcher Buttons */}
-          <div className="pointer-events-auto flex flex-wrap justify-center items-center gap-2 bg-black/70 p-1.5 rounded-full border border-white/10 backdrop-blur-xl shadow-2xl">
+          <div className="pointer-events-auto flex items-center gap-1.5 bg-black/80 p-1 sm:p-1.5 rounded-full border border-white/10 backdrop-blur-xl shadow-2xl max-w-full overflow-x-auto">
             {MODELS.map((m, idx) => {
               const isSelected = activeModelIdx === idx;
               return (
                 <button
                   key={m.id}
                   onClick={() => setActiveModelIdx(idx)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-mono transition-all flex items-center gap-2 ${
+                  className={`px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                     isSelected
-                      ? "bg-gradient-to-r from-amber-400 to-amber-500 text-black font-bold shadow-[0_0_15px_rgba(212,175,55,0.4)]"
+                      ? "bg-gradient-to-r from-amber-400 to-amber-500 text-black font-bold shadow-[0_0_12px_rgba(212,175,55,0.4)]"
                       : "text-zinc-400 hover:text-white"
                   }`}
                 >
@@ -296,7 +294,7 @@ export default function ModelScrollExperience() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.35 }}
-                className="relative w-full h-full max-h-[85vh] sm:max-h-[90vh] rounded-3xl overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.9)]"
+                className="relative w-full h-full max-h-[82vh] sm:max-h-[90vh] rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.9)]"
               >
                 {activeModel.video ? (
                   <video
@@ -340,7 +338,7 @@ export default function ModelScrollExperience() {
           </motion.div>
         </div>
 
-        {/* 3D REAL-TIME GLASSES CANVAS (Layered over the model with Viewport-Paused frameloop) */}
+        {/* 3D REAL-TIME GLASSES CANVAS */}
         <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
           <div className="w-full h-full max-w-4xl mx-auto">
             {mounted && (
@@ -377,113 +375,108 @@ export default function ModelScrollExperience() {
         {/* Stage 1: The Icon & Editorial Reveal */}
         <motion.div
           style={{ opacity: phase1Opacity, y: phase1Y }}
-          className="absolute left-6 sm:left-12 bottom-16 sm:bottom-24 z-30 max-w-md pointer-events-none gpu-layer"
+          className="absolute left-4 right-4 sm:right-auto sm:left-12 bottom-12 sm:bottom-20 z-30 max-w-sm sm:max-w-md mx-auto sm:mx-0 pointer-events-none gpu-layer"
         >
-          <div className="glass-card p-6 rounded-3xl border border-white/10 bg-[#0c0d12]/85 backdrop-blur-2xl shadow-2xl">
-            <div className="flex items-center gap-2 text-xs font-mono text-amber-400 mb-2">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+          <div className="glass-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-white/10 bg-[#0c0d12]/90 backdrop-blur-2xl shadow-2xl">
+            <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-mono text-amber-400 mb-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
               <span>01 • ATELIER SILHOUETTE</span>
             </div>
-            <h3 className="font-cinzel text-xl sm:text-2xl font-bold text-white mb-2">
+            <h3 className="font-cinzel text-lg sm:text-2xl font-bold text-white mb-1">
               {activeModel.name}
             </h3>
-            <p className="text-xs text-zinc-300 leading-relaxed mb-4">
+            <p className="text-[11px] sm:text-xs text-zinc-300 leading-relaxed mb-3">
               {activeModel.tagline}. Designed to mold gracefully to distinct Indian facial bone structures.
             </p>
-            <div className="flex items-center gap-2 text-[11px] font-mono text-zinc-400 border-t border-white/5 pt-3">
-              <Eye className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Scroll down to control live frame placement</span>
+            <div className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-400 border-t border-white/5 pt-2">
+              <Eye className="w-3 h-3 text-cyan-400" />
+              <span>Scroll down to control frame placement</span>
             </div>
           </div>
         </motion.div>
 
-        {/* Stage 2: 3D Glasses Sync & Micro-Engineering */}
+        {/* Stage 2: 3D Glasses Sync */}
         <motion.div
           style={{ opacity: phase2Opacity, y: phase2Y }}
-          className="absolute right-6 sm:right-12 top-24 sm:top-32 z-30 max-w-md pointer-events-none gpu-layer"
+          className="absolute left-4 right-4 sm:left-auto sm:right-12 bottom-12 sm:top-28 z-30 max-w-sm sm:max-w-md mx-auto sm:mx-0 pointer-events-none gpu-layer"
         >
-          <div className="glass-card p-6 rounded-3xl border border-cyan-500/30 bg-[#0c0d12]/90 backdrop-blur-2xl shadow-[0_0_40px_rgba(6,182,212,0.15)]">
-            <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 mb-2">
-              <RotateCw className="w-3.5 h-3.5 animate-spin" />
-              <span>02 • REAL-TIME 3D ALIGNMENT</span>
+          <div className="glass-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-cyan-500/30 bg-[#0c0d12]/90 backdrop-blur-2xl shadow-[0_0_40px_rgba(6,182,212,0.15)]">
+            <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-mono text-cyan-400 mb-1.5">
+              <RotateCw className="w-3 h-3 animate-spin" />
+              <span>02 • 3D OPTICAL ALIGNMENT</span>
             </div>
-            <h3 className="font-cinzel text-xl sm:text-2xl font-bold text-white mb-2">
+            <h3 className="font-cinzel text-lg sm:text-2xl font-bold text-white mb-1">
               {activeModel.frameName}
             </h3>
-            <p className="text-xs text-zinc-300 leading-relaxed mb-4">
+            <p className="text-[11px] sm:text-xs text-zinc-300 leading-relaxed mb-3">
               Real-time PBR physical shaders simulating precision hand-polished bevels and sapphire anti-glare filtration.
             </p>
-            <div className="grid grid-cols-2 gap-2 text-[11px] font-mono text-zinc-400 mb-4">
-              <div className="p-2 rounded-lg bg-white/5 border border-white/5">
-                <span className="text-zinc-500 block">BLUE-CUT</span>
+            <div className="grid grid-cols-2 gap-2 text-[10px] sm:text-[11px] font-mono text-zinc-400">
+              <div className="p-1.5 rounded-lg bg-white/5 border border-white/5">
+                <span className="text-zinc-500 block text-[9px]">BLUE-CUT</span>
                 <span className="text-cyan-300 font-bold">420nm Sapphire</span>
               </div>
-              <div className="p-2 rounded-lg bg-white/5 border border-white/5">
-                <span className="text-zinc-500 block">WEIGHT</span>
-                <span className="text-amber-300 font-bold">Ultralight Feather</span>
+              <div className="p-1.5 rounded-lg bg-white/5 border border-white/5">
+                <span className="text-zinc-500 block text-[9px]">MASS</span>
+                <span className="text-amber-300 font-bold">18g Feather</span>
               </div>
             </div>
-            <p className="text-[11px] text-zinc-500 font-mono">
-              {activeModel.spec}
-            </p>
           </div>
         </motion.div>
 
         {/* Stage 3: Wear The Runway Look CTA */}
         <motion.div
           style={{ opacity: phase3Opacity, y: phase3Y }}
-          className="absolute bottom-8 sm:bottom-12 z-40 w-full px-4 max-w-2xl mx-auto flex flex-col items-center gpu-layer"
+          className="absolute bottom-6 sm:bottom-10 z-40 w-full px-3 sm:px-4 max-w-2xl mx-auto flex flex-col items-center gpu-layer"
         >
-          <div className="w-full glass-card p-6 sm:p-8 rounded-3xl border border-amber-400/40 bg-[#0c0d12]/95 backdrop-blur-2xl shadow-[0_0_50px_rgba(212,175,55,0.25)] flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="text-center sm:text-left">
-              <div className="flex items-center justify-center sm:justify-start gap-2 text-xs font-mono text-amber-400 mb-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                <span>IN STOCK • READY FOR DISPATCH</span>
+          <div className="w-full glass-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-amber-400/40 bg-[#0c0d12]/95 backdrop-blur-2xl shadow-[0_0_50px_rgba(212,175,55,0.25)] flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-center sm:text-left w-full sm:w-auto">
+              <div className="flex items-center justify-center sm:justify-start gap-1.5 text-[10px] sm:text-xs font-mono text-amber-400 mb-1">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span>IN STOCK &bull; DISPATCH TODAY</span>
               </div>
-              <h4 className="font-cinzel text-xl sm:text-2xl font-bold text-white">
+              <h4 className="font-cinzel text-lg sm:text-2xl font-bold text-white">
                 {activeModel.frameName}
               </h4>
-              <div className="flex items-baseline justify-center sm:justify-start gap-3 mt-1">
-                <span className="text-2xl font-bold font-mono text-amber-400">
+              <div className="flex items-baseline justify-center sm:justify-start gap-2.5 mt-1">
+                <span className="text-2xl sm:text-3xl font-bold font-mono text-amber-400">
                   ₹{activeModel.price}
                 </span>
-                <span className="text-sm font-mono text-zinc-500 line-through">
+                <span className="text-xs sm:text-sm font-mono text-zinc-500 line-through">
                   ₹{activeModel.originalPrice}
                 </span>
-                <span className="text-xs font-mono text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] sm:text-xs font-mono text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full">
                   Save {Math.round(((activeModel.originalPrice - activeModel.price) / activeModel.originalPrice) * 100)}%
                 </span>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-              <motion.button
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
+            <div className="flex items-center gap-2.5 w-full sm:w-auto">
+              <button
                 onClick={handleQuickAdd}
-                className="w-full sm:w-auto bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-black font-bold px-6 py-3.5 rounded-xl shadow-[0_0_20px_rgba(212,175,55,0.4)] flex items-center justify-center gap-2 text-sm uppercase tracking-wider cursor-pointer"
+                className="flex-1 sm:flex-none bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-black font-bold px-5 py-3 rounded-xl shadow-[0_0_20px_rgba(212,175,55,0.4)] flex items-center justify-center gap-2 text-xs sm:text-sm uppercase tracking-wider cursor-pointer"
               >
                 <ShoppingBag className="w-4 h-4" /> Add to Bag
-              </motion.button>
+              </button>
 
               <Link
                 href={`/shop/${activeModel.slug}`}
-                className="w-full sm:w-auto px-5 py-3.5 rounded-xl border border-white/10 hover:bg-white/10 text-white text-xs font-mono tracking-wider text-center transition-colors"
+                className="px-4 py-3 rounded-xl border border-white/15 hover:bg-white/10 text-white text-xs font-mono tracking-wider text-center transition-colors"
               >
-                View Specs
+                Specs
               </Link>
             </div>
           </div>
         </motion.div>
 
-        {/* Interactive Optical Filter Toggle Switch */}
-        <div className="absolute right-4 sm:right-8 bottom-6 sm:bottom-8 z-40 hidden md:block">
+        {/* Optical Filter Toggle */}
+        <div className="absolute right-3 sm:right-6 bottom-4 sm:bottom-6 z-40 hidden sm:block">
           <button
             onClick={() => setBlueCutActive(!blueCutActive)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-black/70 border border-white/10 text-xs font-mono text-zinc-300 hover:text-white backdrop-blur-xl transition-all shadow-lg hover:border-cyan-400 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/70 border border-white/10 text-[11px] font-mono text-zinc-300 hover:text-white backdrop-blur-xl transition-all shadow-lg hover:border-cyan-400 cursor-pointer"
           >
-            <Zap className={`w-3.5 h-3.5 ${blueCutActive ? "text-cyan-400" : "text-zinc-500"}`} />
-            <span>420nm Filter: {blueCutActive ? "ACTIVE" : "OFF"}</span>
+            <Zap className={`w-3 h-3 ${blueCutActive ? "text-cyan-400" : "text-zinc-500"}`} />
+            <span>420nm: {blueCutActive ? "ON" : "OFF"}</span>
           </button>
         </div>
 

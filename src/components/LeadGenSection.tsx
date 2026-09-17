@@ -956,7 +956,7 @@ export default function LeadGenSection() {
                           <input
                             type="tel"
                             required
-                            placeholder="+91 98765 43210"
+                            placeholder="+91 72173 71499"
                             value={formData.phone}
                             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/15 text-white placeholder-neutral-500 text-sm focus:outline-none focus:border-cyan-400/60 focus:bg-white/[0.08] transition-all"
@@ -1053,7 +1053,7 @@ export default function LeadGenSection() {
                 TOKEN ID: <strong className="text-cyan-400">{tokenId || "#ALIGH-8821"}</strong>
               </div>
               <a
-                href={`https://wa.me/919876543210?text=Hello%20Aligh's%20Ware,%20mera%20Token%20ID%20${tokenId}%20hai.%20Maine%20${formData.silhouette}%20frame%20select%20kiya%20hai.`}
+                href={`https://wa.me/917217371499?text=Hello%20Aligh's%20Ware,%20mera%20Token%20ID%20${tokenId}%20hai.%20Maine%20${formData.silhouette}%20frame%20select%20kiya%20hai.`}
                 target="_blank"
                 rel="noreferrer"
                 className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-mono font-semibold flex items-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all cursor-pointer"

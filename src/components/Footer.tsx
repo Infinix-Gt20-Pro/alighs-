@@ -56,11 +56,11 @@ export default function Footer() {
             <ul className="flex flex-col gap-4">
               <li className="flex items-center gap-3 text-gray-400 text-sm">
                 <Phone className="w-4 h-4 text-indigo-400" />
-                <span>+91 98765 43210</span>
+                <span>+91 72173 71499</span>
               </li>
               <li>
                 <a 
-                  href="https://wa.me/919876543210?text=Hi%20ALIGH'S%20WARE!%20I'm%20interested%20in%20your%20premium%20eyewear%20collection."
+                  href="https://wa.me/917217371499?text=Hi%20ALIGH'S%20WARE!%20I'm%20interested%20in%20your%20premium%20eyewear%20collection."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-gray-400 hover:text-[#25D366] transition-colors text-sm"

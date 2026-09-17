@@ -19,7 +19,7 @@ export default function CartDrawer() {
       msg += `${idx + 1}. ${item.name} (${item.color}) - Qty: ${item.quantity} - ₹${item.price * item.quantity}\n`;
     });
     msg += `\nTotal: ₹${cartTotal}\nPlease confirm my order!`;
-    return `https://wa.me/919876543210?text=${encodeURIComponent(msg)}`;
+    return `https://wa.me/917217371499?text=${encodeURIComponent(msg)}`;
   };
 
   return (

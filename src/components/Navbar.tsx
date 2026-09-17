@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, ShoppingBag, Menu, X, Sparkles, Phone, Calendar, ArrowRight } from "lucide-react";
+import { Eye, ShoppingBag, Menu, X, Sparkles, Phone, Calendar, ArrowRight, MessageCircle } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 
 export default function Navbar() {
@@ -173,8 +173,24 @@ export default function Navbar() {
                 >
                   Book Doctor Appointment
                 </Link>
+                <div className="grid grid-cols-2 gap-2 mt-1">
+                  <a
+                    href="tel:+917217371499"
+                    className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-zinc-300 hover:text-white transition-colors"
+                  >
+                    <Phone className="w-3.5 h-3.5 text-amber-400" /> Call Doctor
+                  </a>
+                  <a
+                    href="https://wa.me/917217371499?text=Hi%20ALIGH'S%20WARE!%20I'm%20interested%20in%20your%20premium%20eyewear."
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/30 text-xs font-mono text-[#25D366] transition-colors"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
+                  </a>
+                </div>
                 <div className="text-center text-xs text-neutral-500 font-mono">
-                  Firozabad, Uttar Pradesh &bull; +91 98765 43210
+                  Firozabad, Uttar Pradesh &bull; +91 72173 71499
                 </div>
               </div>
             </motion.div>

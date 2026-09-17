@@ -103,7 +103,7 @@ export default function ProductDetailPage() {
 
   const handleWhatsAppBuy = () => {
     const msg = `Hi Dr. Sheeraz & ALIGH'S WARE Team! I am interested in ordering the ${product.name} (Finish: ${activeColor}, Lens: ${lensType}, Qty: ${quantity}). Please guide me with power verification.`;
-    window.open(`https://wa.me/919876543210?text=${encodeURIComponent(msg)}`, "_blank");
+    window.open(`https://wa.me/917217371499?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
   const relatedProducts = DEFAULT_PRODUCTS.filter((p) => p.slug !== product.slug).slice(0, 3);

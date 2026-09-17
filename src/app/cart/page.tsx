@@ -17,7 +17,7 @@ export default function CartPage() {
     const text = encodeURIComponent(
       `Hi ALIGH'S WARE, I would like to enquire about my cart:\n${items.map(i => `• ${i.name} (${i.color}) - ${i.quantity} x ₹${i.price}`).join("\n")}\nTotal: ₹${total}`
     );
-    window.open(`https://wa.me/919876543210?text=${text}`, "_blank");
+    window.open(`https://wa.me/917217371499?text=${text}`, "_blank");
   };
 
   if (cartCount === 0) {

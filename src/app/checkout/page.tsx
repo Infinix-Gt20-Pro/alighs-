@@ -159,7 +159,7 @@ export default function CheckoutPage() {
         `*Grand Total:* ₹${orderTotal.total}\n\n` +
         `_Please confirm dispatch timeline. Thank you!_`
     );
-    window.open(`https://wa.me/919876543210?text=${text}`, "_blank");
+    window.open(`https://wa.me/917217371499?text=${text}`, "_blank");
   };
 
   const variants = {
@@ -289,7 +289,7 @@ export default function CheckoutPage() {
                             name="phone"
                             value={formData.phone}
                             onChange={handleInputChange}
-                            placeholder="9876543210"
+                            placeholder="7217371499"
                             className="w-full bg-white/[0.03] border border-white/10 rounded-xl pl-12 pr-4 py-3.5 text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all text-sm font-mono"
                           />
                         </div>

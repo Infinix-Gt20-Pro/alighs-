@@ -82,14 +82,14 @@ export default function DoctorSection() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-auto">
               <a
-                href="tel:+919876543210"
+                href="tel:+917217371499"
                 className="flex items-center justify-center gap-2 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium transition-colors border border-white/10"
               >
                 <Phone className="w-4 h-4" />
                 Call Clinic
               </a>
               <a
-                href="https://wa.me/919876543210?text=I'd%20like%20to%20book%20a%20consultation%20with%20Dr.%20Sheeraz"
+                href="https://wa.me/917217371499?text=I'd%20like%20to%20book%20a%20consultation%20with%20Dr.%20Sheeraz"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 py-3 rounded-xl bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#25D366] font-medium transition-colors border border-[#25D366]/20"

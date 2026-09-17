@@ -64,7 +64,7 @@ export default function RootLayout({
       lang="en"
       className={`${cinzel.variable} ${cormorant.variable} ${plusJakarta.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans bg-[#070709] text-white">
+      <body className="min-h-full flex flex-col font-sans bg-[#F4E9D5] text-[#2A2118]">
         <SmoothScroll />
         <CartProvider>{children}</CartProvider>
       </body>

@@ -107,24 +107,24 @@ export default function ProductDetailClient() {
   const relatedProducts = DEFAULT_PRODUCTS.filter((p) => p.slug !== product.slug).slice(0, 3);
 
   return (
-    <main className="min-h-screen bg-[#070709] text-white pt-28 pb-24 relative overflow-hidden">
+    <main className="min-h-screen bg-[#F4E9D5] text-[#2A2118] pt-28 pb-24 relative overflow-hidden selection:bg-[#B88A32]/30 selection:text-[#2A2118]">
       {/* Ambient Lighting */}
-      <div className="absolute top-20 right-1/4 w-[600px] h-[500px] bg-amber-500/8 rounded-full blur-[160px] pointer-events-none -z-10" />
-      <div className="absolute bottom-20 left-1/4 w-[600px] h-[500px] bg-indigo-500/10 rounded-full blur-[160px] pointer-events-none -z-10" />
+      <div className="absolute top-20 right-1/4 w-[600px] h-[500px] bg-gradient-to-br from-[#D4AF62]/20 via-[#B88A32]/10 to-transparent rounded-full blur-[160px] pointer-events-none -z-10" />
+      <div className="absolute bottom-20 left-1/4 w-[600px] h-[500px] bg-gradient-to-tr from-[#E8D2A8]/30 via-[#D6B878]/15 to-transparent rounded-full blur-[160px] pointer-events-none -z-10" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Navigation Breadcrumb */}
         <div className="flex items-center justify-between gap-4 mb-8">
           <Link
             href="/shop"
-            className="cursor-pointer inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-amber-400/40 text-xs font-mono text-neutral-300 hover:text-amber-300 transition-all group"
+            className="cursor-pointer inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#FFF9EF] hover:bg-white border border-[#B88A32]/30 text-xs font-mono text-[#2A2118] hover:text-[#B88A32] transition-all group shadow-sm"
           >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform text-amber-400" />
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform text-[#B88A32]" />
             <span>&larr; Back to Collection</span>
           </Link>
           <Link
             href="/"
-            className="cursor-pointer inline-flex items-center gap-1.5 text-xs font-mono text-neutral-400 hover:text-white transition-colors"
+            className="cursor-pointer inline-flex items-center gap-1.5 text-xs font-mono text-[#6B5740] hover:text-[#2A2118] transition-colors"
           >
             <span>Home</span>
           </Link>
@@ -134,14 +134,14 @@ export default function ProductDetailClient() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           {/* Left Column: Visual Showcase Card */}
           <div className="space-y-6 lg:sticky lg:top-28">
-            <div className="relative rounded-3xl bg-gradient-to-b from-white/[0.05] to-white/[0.01] border border-white/10 p-10 flex flex-col items-center justify-center min-h-[380px] sm:min-h-[460px] shadow-2xl overflow-hidden group">
+            <div className="relative rounded-3xl bg-[#FFF9EF] border border-[#B88A32]/25 p-10 flex flex-col items-center justify-center min-h-[380px] sm:min-h-[460px] shadow-[0_15px_45px_rgba(42,33,24,0.08)] overflow-hidden group">
               {/* Card Badges */}
               <div className="absolute top-6 left-6 flex items-center gap-2 z-10">
-                <span className="text-[10px] font-mono text-amber-300 uppercase tracking-widest px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/30">
+                <span className="text-[10px] font-mono text-[#B88A32] uppercase tracking-widest px-3 py-1 rounded-full bg-[#F4E9D5] border border-[#B88A32]/30 font-bold shadow-sm">
                   {product.material.toUpperCase()} &bull; {product.weight}
                 </span>
                 {product.bestSeller && (
-                  <span className="text-[10px] font-mono text-emerald-300 uppercase tracking-widest px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30">
+                  <span className="text-[10px] font-mono text-emerald-600 uppercase tracking-widest px-3 py-1 rounded-full bg-emerald-50 border border-emerald-300 font-bold shadow-sm">
                     Bestseller
                   </span>
                 )}
@@ -149,7 +149,7 @@ export default function ProductDetailClient() {
 
               {/* Dynamic Aura */}
               <div
-                className="absolute inset-0 opacity-40 blur-3xl transition-colors duration-700 pointer-events-none"
+                className="absolute inset-0 opacity-20 blur-3xl transition-colors duration-700 pointer-events-none"
                 style={{ backgroundColor: activeColorHex }}
               />
 
@@ -160,7 +160,7 @@ export default function ProductDetailClient() {
                     <img
                       src={product.images[0]}
                       alt={product.name}
-                      className="max-h-full max-w-full object-contain filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.9)] transition-transform duration-500 hover:scale-105"
+                      className="max-h-full max-w-full object-contain filter drop-shadow-[0_12px_24px_rgba(42,33,24,0.18)] transition-transform duration-500 hover:scale-105"
                       onError={(e) => {
                         if (product.images && product.images[1] && e.currentTarget.src !== product.images[1]) {
                           e.currentTarget.src = product.images[1];
@@ -169,7 +169,7 @@ export default function ProductDetailClient() {
                     />
                   </div>
                 ) : (
-                  <div className="relative filter drop-shadow-[0_0_25px_rgba(212,175,55,0.4)] my-8 flex items-center justify-center">
+                  <div className="relative filter drop-shadow-[0_0_20px_rgba(184,138,50,0.3)] my-8 flex items-center justify-center">
                     <FrameSilhouette
                       shape={product.frameShape || "rectangle"}
                       frameType={(product as unknown as Record<string, unknown>).frameType as "full-rim" | "half-rim" | "rimless" || "full-rim"}
@@ -182,10 +182,10 @@ export default function ProductDetailClient() {
               </div>
 
               <div className="relative text-center">
-                <span className="text-xs font-mono text-amber-300 uppercase tracking-widest">
+                <span className="text-xs font-mono text-[#B88A32] uppercase tracking-widest font-bold">
                   Selected Finish: {activeColor}
                 </span>
-                <p className="text-[11px] text-neutral-400 mt-1 font-mono">
+                <p className="text-[11px] text-[#6B5740] mt-1 font-mono">
                   Optical Bench Tested &bull; Japanese Alloy Precision
                 </p>
               </div>
@@ -193,20 +193,20 @@ export default function ProductDetailClient() {
 
             {/* Quality Certifications Row */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
-                <ShieldCheck className="w-4 h-4 text-amber-400 mx-auto mb-1.5" />
-                <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider block">Coating</span>
-                <span className="text-xs font-semibold text-white block">Sapphire 420nm</span>
+              <div className="p-3.5 rounded-2xl bg-[#FFF9EF] border border-[#B88A32]/25 text-center shadow-sm">
+                <ShieldCheck className="w-4 h-4 text-[#B88A32] mx-auto mb-1.5" />
+                <span className="text-[10px] font-mono text-[#6B5740] uppercase tracking-wider block">Coating</span>
+                <span className="text-xs font-bold text-[#2A2118] block">Sapphire 420nm</span>
               </div>
-              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
-                <Truck className="w-4 h-4 text-cyan-400 mx-auto mb-1.5" />
-                <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider block">Delivery</span>
-                <span className="text-xs font-semibold text-white block">Free Express</span>
+              <div className="p-3.5 rounded-2xl bg-[#FFF9EF] border border-[#B88A32]/25 text-center shadow-sm">
+                <Truck className="w-4 h-4 text-[#B88A32] mx-auto mb-1.5" />
+                <span className="text-[10px] font-mono text-[#6B5740] uppercase tracking-wider block">Delivery</span>
+                <span className="text-xs font-bold text-[#2A2118] block">Free Express</span>
               </div>
-              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
-                <Award className="w-4 h-4 text-emerald-400 mx-auto mb-1.5" />
-                <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider block">Doctor Check</span>
-                <span className="text-xs font-semibold text-white block">AMU Certified</span>
+              <div className="p-3.5 rounded-2xl bg-[#FFF9EF] border border-[#B88A32]/25 text-center shadow-sm">
+                <Award className="w-4 h-4 text-emerald-600 mx-auto mb-1.5" />
+                <span className="text-[10px] font-mono text-[#6B5740] uppercase tracking-wider block">Doctor Check</span>
+                <span className="text-xs font-bold text-[#2A2118] block">AMU Certified</span>
               </div>
             </div>
           </div>
@@ -214,45 +214,45 @@ export default function ProductDetailClient() {
           {/* Right Column: Customizer & Purchase */}
           <div className="space-y-8">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 text-[11px] font-mono text-neutral-300 uppercase tracking-widest mb-3">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFF9EF] border border-[#B88A32]/30 text-[11px] font-mono text-[#4A3928] uppercase tracking-widest mb-3 shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 text-[#B88A32]" />
                 <span className="capitalize">{product.category.replace("-", " ")}</span>
                 <span>&bull;</span>
                 <span className="capitalize">{product.frameShape}</span>
               </div>
 
-              <h1 className="text-3xl sm:text-5xl font-bold text-white tracking-tight font-sans">
+              <h1 className="text-3xl sm:text-5xl font-black text-[#2A2118] tracking-tight font-cinzel">
                 {product.name}
               </h1>
 
               <div className="flex items-baseline gap-4 mt-4">
-                <span className="text-3xl sm:text-4xl font-bold font-mono text-amber-300">
+                <span className="text-3xl sm:text-4xl font-bold font-mono text-[#B88A32]">
                   ₹{product.price.toLocaleString()}
                 </span>
                 {product.originalPrice && (
                   <>
-                    <span className="text-xl text-neutral-500 line-through font-mono">
+                    <span className="text-xl text-[#8B7355] line-through font-mono">
                       ₹{product.originalPrice.toLocaleString()}
                     </span>
-                    <span className="text-xs font-mono font-bold text-emerald-400 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30">
+                    <span className="text-xs font-mono font-bold text-emerald-600 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-300">
                       SAVE {discount}%
                     </span>
                   </>
                 )}
               </div>
 
-              <p className="text-neutral-300 text-sm sm:text-base mt-4 font-light leading-relaxed">
+              <p className="text-[#4A3928] text-sm sm:text-base mt-4 font-cormorant italic leading-relaxed">
                 {product.description}
               </p>
             </div>
 
             {/* Frame Finish Selector */}
-            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3">
+            <div className="p-5 rounded-2xl bg-[#FFF9EF] border border-[#B88A32]/25 space-y-3 shadow-sm">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono uppercase tracking-wider text-neutral-400">
+                <span className="text-xs font-mono uppercase tracking-wider text-[#6B5740]">
                   Select Frame Finish:
                 </span>
-                <span className="text-xs font-semibold text-white font-mono">{activeColor}</span>
+                <span className="text-xs font-bold text-[#2A2118] font-mono">{activeColor}</span>
               </div>
 
               <div className="flex flex-wrap gap-2.5">
@@ -265,11 +265,11 @@ export default function ProductDetailClient() {
                       onClick={() => setSelectedColorIdx(idx)}
                       className={`cursor-pointer flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs transition-all ${
                         isSelected
-                          ? "bg-white/15 border border-amber-400 text-white shadow-[0_0_15px_rgba(212,175,55,0.3)]"
-                          : "bg-white/[0.04] text-neutral-400 hover:text-white border border-white/10"
+                          ? "bg-[#B88A32]/15 border-2 border-[#B88A32] text-[#2A2118] font-bold shadow-sm"
+                          : "bg-[#F4E9D5] text-[#6B5740] hover:text-[#2A2118] border border-[#B88A32]/20"
                       }`}
                     >
-                      <span className="w-3.5 h-3.5 rounded-full border border-white/20" style={{ backgroundColor: cHex }} />
+                      <span className="w-3.5 h-3.5 rounded-full border border-black/20" style={{ backgroundColor: cHex }} />
                       <span>{color}</span>
                     </button>
                   );
@@ -278,8 +278,8 @@ export default function ProductDetailClient() {
             </div>
 
             {/* Lens Type Customizer */}
-            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3">
-              <span className="text-xs font-mono uppercase tracking-wider text-neutral-400 block">
+            <div className="p-5 rounded-2xl bg-[#FFF9EF] border border-[#B88A32]/25 space-y-3 shadow-sm">
+              <span className="text-xs font-mono uppercase tracking-wider text-[#6B5740] block">
                 Select Lens Prescription Option:
               </span>
 
@@ -294,12 +294,12 @@ export default function ProductDetailClient() {
                     onClick={() => setLensType(lt.id)}
                     className={`cursor-pointer p-3.5 rounded-xl text-left border transition-all ${
                       lensType === lt.id
-                        ? "bg-amber-400/10 border-amber-400 text-white shadow-sm"
-                        : "bg-white/[0.03] border-white/10 text-neutral-400 hover:text-white"
+                        ? "bg-[#B88A32]/15 border-2 border-[#B88A32] text-[#2A2118] shadow-sm font-semibold"
+                        : "bg-[#F4E9D5] border-[#B88A32]/20 text-[#6B5740] hover:text-[#2A2118]"
                     }`}
                   >
-                    <span className="text-xs font-semibold block text-white">{lt.title}</span>
-                    <span className="text-[11px] text-neutral-400 block mt-1">{lt.desc}</span>
+                    <span className="text-xs font-bold block text-[#2A2118]">{lt.title}</span>
+                    <span className="text-[11px] text-[#6B5740] block mt-1">{lt.desc}</span>
                   </button>
                 ))}
               </div>
@@ -308,18 +308,18 @@ export default function ProductDetailClient() {
             {/* Quantity Counter & Primary Actions */}
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <span className="text-xs font-mono text-neutral-400 uppercase tracking-wider">Quantity:</span>
-                <div className="inline-flex items-center rounded-xl bg-white/[0.06] border border-white/15 p-1">
+                <span className="text-xs font-mono text-[#6B5740] uppercase tracking-wider">Quantity:</span>
+                <div className="inline-flex items-center rounded-xl bg-[#F4E9D5] border border-[#B88A32]/25 p-1">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="cursor-pointer p-1.5 text-neutral-400 hover:text-white"
+                    className="cursor-pointer p-1.5 text-[#6B5740] hover:text-[#2A2118]"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
-                  <span className="px-4 text-sm font-mono font-bold text-white">{quantity}</span>
+                  <span className="px-4 text-sm font-mono font-bold text-[#2A2118]">{quantity}</span>
                   <button
                     onClick={() => setQuantity(quantity + 1)}
-                    className="cursor-pointer p-1.5 text-neutral-400 hover:text-white"
+                    className="cursor-pointer p-1.5 text-[#6B5740] hover:text-[#2A2118]"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -329,16 +329,16 @@ export default function ProductDetailClient() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 <button
                   onClick={handleAddToCart}
-                  className="cursor-pointer w-full py-4 rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-black font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(212,175,55,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  className="cursor-pointer w-full py-4 rounded-full bg-gradient-to-r from-[#B88A32] via-[#D4AF62] to-[#B88A32] text-white font-bold text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(184,138,50,0.35)] hover:brightness-105 active:scale-95 transition-all"
                 >
                   {isAdded ? (
                     <>
-                      <Check className="w-4 h-4 text-black" />
+                      <Check className="w-4 h-4 text-white" />
                       <span>Added to Your Bag!</span>
                     </>
                   ) : (
                     <>
-                      <ShoppingBag className="w-4 h-4 text-black" />
+                      <ShoppingBag className="w-4 h-4 text-white" />
                       <span>Add to Bag (₹{(product.price * quantity).toLocaleString()})</span>
                     </>
                   )}
@@ -346,45 +346,45 @@ export default function ProductDetailClient() {
 
                 <button
                   onClick={handleWhatsAppBuy}
-                  className="cursor-pointer w-full py-4 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 font-semibold text-sm flex items-center justify-center gap-2 transition-all"
+                  className="cursor-pointer w-full py-4 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all"
                 >
-                  <MessageCircle className="w-4 h-4 text-emerald-400" />
+                  <MessageCircle className="w-4 h-4 text-white" />
                   <span>Buy Directly on WhatsApp</span>
                 </button>
               </div>
 
               <Link
                 href="/appointment"
-                className="cursor-pointer w-full py-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 text-neutral-300 hover:text-white text-xs flex items-center justify-center gap-2 transition-colors"
+                className="cursor-pointer w-full py-3 rounded-2xl bg-[#FFF9EF] hover:bg-white border border-[#B88A32]/25 text-[#4A3928] hover:text-[#2A2118] text-xs flex items-center justify-center gap-2 transition-colors shadow-sm"
               >
-                <Calendar className="w-3.5 h-3.5 text-amber-400" />
+                <Calendar className="w-3.5 h-3.5 text-[#B88A32]" />
                 <span>Want Dr. Sheeraz Ahmad to check your power in Firozabad? Book Appointment</span>
               </Link>
             </div>
 
             {/* Technical Specifications Table */}
-            <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10 space-y-4">
-              <h3 className="text-sm font-mono text-neutral-300 uppercase tracking-wider flex items-center gap-2">
-                <FileText className="w-4 h-4 text-amber-400" />
+            <div className="p-6 rounded-3xl bg-[#FFF9EF] border border-[#B88A32]/25 space-y-4 shadow-sm">
+              <h3 className="text-sm font-mono text-[#2A2118] font-bold uppercase tracking-wider flex items-center gap-2">
+                <FileText className="w-4 h-4 text-[#B88A32]" />
                 Optical Architecture &amp; Dimensions
               </h3>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2 text-xs">
                 <div>
-                  <span className="text-neutral-500 block font-mono">Frame Material</span>
-                  <span className="font-semibold text-white capitalize mt-0.5 block">{product.material}</span>
+                  <span className="text-[#6B5740] block font-mono">Frame Material</span>
+                  <span className="font-bold text-[#2A2118] capitalize mt-0.5 block">{product.material}</span>
                 </div>
                 <div>
-                  <span className="text-neutral-500 block font-mono">Total Weight</span>
-                  <span className="font-semibold text-white mt-0.5 block">{product.weight}</span>
+                  <span className="text-[#6B5740] block font-mono">Total Weight</span>
+                  <span className="font-bold text-[#2A2118] mt-0.5 block">{product.weight}</span>
                 </div>
                 <div>
-                  <span className="text-neutral-500 block font-mono">Contour Silhouette</span>
-                  <span className="font-semibold text-white capitalize mt-0.5 block">{product.frameShape}</span>
+                  <span className="text-[#6B5740] block font-mono">Contour Silhouette</span>
+                  <span className="font-bold text-[#2A2118] capitalize mt-0.5 block">{product.frameShape}</span>
                 </div>
                 <div>
-                  <span className="text-neutral-500 block font-mono">Lens Coating</span>
-                  <span className="font-semibold text-white mt-0.5 block">Anti-Glare Sapphire</span>
+                  <span className="text-[#6B5740] block font-mono">Lens Coating</span>
+                  <span className="font-bold text-[#2A2118] mt-0.5 block">Anti-Glare Sapphire</span>
                 </div>
               </div>
             </div>
@@ -392,14 +392,14 @@ export default function ProductDetailClient() {
         </div>
 
         {/* Related Handcrafted Frames */}
-        <div className="mt-28 border-t border-white/10 pt-16">
+        <div className="mt-28 border-t border-[#B88A32]/20 pt-16">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <span className="text-xs font-mono text-amber-300 uppercase tracking-widest block">Complete Your Style</span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-white mt-1">Similar Handcrafted Frames</h2>
+              <span className="text-xs font-mono text-[#B88A32] uppercase tracking-widest block font-bold">Complete Your Style</span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-[#2A2118] font-cinzel mt-1">Similar Handcrafted Frames</h2>
             </div>
-            <Link href="/shop" className="cursor-pointer text-xs font-mono text-amber-400 hover:underline">
-              View All 12 Frames &rarr;
+            <Link href="/shop" className="cursor-pointer text-xs font-mono text-[#B88A32] hover:underline font-bold">
+              View All 40+ Frames &rarr;
             </Link>
           </div>
 
@@ -408,18 +408,18 @@ export default function ProductDetailClient() {
               <Link
                 key={rel.slug}
                 href={`/shop/${rel.slug}`}
-                className="group p-5 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-amber-400/40 transition-all flex flex-col justify-between"
+                className="group p-5 rounded-3xl bg-[#FFF9EF] border border-[#B88A32]/20 hover:border-[#B88A32]/50 transition-all flex flex-col justify-between shadow-sm"
               >
-                <div className="w-full h-36 rounded-2xl bg-gradient-to-br from-neutral-900 to-black border border-white/5 flex items-center justify-center text-4xl group-hover:scale-105 transition-transform duration-300">
+                <div className="w-full h-36 rounded-2xl bg-gradient-to-br from-[#F4E9D5] to-[#E8D2A8] border border-[#B88A32]/15 flex items-center justify-center text-4xl group-hover:scale-105 transition-transform duration-300 shadow-sm">
                   👓
                 </div>
                 <div className="mt-4">
-                  <h4 className="text-sm font-semibold text-white group-hover:text-amber-300 transition-colors">
+                  <h4 className="text-sm font-bold text-[#2A2118] font-cinzel group-hover:text-[#B88A32] transition-colors">
                     {rel.name}
                   </h4>
                   <div className="flex items-center justify-between mt-1 text-xs font-mono">
-                    <span className="text-neutral-400 capitalize">{rel.material}</span>
-                    <span className="font-bold text-amber-300">₹{rel.price}</span>
+                    <span className="text-[#6B5740] capitalize">{rel.material}</span>
+                    <span className="font-bold text-[#B88A32]">₹{rel.price}</span>
                   </div>
                 </div>
               </Link>

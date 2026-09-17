@@ -1,14 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #FFFDF5;
-  --foreground: #2A1F14;
-  --color-primary: #C6A463;
-  --color-accent: #A8884A;
-  --color-espresso: #3C2415;
-  --color-gold: #C6A463;
-  --color-cream: #FAF7F0;
-  --color-ivory: #FFFDF5;
+  --background: #F4E9D5;
+  --foreground: #2A2118;
+  --color-bg-base: #F4E9D5;
+  --color-bg-mid: #E8D2A8;
+  --color-bg-deep: #D6B878;
+  --color-text-main: #2A2118;
+  --color-text-sub: #4A3928;
+  --color-accent: #B88A32;
+  --color-accent-light: #D4AF62;
+  --color-secondary-light: #FFF9EF;
+  --color-secondary-dark: #6B5740;
 }
 
 @theme inline {
@@ -27,87 +30,87 @@ html {
 }
 
 body {
-  background-color: #FFFDF5;
-  color: #2A1F14;
+  background-color: #F4E9D5;
+  color: #2A2118;
   font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
   min-height: 100vh;
 }
 
 /* ==========================================================================
-   Reusable Glassmorphism (Frosted Glass) Utilities — Warm Champagne Theme
+   Reusable Frosted Glass Utilities — LO Palette
    ========================================================================== */
 
 /* Standard Frosted Glass Layer */
 .glass {
-  background-color: rgba(255, 253, 245, 0.7);
+  background-color: rgba(255, 249, 239, 0.78);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(198, 164, 99, 0.15);
+  border: 1px solid rgba(184, 138, 50, 0.22);
   border-radius: 1rem;
-  box-shadow: 0 8px 32px 0 rgba(60, 36, 21, 0.06);
+  box-shadow: 0 8px 32px 0 rgba(42, 33, 24, 0.07);
 }
 
 /* Glass Card with enhanced depth and sheen */
 .glass-card {
   background: linear-gradient(
     135deg,
-    rgba(255, 253, 245, 0.85) 0%,
-    rgba(250, 247, 240, 0.6) 100%
+    rgba(255, 249, 239, 0.92) 0%,
+    rgba(244, 233, 213, 0.75) 100%
   );
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(198, 164, 99, 0.15);
-  border-radius: 1rem;
+  border: 1px solid rgba(184, 138, 50, 0.25);
+  border-radius: 1.25rem;
   box-shadow: 
-    0 8px 32px 0 rgba(60, 36, 21, 0.06),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
+    0 10px 35px 0 rgba(42, 33, 24, 0.08),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.85);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card:hover {
   background: linear-gradient(
     135deg,
-    rgba(255, 253, 245, 0.95) 0%,
-    rgba(250, 247, 240, 0.75) 100%
+    rgba(255, 249, 239, 0.98) 0%,
+    rgba(232, 210, 168, 0.85) 100%
   );
-  border-color: rgba(198, 164, 99, 0.3);
+  border-color: rgba(184, 138, 50, 0.45);
   box-shadow: 
-    0 16px 40px 0 rgba(60, 36, 21, 0.1),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+    0 18px 45px 0 rgba(42, 33, 24, 0.12),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
 }
 
 /* Deep Panel Glass (Sidebars, modals, floating navbars) */
 .glass-panel {
-  background-color: rgba(255, 253, 245, 0.85);
+  background-color: rgba(255, 249, 239, 0.88);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(198, 164, 99, 0.12);
-  box-shadow: 0 24px 48px -12px rgba(60, 36, 21, 0.08);
+  border: 1px solid rgba(184, 138, 50, 0.2);
+  box-shadow: 0 24px 48px -12px rgba(42, 33, 24, 0.09);
 }
 
 /* Glass Pill / Badges */
 .glass-pill {
-  background-color: rgba(250, 247, 240, 0.8);
+  background-color: rgba(255, 249, 239, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(198, 164, 99, 0.15);
+  border: 1px solid rgba(184, 138, 50, 0.25);
   border-radius: 9999px;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-pill:hover {
-  background-color: rgba(250, 247, 240, 0.95);
-  border-color: rgba(198, 164, 99, 0.35);
+  background-color: #FFF9EF;
+  border-color: rgba(184, 138, 50, 0.5);
 }
 
-/* Subtle glowing pulse animations for background ambiance */
+/* Subtle glowing pulse animations */
 @keyframes floatOrb1 {
   0%, 100% {
     transform: translate(0px, 0px) scale(1);
   }
   50% {
-    transform: translate(60px, -40px) scale(1.1);
+    transform: translate(50px, -30px) scale(1.08);
   }
 }
 
@@ -116,7 +119,7 @@ body {
     transform: translate(0px, 0px) scale(1);
   }
   50% {
-    transform: translate(-50px, 60px) scale(0.95);
+    transform: translate(-40px, 50px) scale(0.96);
   }
 }
 
@@ -142,25 +145,16 @@ body {
 }
 
 .text-gold-gradient {
-  background: linear-gradient(180deg, #3C2415 0%, #8B7355 28%, #C6A463 68%, #A8884A 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.text-silver-gradient {
-  background: linear-gradient(180deg, #3C2415 0%, #5C3D2E 40%, #8B7355 100%);
+  background: linear-gradient(180deg, #2A2118 0%, #B88A32 55%, #D4AF62 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .gold-glow {
-  text-shadow: 0 0 40px rgba(198, 164, 99, 0.35), 0 0 80px rgba(198, 164, 99, 0.15);
+  text-shadow: 0 0 40px rgba(184, 138, 50, 0.35), 0 0 80px rgba(212, 175, 98, 0.2);
 }
 
-
-/* ==========================================================================
-   Lenis 144Hz Ultra-Fluid Smooth Scroll & Hardware Acceleration
-   ========================================================================== */
+/* Lenis 144Hz Smooth Scroll */
 html.lenis, html.lenis body {
   height: auto;
 }
@@ -173,11 +167,7 @@ html.lenis, html.lenis body {
 .lenis.lenis-stopped {
   overflow: hidden;
 }
-.lenis.lenis-scrolling iframe {
-  pointer-events: none;
-}
 
-/* GPU Hardware Layering for 144Hz Compositing */
 .gpu-layer {
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
@@ -189,15 +179,7 @@ html.lenis, html.lenis body {
   will-change: transform;
 }
 
-
-/* Mobile Viewport Guard */
 html, body {
   max-width: 100vw;
   overflow-x: hidden !important;
-}
-
-@media (max-width: 640px) {
-  .glass-card {
-    border-radius: 1.25rem;
-  }
 }

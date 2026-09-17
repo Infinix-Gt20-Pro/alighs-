@@ -21,12 +21,12 @@ export const FRAME_MATERIALS: MaterialOption[] = [
   {
     id: "gold",
     name: "24K Champagne Gold",
-    color: "#C6A463",
+    color: "#B88A32",
     metalness: 0.98,
     roughness: 0.18,
     badge: "Beta Titanium",
     lensTint: "#f0f9ff",
-    accentColor: "#E2C485"
+    accentColor: "#D4AF62"
   },
   {
     id: "onyx",
@@ -70,16 +70,20 @@ export const FRAME_MATERIALS: MaterialOption[] = [
   },
 ];
 
+export type InspectionAngle = "front" | "side" | "temple" | "hinge" | "lens";
+
 export default function GlassesModel({
   materialId = "gold",
   viewAngle = "orbit",
-  autoRotate = true,
+  autoRotate = false,
   scrollProgress,
+  dragOffset = { x: 0, y: 0 },
 }: {
   materialId?: string;
-  viewAngle?: "orbit" | "front" | "profile" | "macro";
+  viewAngle?: "orbit" | "front" | "side" | "temple" | "hinge" | "lens" | "profile" | "macro";
   autoRotate?: boolean;
   scrollProgress?: number;
+  dragOffset?: { x: number; y: number };
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const leftLensRef = useRef<THREE.Mesh>(null);
@@ -283,70 +287,136 @@ export default function GlassesModel({
     };
   }, []);
 
-  // Responsive calculations: ensure glasses fit phone UI with side margins and don't clash with text
+  // Responsive calculations: GIANT 3D frame that fills mobile viewport with safe 7% margins
   const { viewport, size } = useThree();
   const isMobile = size.width < 768;
 
   const responsiveScale = useMemo(() => {
     if (isMobile) {
-      // Fit within 72% of phone screen width
-      return Math.min(Math.max((viewport.width * 0.72) / 3.1, 0.38), 0.62);
+      // Bold, giant 86% mobile width framing
+      return Math.min(Math.max((viewport.width * 0.86) / 3.1, 0.45), 0.70);
     }
-    // Desktop: refined, elegant scale (approx 45% of view width)
-    return 0.82;
+    // Desktop: monumental, giant luxury frame (approx 55%-60% view width)
+    return 0.98;
   }, [viewport.width, isMobile]);
 
-  const baseY = isMobile ? -0.24 : -0.12;
+  const baseY = isMobile ? -0.16 : -0.06;
 
   // Studio Turntable Rotation & View Presets
-  const targetRotation = useRef({ x: 0.05, y: -0.25, z: 0 });
-  const targetPosition = useRef({ x: 0, y: -0.12, z: 0 });
-  const targetScale = useRef(0.82);
+  const targetRotation = useRef({ x: 0.02, y: 0.0, z: 0 });
+  const targetPosition = useRef({ x: 0, y: -0.06, z: 0 });
+  const targetScale = useRef(0.98);
 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
 
-    if (viewAngle === "front") {
-      targetRotation.current = { x: 0.0, y: 0, z: 0 };
-      targetPosition.current = { x: 0, y: baseY, z: 0.1 };
-      targetScale.current = responsiveScale * 1.05;
+    const mouseX = state.pointer.x * 0.12;
+    const mouseY = state.pointer.y * 0.06;
+
+    // 5 Architectural Poses Requested by LO: FRONT -> SIDE -> TEMPLE -> HINGE -> LENS
+    const poses = {
+      front: {
+        rot: { x: 0.02, y: 0.0, z: 0.0 },
+        pos: { x: 0, y: baseY, z: 0.05 },
+        scaleMult: 1.0,
+      },
+      side: {
+        rot: { x: 0.04, y: -1.52, z: 0.02 },
+        pos: { x: isMobile ? 0.06 : 0.16, y: baseY, z: 0.02 },
+        scaleMult: 1.05,
+      },
+      temple: {
+        rot: { x: 0.20, y: -2.35, z: 0.04 },
+        pos: { x: isMobile ? -0.14 : -0.26, y: baseY - 0.03, z: 0.22 },
+        scaleMult: 1.25,
+      },
+      hinge: {
+        rot: { x: 0.22, y: -0.85, z: -0.05 },
+        pos: { x: isMobile ? 0.52 : 0.80, y: baseY - 0.18, z: 0.65 },
+        scaleMult: isMobile ? 1.55 : 1.95,
+      },
+      lens: {
+        rot: { x: 0.04, y: -0.22, z: 0.0 },
+        pos: { x: isMobile ? 0.24 : 0.40, y: baseY + 0.02, z: 0.60 },
+        scaleMult: isMobile ? 1.40 : 1.70,
+      },
+    };
+
+    const poseKeys = ["front", "side", "temple", "hinge", "lens"] as const;
+
+    if (viewAngle === "front" || viewAngle === "side" || viewAngle === "temple" || viewAngle === "hinge" || viewAngle === "lens") {
+      const p = poses[viewAngle];
+      targetRotation.current = { x: p.rot.x - mouseY * 0.3, y: p.rot.y + mouseX * 0.3, z: p.rot.z };
+      targetPosition.current = { x: p.pos.x, y: p.pos.y, z: p.pos.z };
+      targetScale.current = responsiveScale * p.scaleMult;
     } else if (viewAngle === "profile") {
-      targetRotation.current = { x: 0.08, y: -0.75, z: 0.02 };
-      targetPosition.current = { x: 0.05, y: baseY, z: 0.05 };
-      targetScale.current = responsiveScale * 1.02;
+      const p = poses.side;
+      targetRotation.current = { x: p.rot.x - mouseY * 0.3, y: p.rot.y + mouseX * 0.3, z: p.rot.z };
+      targetPosition.current = { x: p.pos.x, y: p.pos.y, z: p.pos.z };
+      targetScale.current = responsiveScale * p.scaleMult;
     } else if (viewAngle === "macro") {
-      targetRotation.current = { x: 0.12, y: -1.2, z: 0.04 };
-      targetPosition.current = { x: 0.3, y: baseY + 0.1, z: 0.4 };
-      targetScale.current = responsiveScale * 1.35;
+      const p = poses.hinge;
+      targetRotation.current = { x: p.rot.x - mouseY * 0.3, y: p.rot.y + mouseX * 0.3, z: p.rot.z };
+      targetPosition.current = { x: p.pos.x, y: p.pos.y, z: p.pos.z };
+      targetScale.current = responsiveScale * p.scaleMult;
     } else {
-      // orbit mode: scroll-driven or gentle turntable
+      // orbit mode: continuous scroll inspection through FRONT -> SIDE -> TEMPLE -> HINGE -> LENS
       if (typeof scrollProgress === "number") {
-        // Scroll drives full 360° rotation
-        groupRef.current.rotation.y = THREE.MathUtils.damp(
-          groupRef.current.rotation.y,
-          scrollProgress * Math.PI * 2,
-          4.0,
-          delta
-        );
+        if (scrollProgress < 0.16) {
+          // Opening Hero: beauty front view
+          targetRotation.current = { x: 0.04 - mouseY, y: mouseX, z: 0 };
+          targetPosition.current = { x: 0, y: baseY, z: 0 };
+          targetScale.current = responsiveScale;
+        } else {
+          // Inspection sequence: smooth interpolation across the 5 poses
+          const progressNorm = Math.min(Math.max((scrollProgress - 0.16) / 0.84, 0), 1);
+          const totalSegments = poseKeys.length - 1; // 4 segments
+          const segmentVal = progressNorm * totalSegments;
+          const idx = Math.min(Math.floor(segmentVal), totalSegments - 1);
+          const frac = segmentVal - idx;
+          const s = frac * frac * (3 - 2 * frac); // smooth hermite ease
+
+          const pA = poses[poseKeys[idx]];
+          const pB = poses[poseKeys[idx + 1]];
+
+          targetRotation.current = {
+            x: THREE.MathUtils.lerp(pA.rot.x, pB.rot.x, s) - mouseY * 0.35,
+            y: THREE.MathUtils.lerp(pA.rot.y, pB.rot.y, s) + mouseX * 0.35,
+            z: THREE.MathUtils.lerp(pA.rot.z, pB.rot.z, s),
+          };
+          targetPosition.current = {
+            x: THREE.MathUtils.lerp(pA.pos.x, pB.pos.x, s),
+            y: THREE.MathUtils.lerp(pA.pos.y, pB.pos.y, s),
+            z: THREE.MathUtils.lerp(pA.pos.z, pB.pos.z, s),
+          };
+          targetScale.current = responsiveScale * THREE.MathUtils.lerp(pA.scaleMult, pB.scaleMult, s);
+
+          // Step 7 & 8: As user approaches the end of the hero scrollytelling, product glides toward side
+          if (scrollProgress > 0.86) {
+            const exitFrac = Math.min((scrollProgress - 0.86) / 0.14, 1);
+            const exitEase = exitFrac * exitFrac;
+            targetPosition.current.x += (isMobile ? 0.75 : 1.6) * exitEase;
+            targetPosition.current.z += 0.8 * exitEase;
+          }
+        }
       } else if (autoRotate) {
         groupRef.current.rotation.y += delta * 0.28;
       }
-      const mouseX = state.pointer.x * 0.12;
-      const mouseY = state.pointer.y * 0.06;
-      targetRotation.current.x = 0.05 - mouseY;
-      targetPosition.current = { x: 0, y: baseY, z: 0 };
-      targetScale.current = responsiveScale;
     }
 
-    if (viewAngle !== "orbit") {
-      groupRef.current.rotation.y = THREE.MathUtils.damp(groupRef.current.rotation.y, targetRotation.current.y, 4.0, delta);
-    }
-    groupRef.current.rotation.x = THREE.MathUtils.damp(groupRef.current.rotation.x, targetRotation.current.x, 4.0, delta);
-    groupRef.current.rotation.z = THREE.MathUtils.damp(groupRef.current.rotation.z, targetRotation.current.z, 4.0, delta);
-    groupRef.current.position.x = THREE.MathUtils.damp(groupRef.current.position.x, targetPosition.current.x, 4.0, delta);
-    groupRef.current.position.y = THREE.MathUtils.damp(groupRef.current.position.y, targetPosition.current.y, 4.0, delta);
-    groupRef.current.position.z = THREE.MathUtils.damp(groupRef.current.position.z, targetPosition.current.z, 4.0, delta);
-    groupRef.current.scale.setScalar(THREE.MathUtils.damp(groupRef.current.scale.x, targetScale.current, 4.0, delta));
+    // Apply interactive 360 drag inspection offset
+    const finalRotX = targetRotation.current.x + (dragOffset.x || 0);
+    const finalRotY = targetRotation.current.y + (dragOffset.y || 0);
+    const finalRotZ = targetRotation.current.z;
+
+    // Smooth damping physics for seamless transitions
+    groupRef.current.rotation.x = THREE.MathUtils.damp(groupRef.current.rotation.x, finalRotX, 4.5, delta);
+    groupRef.current.rotation.y = THREE.MathUtils.damp(groupRef.current.rotation.y, finalRotY, 4.5, delta);
+    groupRef.current.rotation.z = THREE.MathUtils.damp(groupRef.current.rotation.z, finalRotZ, 4.5, delta);
+    groupRef.current.position.x = THREE.MathUtils.damp(groupRef.current.position.x, targetPosition.current.x, 4.5, delta);
+    groupRef.current.position.y = THREE.MathUtils.damp(groupRef.current.position.y, targetPosition.current.y, 4.5, delta);
+    groupRef.current.position.z = THREE.MathUtils.damp(groupRef.current.position.z, targetPosition.current.z, 4.5, delta);
+    groupRef.current.scale.setScalar(THREE.MathUtils.damp(groupRef.current.scale.x, targetScale.current, 4.5, delta));
   });
 
   return (

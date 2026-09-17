@@ -60,59 +60,60 @@ const POSTS = [
   {
     id: "post-2",
     category: "reels",
-    title: "1080p Motion Study: The Ergonomic Fit",
-    caption: "Live video capture: testing how our pantos bridge contour rests comfortably without slippage or cheekbone contact on Indian facial profiles.",
-    video: "/videos/man-putting-on-glasses.mp4",
-    image: "/images/model-dark.jpg",
+    title: "Behind The Scenes: Japanese Beta-Titanium Cold Milling",
+    caption: "Watch how 0.6mm titanium sheets are laser-contoured and vacuum-sintered to create featherlight 18.4g resilience that never deforms under pressure.",
+    image: "/images/glasses-render.jpg",
+    video: "/videos/glasses-spin.mp4",
     isVideo: true,
-    likes: "3,890",
-    comments: "214",
-    productSlug: "nocturne-bold-clubmaster",
-    productName: "Imperial Classic Titanium",
-    price: "₹2,799",
-    tags: ["#MotionReel", "#EyewearDesign", "#OpticalFit", "#AMU"]
+    likes: "4,890",
+    comments: "312",
+    productSlug: "zenith-geometric-octa",
+    productName: "Zenith Geometric Octa",
+    price: "₹2,699",
+    tags: ["#EyewearCraft", "#TitaniumEyewear", "#Optics", "#LuxuryStyle"]
   },
   {
     id: "post-3",
     category: "doctor",
-    title: "Dr. Sheeraz Ahmad: Blue-Cut 420nm vs Standard Tint",
-    caption: "Clinical demonstration by Dr. Sheeraz Ahmad (AMU). Why 420nm high-energy blue-light filtration protects the retina during long screen hours.",
-    image: "/images/clarity-showcase.jpg",
+    title: "Dr. Sheeraz on 420nm Blue-Cut Lenses vs Screen Fatigue",
+    caption: "Dr. Sheeraz Ahmad (AMU) explains how true 420nm blue-violet cutoff prevents digital retinal strain compared to ordinary coated lenses.",
+    image: "/images/dr-sheeraz-consultation.jpg",
     isVideo: false,
-    likes: "4,120",
-    comments: "320",
-    productSlug: "aurelia-titanium-round",
-    productName: "Clinical Eye Checkup & Sapphire Lenses",
+    likes: "1,870",
+    comments: "94",
+    productSlug: "chronos-matte-black-aviator",
+    productName: "Chronos Matte Aviator",
     price: "Free Consult",
-    tags: ["#DrSheerazAhmad", "#AMUOptometrist", "#EyeHealth", "#BlueCut"]
+    tags: ["#EyeCareTips", "#DrSheerazAhmad", "#Optometry", "#DigitalStrain"]
   },
   {
     id: "post-4",
     category: "drops",
-    title: "Nocturne Matte Clubmaster • Obsidian Onyx",
-    caption: "Italian hand-beveled acetate browline with 24K gold-plated micro-pins. Precision craftsmanship engineered in our Firozabad atelier.",
-    image: "/images/luxury-craft.jpg",
+    title: "Eclipse Matte Black • Limited Batch of 50 Pieces",
+    caption: "Deep obsidian sandblasted finish with hand-beveled acetate tips. Engineered for boardroom gravitas and night city driving.",
+    image: "/images/glasses-front.jpg",
     isVideo: false,
-    likes: "1,980",
-    comments: "92",
-    productSlug: "nocturne-bold-clubmaster",
-    productName: "Nocturne Bold Clubmaster",
-    price: "₹2,799",
-    tags: ["#ItalianAcetate", "#Clubmaster", "#Obsidian", "#Luxury"]
+    likes: "3,250",
+    comments: "205",
+    productSlug: "aurelia-titanium-round",
+    productName: "Eclipse Obsidian Matte",
+    price: "₹2,899",
+    tags: ["#NewDrop", "#MinimalistDesign", "#MatteBlack", "#LuxuryFrames"]
   },
   {
     id: "post-5",
-    category: "drops",
-    title: "Atelier Packaging & Velvet Hard-Case Reveal",
-    caption: "Every ALIG'S WARE frame arrives in our custom weighted gold-embossed box, microfiber lens towel, and AMU clinical certificate card.",
-    image: "/images/hero-luxury-eyewear.jpg",
-    isVideo: false,
-    likes: "2,740",
-    comments: "165",
-    productSlug: "aurelia-titanium-round",
-    productName: "Collector Atelier Unboxing",
-    price: "Included",
-    tags: ["#Unboxing", "#VelvetCase", "#FirozabadHeritage", "#Packaging"]
+    category: "reels",
+    title: "Man Putting On Glasses • Movement In Cinema Reel",
+    caption: "Natural weight distribution test. Ergonomic silicone nose pads that leave zero bridge marks even after 14 continuous hours.",
+    image: "/images/model-gold.jpg",
+    video: "/videos/man-putting-on-glasses.mp4",
+    isVideo: true,
+    likes: "5,640",
+    comments: "420",
+    productSlug: "zenith-geometric-octa",
+    productName: "Zenith Featherweight",
+    price: "₹2,699",
+    tags: ["#CinematicReels", "#EyewearFashion", "#MensStyle", "#DailyCarry"]
   },
   {
     id: "post-6",
@@ -139,20 +140,24 @@ export default function InstagramPage() {
   });
 
   return (
-    <div className="relative min-h-screen bg-[#070709] text-white flex flex-col selection:bg-amber-500/30 selection:text-white">
+    <div className="relative min-h-screen bg-[#F4E9D5] text-[#2A2118] flex flex-col selection:bg-[#B88A32]/30 selection:text-[#2A2118]">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-36 pb-20 w-full">
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-36 pb-20 w-full relative">
+        {/* Ambient Warmth Glows */}
+        <div className="absolute top-20 left-10 w-[500px] h-[500px] bg-[#E8D2A8]/30 rounded-full blur-[140px] -z-10 pointer-events-none" />
+        <div className="absolute bottom-10 right-10 w-[600px] h-[600px] bg-[#D4AF62]/20 rounded-full blur-[160px] -z-10 pointer-events-none" />
+
         {/* INSTAGRAM PROFILE HEADER HERO CARD */}
-        <div className="relative rounded-3xl bg-gradient-to-b from-white/[0.06] to-white/[0.02] border border-white/10 p-6 sm:p-10 mb-12 shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden">
-          {/* Ambient Glows */}
-          <div className="absolute -top-24 -right-24 w-80 h-80 bg-gradient-to-br from-[#f09433]/20 via-[#dc2743]/20 to-[#bc1888]/20 rounded-full blur-[90px] pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-amber-500/10 rounded-full blur-[90px] pointer-events-none" />
+        <div className="relative rounded-3xl bg-[#FFF9EF] border border-[#B88A32]/25 p-6 sm:p-10 mb-12 shadow-xl shadow-[#2A2118]/5 overflow-hidden">
+          {/* Subtle Ambient Accent */}
+          <div className="absolute -top-24 -right-24 w-80 h-80 bg-gradient-to-br from-[#f09433]/15 via-[#dc2743]/15 to-[#bc1888]/15 rounded-full blur-[90px] pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-[#B88A32]/10 rounded-full blur-[90px] pointer-events-none" />
 
           <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6 sm:gap-10 text-center md:text-left">
             {/* Profile Avatar / Official Logo */}
-            <div className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-full p-1 bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] shadow-[0_0_40px_rgba(220,39,67,0.4)] shrink-0 group">
-              <div className="relative w-full h-full rounded-full overflow-hidden bg-black flex items-center justify-center">
+            <div className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-full p-1 bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] shadow-md shrink-0 group">
+              <div className="relative w-full h-full rounded-full overflow-hidden bg-[#2A2118] flex items-center justify-center">
                 <Image
                   src="/images/aligsware-logo.png"
                   alt="ALIG'S WARE Official Logo"
@@ -167,22 +172,22 @@ export default function InstagramPage() {
             {/* Profile Bio & Handle Info */}
             <div className="flex-1 flex flex-col justify-center">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-3 justify-center md:justify-start">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black font-cinzel tracking-wider text-white">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold tracking-wider text-[#2A2118]">
                   ALIGSWARE
                 </h1>
                 <div className="flex items-center gap-2 justify-center">
-                  <span className="text-xs font-mono font-bold text-amber-300 bg-amber-400/10 border border-amber-400/30 px-3 py-1 rounded-full">
+                  <span className="text-xs font-mono font-bold text-[#B88A32] bg-[#B88A32]/15 border border-[#B88A32]/30 px-3 py-1 rounded-full">
                     @aligsware
                   </span>
-                  <span className="inline-flex items-center gap-1 text-[11px] font-mono text-emerald-400 bg-emerald-400/10 border border-emerald-400/30 px-2.5 py-1 rounded-full">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-mono text-[#4A7C59] bg-[#4A7C59]/15 border border-[#4A7C59]/30 px-2.5 py-1 rounded-full font-semibold">
                     <CheckCircle2 className="w-3.5 h-3.5" /> Verified Atelier
                   </span>
                 </div>
               </div>
 
               {/* Bio Highlights */}
-              <div className="text-neutral-300 text-xs sm:text-sm leading-relaxed max-w-2xl font-sans mb-5 space-y-1">
-                <p className="font-medium text-white">
+              <div className="text-[#6B5740] text-xs sm:text-sm leading-relaxed max-w-2xl font-sans mb-5 space-y-1">
+                <p className="font-semibold text-[#2A2118]">
                   👓 Firozabad&apos;s trusted heritage craftsmanship, now online.
                 </p>
                 <p>
@@ -191,8 +196,8 @@ export default function InstagramPage() {
                 <p>
                   ✨ Japanese Beta-Titanium frames &bull; 420nm Sapphire Blue-Cut Lenses.
                 </p>
-                <p className="text-amber-300/90 font-mono text-[11px]">
-                  📍 Firozabad, Uttar Pradesh &bull; 📞 +91 72173 71499 &bull; Pan-India Dispatch
+                <p className="text-[#B88A32] font-mono text-[11px] font-medium">
+                  📍 Firozabad, Uttar Pradesh &bull; 📞 +91 72173 71499 &bull; Pan-India Insured Dispatch
                 </p>
               </div>
 
@@ -202,7 +207,7 @@ export default function InstagramPage() {
                   href="https://www.instagram.com/aligsware/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="cursor-pointer inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#f09433] via-[#dc2743] to-[#bc1888] hover:opacity-95 text-white font-bold text-xs uppercase tracking-wider shadow-[0_0_25px_rgba(220,39,67,0.4)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  className="cursor-pointer inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#f09433] via-[#dc2743] to-[#bc1888] hover:opacity-95 text-white font-bold text-xs uppercase tracking-wider shadow-md transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <InstagramIcon className="w-4 h-4" />
                   <span>Follow on Instagram</span>
@@ -213,17 +218,17 @@ export default function InstagramPage() {
                   href="https://wa.me/917217371499?text=Hi%20ALIGSWARE!%20I'm%20visiting%20your%20Instagram%20page%20and%20interested%20in%20your%20eyewear."
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/40 text-[#25D366] font-semibold text-xs font-mono transition-colors"
+                  className="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/40 text-[#1b8743] font-semibold text-xs font-mono transition-colors"
                 >
-                  <MessageCircle className="w-4 h-4" />
+                  <MessageCircle className="w-4 h-4 text-[#25D366]" />
                   <span>WhatsApp: 7217371499</span>
                 </a>
 
                 <Link
                   href="/appointment"
-                  className="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-white font-medium text-xs transition-colors"
+                  className="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#F4E9D5] hover:bg-[#E8D2A8] border border-[#B88A32]/25 text-[#2A2118] font-medium text-xs transition-colors"
                 >
-                  <Award className="w-4 h-4 text-amber-400" />
+                  <Award className="w-4 h-4 text-[#B88A32]" />
                   <span>Book Clinic Visit</span>
                 </Link>
               </div>
@@ -232,7 +237,7 @@ export default function InstagramPage() {
         </div>
 
         {/* FEED FILTER TABS */}
-        <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-8">
+        <div className="flex items-center justify-between border-b border-[#B88A32]/20 pb-4 mb-8">
           <div className="flex items-center gap-2 overflow-x-auto max-w-full py-1">
             {[
               { id: "all", label: "All Curations" },
@@ -245,8 +250,8 @@ export default function InstagramPage() {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`cursor-pointer px-4 py-2 rounded-full text-xs font-mono uppercase tracking-wider transition-all duration-200 shrink-0 ${
                   activeTab === tab.id
-                    ? "bg-gradient-to-r from-amber-400 to-amber-500 text-black font-bold shadow-[0_0_15px_rgba(212,175,55,0.4)]"
-                    : "bg-white/[0.04] text-neutral-400 hover:text-white border border-white/10 hover:bg-white/[0.08]"
+                    ? "bg-[#B88A32] text-[#FFF9EF] font-bold shadow-sm"
+                    : "bg-[#FFF9EF] text-[#6B5740] hover:text-[#2A2118] border border-[#B88A32]/20 hover:bg-[#E8D2A8]/40"
                 }`}
               >
                 {tab.label}
@@ -258,7 +263,7 @@ export default function InstagramPage() {
             href="https://www.instagram.com/aligsware/"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono text-pink-400 hover:text-pink-300 transition-colors"
+            className="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono text-[#B88A32] hover:text-[#A07828] transition-colors"
           >
             <span>instagram.com/aligsware</span>
             <ExternalLink className="w-3.5 h-3.5" />
@@ -276,10 +281,10 @@ export default function InstagramPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.96 }}
                 transition={{ duration: 0.3 }}
-                className="group rounded-3xl overflow-hidden bg-gradient-to-b from-[#0e0f14] to-[#070709] border border-white/10 hover:border-pink-500/40 transition-all duration-500 flex flex-col justify-between shadow-2xl hover:shadow-[0_20px_45px_rgba(220,39,67,0.2)]"
+                className="group rounded-3xl overflow-hidden bg-[#FFF9EF] border border-[#B88A32]/25 hover:border-[#B88A32]/60 transition-all duration-500 flex flex-col justify-between shadow-md hover:shadow-xl shadow-[#2A2118]/5"
               >
                 {/* Media Container */}
-                <div className="relative aspect-square w-full overflow-hidden bg-black">
+                <div className="relative aspect-square w-full overflow-hidden bg-[#2A2118]">
                   {post.isVideo && post.video ? (
                     <video
                       autoPlay
@@ -296,19 +301,19 @@ export default function InstagramPage() {
                       alt={post.title}
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      className="object-cover object-center group-hover:scale-105 transition-transform duration-700 brightness-90 group-hover:brightness-100"
+                      className="object-cover object-center group-hover:scale-105 transition-transform duration-700"
                     />
                   )}
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent pointer-events-none" />
 
                   {/* Badges on Media */}
                   <div className="absolute top-4 left-4 flex items-center gap-2">
-                    <span className="px-3 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/20 text-[10px] font-mono text-amber-300 uppercase tracking-widest">
+                    <span className="px-3 py-1 rounded-full bg-[#2A2118]/80 backdrop-blur-md border border-[#B88A32]/30 text-[10px] font-mono text-[#D4AF62] uppercase tracking-widest font-semibold">
                       {post.category.toUpperCase()}
                     </span>
                     {post.isVideo && (
-                      <span className="w-7 h-7 rounded-full bg-black/75 backdrop-blur-md border border-white/20 flex items-center justify-center text-amber-400">
+                      <span className="w-7 h-7 rounded-full bg-[#2A2118]/80 backdrop-blur-md border border-[#B88A32]/30 flex items-center justify-center text-[#D4AF62]">
                         <Film className="w-3.5 h-3.5" />
                       </span>
                     )}
@@ -319,13 +324,13 @@ export default function InstagramPage() {
                     href="https://www.instagram.com/aligsware/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/75 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/90 group-hover:text-pink-400 group-hover:border-pink-500/40 transition-colors shadow-lg"
+                    className="absolute top-4 right-4 w-9 h-9 rounded-full bg-[#2A2118]/80 backdrop-blur-md border border-[#B88A32]/30 flex items-center justify-center text-white group-hover:text-pink-400 transition-colors shadow-md"
                   >
                     <InstagramIcon className="w-4 h-4" />
                   </a>
 
                   {/* Likes & Comments Overlay */}
-                  <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs font-mono text-white/90 bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10">
+                  <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs font-mono text-white bg-[#2A2118]/70 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/15">
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-1">
                         <Heart className="w-3.5 h-3.5 text-pink-400 fill-pink-400" />
@@ -336,24 +341,24 @@ export default function InstagramPage() {
                         <span>{post.comments}</span>
                       </div>
                     </div>
-                    <span className="text-amber-300 font-bold">{post.price}</span>
+                    <span className="text-[#D4AF62] font-bold">{post.price}</span>
                   </div>
                 </div>
 
                 {/* Caption & Product Meta */}
                 <div className="p-6 flex flex-col justify-between flex-1">
                   <div>
-                    <h3 className="font-cinzel text-base sm:text-lg font-bold text-white group-hover:text-pink-300 transition-colors mb-2">
+                    <h3 className="font-serif text-base sm:text-lg font-bold text-[#2A2118] group-hover:text-[#B88A32] transition-colors mb-2">
                       {post.title}
                     </h3>
-                    <p className="text-xs text-neutral-400 leading-relaxed line-clamp-3 mb-4 font-sans">
+                    <p className="text-xs text-[#6B5740] leading-relaxed line-clamp-3 mb-4 font-sans">
                       {post.caption}
                     </p>
 
                     {/* Hashtags */}
                     <div className="flex flex-wrap gap-1.5 mb-5">
                       {post.tags.map((tag) => (
-                        <span key={tag} className="text-[10px] font-mono text-pink-400/80 bg-pink-500/10 px-2 py-0.5 rounded-md">
+                        <span key={tag} className="text-[10px] font-mono text-[#B88A32] bg-[#B88A32]/10 px-2 py-0.5 rounded-md font-medium">
                           {tag}
                         </span>
                       ))}
@@ -361,10 +366,10 @@ export default function InstagramPage() {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="pt-4 border-t border-white/10 flex items-center gap-2.5">
+                  <div className="pt-4 border-t border-[#B88A32]/15 flex items-center gap-2.5">
                     <Link
                       href={`/shop/${post.productSlug}`}
-                      className="cursor-pointer flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-black font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:brightness-110 transition-all shadow-[0_0_15px_rgba(212,175,55,0.3)]"
+                      className="cursor-pointer flex-1 py-2.5 rounded-xl bg-[#B88A32] hover:bg-[#A07828] text-[#FFF9EF] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-sm"
                     >
                       <ShoppingBag className="w-3.5 h-3.5" />
                       <span>Shop Frame</span>
@@ -374,7 +379,7 @@ export default function InstagramPage() {
                       href="https://www.instagram.com/aligsware/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="cursor-pointer p-2.5 rounded-xl border border-white/20 hover:border-pink-400 hover:text-pink-400 text-white transition-colors"
+                      className="cursor-pointer p-2.5 rounded-xl border border-[#B88A32]/25 hover:border-[#B88A32] hover:text-[#B88A32] text-[#4A3928] transition-colors bg-[#F4E9D5]/40"
                       title="View on Instagram"
                     >
                       <ExternalLink className="w-4 h-4" />
@@ -387,14 +392,14 @@ export default function InstagramPage() {
         </div>
 
         {/* BOTTOM CTA: DIRECT WHATSAPP & APPOINTMENT */}
-        <div className="mt-16 rounded-3xl bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-pink-500/10 border border-white/15 p-8 sm:p-12 text-center flex flex-col items-center justify-center">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] flex items-center justify-center mb-4 shadow-xl">
+        <div className="mt-16 rounded-3xl bg-[#FFF9EF] border border-[#B88A32]/25 p-8 sm:p-12 text-center flex flex-col items-center justify-center shadow-xl shadow-[#2A2118]/5">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] flex items-center justify-center mb-4 shadow-md">
             <InstagramIcon className="w-7 h-7 text-white" />
           </div>
-          <h2 className="text-2xl sm:text-4xl font-bold font-cinzel text-white mb-2">
+          <h2 className="text-2xl sm:text-4xl font-bold font-serif text-[#2A2118] mb-2">
             Stay Connected with ALIG&apos;S WARE
           </h2>
-          <p className="text-neutral-300 text-sm max-w-xl mb-6 font-light">
+          <p className="text-[#6B5740] text-sm max-w-xl mb-6 font-normal">
             Follow our daily drops, live spectacles craftsmanship reels, and eye health tips by Dr. Sheeraz Ahmad on Instagram.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
@@ -402,7 +407,7 @@ export default function InstagramPage() {
               href="https://www.instagram.com/aligsware/"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-[#f09433] via-[#dc2743] to-[#bc1888] text-white font-bold text-sm uppercase tracking-wider shadow-[0_0_30px_rgba(220,39,67,0.5)] hover:scale-105 transition-transform"
+              className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-[#f09433] via-[#dc2743] to-[#bc1888] text-white font-bold text-sm uppercase tracking-wider shadow-md hover:scale-105 transition-transform"
             >
               Follow @aligsware Now
             </a>
@@ -410,7 +415,7 @@ export default function InstagramPage() {
               href="https://wa.me/917217371499?text=Hi%20ALIGSWARE!%20I'm%20interested%20in%20your%20eyewear."
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-mono text-sm transition-colors"
+              className="px-6 py-3.5 rounded-2xl bg-[#F4E9D5] hover:bg-[#E8D2A8] border border-[#B88A32]/25 text-[#2A2118] font-mono text-sm transition-colors"
             >
               WhatsApp 7217371499
             </a>

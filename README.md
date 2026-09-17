@@ -1,70 +1,36 @@
-# ALIGH'S WARE — Luxury 3D Eyewear & Clinic Platform 👓
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-Official web application and clinic appointment portal for **Dr. Sheeraz Ahmad (AMU-Certified Optometrist & Eye Care Specialist)**, Firozabad, Uttar Pradesh.
+## Getting Started
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FInfinix-Gt20-Pro%2FAligh-s---Ware)
-
----
-
-## 🌟 Tech Stack
-- **Framework**: Next.js 16 (App Router) + React 19 + TypeScript
-- **Styling**: Tailwind CSS v4 + Cinematic Luxury Dark Glassmorphic Design (`#0a0a0a`)
-- **3D Graphics**: Three.js + React Three Fiber + Custom GLSL Procedural Shaders
-- **Animations**: Framer Motion 12 + Lucide React Icons
-- **Database**: MongoDB + Mongoose (Products, Orders, Appointments)
-- **Deployment**: Zero-Config Vercel Deployment
-
----
-
-## 📁 Project Architecture
-
-This repository is optimized for **Instant 1-Click Vercel Deployment** while also providing standalone separated folders:
-
-```
-Aligh-s---Ware/
-├── src/                     # Core Next.js App Router (Deploys directly on Vercel)
-│   ├── app/                 # Routes: /, /shop, /cart, /checkout, /appointment
-│   │   └── api/             # Serverless API: /api/products, /api/orders, /api/appointments, /api/seed
-│   ├── components/          # 3D Canvas, GlassCard, Navbar, Footer, DoctorSection, etc.
-│   ├── context/             # Cart State & LocalStorage persistence
-│   └── shaders/             # Custom GLSL Shaders
-├── public/                  # Static assets & 3D GLTF/GLB models
-├── package.json             # Root Next.js configuration (Auto-detected by Vercel)
-├── vercel.json              # Vercel deployment presets
-│
-├── backend/                 # Standalone Express + TypeScript + Mongoose Server
-│   ├── src/                 # Controllers, Models, Routes, db.ts, server.ts (Port 5000)
-│   └── package.json
-│
-└── frontend/                # Standalone Frontend Export
-    └── package.json
-```
-
----
-
-## 🚀 Deployment on Vercel (Automatic)
-
-1. Connect your GitHub repository `Infinix-Gt20-Pro/Aligh-s---Ware` on [Vercel](https://vercel.com).
-2. Leave **Root Directory** as `./` (default).
-3. Vercel will automatically detect **Next.js** framework preset.
-4. (Optional) Add Environment Variable:
-   - `MONGODB_URI`: Your MongoDB Atlas connection string (or leave empty for fallback).
-5. Click **Deploy**! Your site is live!
-
----
-
-## 💻 Local Development
+First, run the development server:
 
 ```bash
-# Install dependencies
-npm install
-
-# Start development server
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
----
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-© 2026 ALIGH'S WARE — Firozabad, Uttar Pradesh.
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

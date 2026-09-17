@@ -124,28 +124,28 @@ export default function ModelScrollExperience() {
   return (
     <section
       ref={containerRef}
-      className="relative h-[200vh] sm:h-[220vh] bg-[#FAF7F0] w-full max-w-full overflow-hidden"
+      className="relative h-[200vh] sm:h-[220vh] bg-[#F4E9D5] w-full max-w-full overflow-hidden"
     >
       {/* Sticky Viewport Container */}
       <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
         
         {/* Background Ambient Glows */}
         <div className="pointer-events-none absolute inset-0 z-0">
-          <div className="absolute top-1/3 left-1/4 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] rounded-full bg-[#C6A463]/10 blur-[110px]" />
-          <div className="absolute bottom-1/4 right-1/4 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] rounded-full bg-[#E2C485]/8 blur-[120px]" />
+          <div className="absolute top-1/3 left-1/4 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] rounded-full bg-[#B88A32]/12 blur-[120px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] rounded-full bg-[#D4AF62]/10 blur-[130px]" />
         </div>
 
         {/* Section Top Header & Model Switcher Bar */}
         <div className="absolute top-4 sm:top-8 z-40 w-full px-3 sm:px-4 max-w-5xl mx-auto flex flex-col items-center pointer-events-none">
-          <div className="pointer-events-auto inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full border border-[#C6A463]/30 bg-white/90 backdrop-blur-md mb-2 shadow-[0_2px_15px_rgba(198,164,99,0.15)]">
-            <Sparkles className="w-3 h-3 text-[#C6A463]" />
-            <span className="text-[10px] sm:text-[11px] font-mono tracking-widest text-[#3C2415] uppercase">
+          <div className="pointer-events-auto inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full border border-[#B88A32]/30 bg-[#FFF9EF]/90 backdrop-blur-md mb-2 shadow-[0_2px_15px_rgba(184,138,50,0.15)]">
+            <Sparkles className="w-3 h-3 text-[#B88A32]" />
+            <span className="text-[10px] sm:text-[11px] font-mono tracking-widest text-[#2A2118] uppercase">
               Editorial Runway Showcase
             </span>
           </div>
 
           {/* Model Switcher Buttons */}
-          <div className="pointer-events-auto flex items-center gap-1.5 bg-white/95 p-1 sm:p-1.5 rounded-full border border-[#C6A463]/20 backdrop-blur-xl shadow-lg max-w-full overflow-x-auto">
+          <div className="pointer-events-auto flex items-center gap-1.5 bg-[#FFF9EF]/95 p-1 sm:p-1.5 rounded-full border border-[#B88A32]/25 backdrop-blur-xl shadow-lg max-w-full overflow-x-auto">
             {MODELS.map((m, idx) => {
               const isSelected = activeModelIdx === idx;
               return (
@@ -154,12 +154,12 @@ export default function ModelScrollExperience() {
                   onClick={() => setActiveModelIdx(idx)}
                   className={`px-3.5 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                     isSelected
-                      ? "bg-[#C6A463] text-white font-bold shadow-[0_2px_12px_rgba(198,164,99,0.35)]"
-                      : "text-[#8B7355] hover:text-[#3C2415] hover:bg-[#FAF7F0]"
+                      ? "bg-gradient-to-r from-[#B88A32] to-[#D4AF62] text-white font-bold shadow-[0_2px_12px_rgba(184,138,50,0.35)]"
+                      : "text-[#6B5740] hover:text-[#2A2118] hover:bg-[#F4E9D5]"
                   }`}
                 >
                   {m.video ? (
-                    <Film className="w-3 h-3 text-[#C6A463]" />
+                    <Film className="w-3 h-3 text-[#B88A32]" />
                   ) : (
                     <span className="w-2 h-2 rounded-full" style={{ backgroundColor: m.finishColor }} />
                   )}
@@ -229,25 +229,24 @@ export default function ModelScrollExperience() {
           </motion.div>
         </div>
 
-        {/* Phase 1: Atelier Silhouette & Anatomy */}
+        {/* Phase 1: 01 ATELIER SILHOUETTE */}
         <motion.div
           style={{ opacity: phase1Opacity, y: phase1Y }}
-          className="absolute left-4 right-4 sm:right-auto sm:left-12 bottom-12 sm:bottom-20 z-30 max-w-sm sm:max-w-md mx-auto sm:mx-0 pointer-events-none"
+          className="absolute left-4 right-4 sm:right-auto sm:left-12 lg:left-16 bottom-10 sm:bottom-16 z-30 max-w-sm sm:max-w-md mx-auto sm:mx-0 pointer-events-none"
         >
-          <div className="glass-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-[#C6A463]/25 bg-white/95 backdrop-blur-2xl shadow-[0_15px_40px_rgba(60,36,21,0.08)]">
-            <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-mono text-[#C6A463] mb-1.5 font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C6A463] animate-ping" />
-              <span>01 • ATELIER SILHOUETTE</span>
-            </div>
-            <h3 className="font-cinzel text-lg sm:text-2xl font-bold text-[#3C2415] mb-1">
-              {activeModel.name}
+          <div className="p-6 sm:p-7 rounded-3xl border border-[#B88A32]/30 bg-[#FFF9EF]/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(42,33,24,0.12)]">
+            <span className="font-cinzel text-3xl sm:text-4xl font-black text-[#B88A32] block tracking-tight mb-1">
+              01
+            </span>
+            <h3 className="font-cinzel text-xl sm:text-2xl lg:text-3xl font-black tracking-[0.14em] text-[#2A2118] uppercase mb-3 drop-shadow-sm">
+              ATELIER SILHOUETTE
             </h3>
-            <p className="text-[11px] sm:text-xs text-[#8B7355] leading-relaxed mb-3">
-              {activeModel.tagline}. Calibrated to harmonize with Indian facial profiles without slipping or cheek contact.
+            <p className="font-cormorant italic text-xl sm:text-2xl text-[#4A3928] leading-tight mb-3">
+              Precision designed<br />
+              for everyday vision.
             </p>
-            <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#A69580] border-t border-[#C6A463]/15 pt-2">
-              <Eye className="w-3 h-3 text-[#C6A463]" />
-              <span>Scroll down to inspect lens craftsmanship</span>
+            <div className="flex items-center gap-2 text-[10px] font-mono tracking-[0.18em] text-[#B88A32] uppercase font-bold border-t border-[#B88A32]/20 pt-2.5">
+              <span>{activeModel.name} &bull; {activeModel.spec}</span>
             </div>
           </div>
         </motion.div>
@@ -257,25 +256,25 @@ export default function ModelScrollExperience() {
           style={{ opacity: phase2Opacity, y: phase2Y }}
           className="absolute left-4 right-4 sm:left-auto sm:right-12 bottom-12 sm:top-28 z-30 max-w-sm sm:max-w-md mx-auto sm:mx-0 pointer-events-none"
         >
-          <div className="glass-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-[#C6A463]/30 bg-white/95 backdrop-blur-2xl shadow-[0_15px_40px_rgba(198,164,99,0.15)]">
-            <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-mono text-[#C6A463] mb-1.5 font-bold">
+          <div className="p-5 sm:p-6 rounded-3xl border border-[#B88A32]/30 bg-[#FFF9EF]/95 backdrop-blur-2xl shadow-[0_15px_40px_rgba(42,33,24,0.1)]">
+            <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-mono text-[#B88A32] mb-1.5 font-bold">
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>02 • SAPPHIRE OPTICAL CLARITY</span>
             </div>
-            <h3 className="font-cinzel text-lg sm:text-2xl font-bold text-[#3C2415] mb-1">
+            <h3 className="font-cinzel text-lg sm:text-2xl font-bold text-[#2A2118] mb-1">
               {activeModel.frameName}
             </h3>
-            <p className="text-[11px] sm:text-xs text-[#8B7355] leading-relaxed mb-3">
+            <p className="text-[11px] sm:text-xs text-[#4A3928] leading-relaxed mb-3">
               Precision hand-beveled optics with multi-layer sapphire anti-glare filtration and 420nm high-energy blue protection.
             </p>
             <div className="grid grid-cols-2 gap-2 text-[10px] sm:text-[11px] font-mono">
-              <div className="p-2 rounded-xl bg-[#FAF7F0] border border-[#C6A463]/15">
-                <span className="text-[#A69580] block text-[9px]">BLUE-CUT</span>
-                <span className="text-[#3C2415] font-bold">420nm Sapphire</span>
+              <div className="p-2 rounded-xl bg-[#F4E9D5] border border-[#B88A32]/20">
+                <span className="text-[#6B5740] block text-[9px]">BLUE-CUT</span>
+                <span className="text-[#2A2118] font-bold">420nm Sapphire</span>
               </div>
-              <div className="p-2 rounded-xl bg-[#FAF7F0] border border-[#C6A463]/15">
-                <span className="text-[#A69580] block text-[9px]">MASS</span>
-                <span className="text-[#C6A463] font-bold">18g Feather</span>
+              <div className="p-2 rounded-xl bg-[#F4E9D5] border border-[#B88A32]/20">
+                <span className="text-[#6B5740] block text-[9px]">MASS</span>
+                <span className="text-[#B88A32] font-bold">18g Feather</span>
               </div>
             </div>
           </div>
@@ -286,23 +285,23 @@ export default function ModelScrollExperience() {
           style={{ opacity: phase3Opacity, y: phase3Y }}
           className="absolute bottom-6 sm:bottom-10 z-40 w-full px-3 sm:px-4 max-w-2xl mx-auto flex flex-col items-center"
         >
-          <div className="w-full glass-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-[#C6A463]/40 bg-white/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(198,164,99,0.2)] flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="w-full p-5 sm:p-6 rounded-3xl border border-[#B88A32]/35 bg-[#FFF9EF]/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(184,138,50,0.2)] flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-center sm:text-left w-full sm:w-auto">
-              <div className="flex items-center justify-center sm:justify-start gap-1.5 text-[10px] sm:text-xs font-mono text-[#C6A463] mb-1 font-semibold">
+              <div className="flex items-center justify-center sm:justify-start gap-1.5 text-[10px] sm:text-xs font-mono text-[#B88A32] mb-1 font-semibold">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                 <span>IN STOCK &bull; DISPATCH TODAY</span>
               </div>
-              <h4 className="font-cinzel text-lg sm:text-2xl font-bold text-[#3C2415]">
+              <h4 className="font-cinzel text-lg sm:text-2xl font-bold text-[#2A2118]">
                 {activeModel.frameName}
               </h4>
               <div className="flex items-baseline justify-center sm:justify-start gap-2.5 mt-1">
-                <span className="text-2xl sm:text-3xl font-bold font-mono text-[#C6A463]">
+                <span className="text-2xl sm:text-3xl font-bold font-mono text-[#B88A32]">
                   ₹{activeModel.price}
                 </span>
-                <span className="text-xs sm:text-sm font-mono text-[#A69580] line-through">
+                <span className="text-xs sm:text-sm font-mono text-[#6B5740] line-through">
                   ₹{activeModel.originalPrice}
                 </span>
-                <span className="text-[10px] sm:text-xs font-mono text-emerald-700 bg-emerald-500/15 px-2 py-0.5 rounded-full font-semibold">
+                <span className="text-[10px] sm:text-xs font-mono text-emerald-800 bg-emerald-500/15 px-2 py-0.5 rounded-full font-semibold">
                   Save {Math.round(((activeModel.originalPrice - activeModel.price) / activeModel.originalPrice) * 100)}%
                 </span>
               </div>
@@ -310,15 +309,16 @@ export default function ModelScrollExperience() {
 
             <div className="flex items-center gap-2.5 w-full sm:w-auto">
               <button
+                type="button"
                 onClick={handleQuickAdd}
-                className="flex-1 sm:flex-none bg-[#C6A463] hover:bg-[#A8884A] text-white font-bold px-5 py-3 rounded-xl shadow-[0_4px_20px_rgba(198,164,99,0.4)] flex items-center justify-center gap-2 text-xs sm:text-sm uppercase tracking-wider cursor-pointer transition-all"
+                className="flex-1 sm:flex-none bg-gradient-to-r from-[#B88A32] via-[#D4AF62] to-[#B88A32] hover:brightness-105 text-white font-bold px-6 py-3 rounded-xl shadow-[0_4px_20px_rgba(184,138,50,0.35)] flex items-center justify-center gap-2 text-xs sm:text-sm uppercase tracking-wider cursor-pointer transition-all active:scale-95"
               >
                 <ShoppingBag className="w-4 h-4" /> Add to Bag
               </button>
 
               <Link
                 href={`/shop/${activeModel.slug}`}
-                className="px-4 py-3 rounded-xl border border-[#C6A463]/25 hover:bg-[#FAF7F0] text-[#3C2415] text-xs font-mono tracking-wider text-center transition-colors font-medium"
+                className="px-4 py-3 rounded-xl border border-[#B88A32]/30 hover:bg-[#F4E9D5] text-[#2A2118] text-xs font-mono tracking-wider text-center transition-colors font-semibold"
               >
                 Specs
               </Link>

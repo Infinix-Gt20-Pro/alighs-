@@ -32,7 +32,7 @@ export default function CartDrawer() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeCart}
-            className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md"
+            className="fixed inset-0 z-50 bg-[#2A2118]/55 backdrop-blur-sm"
           />
 
           {/* Slide-out Panel */}
@@ -41,17 +41,17 @@ export default function CartDrawer() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 26, stiffness: 220 }}
-            className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-[#0b0c10] border-l border-white/15 shadow-[0_0_50px_rgba(0,0,0,0.9)] flex flex-col justify-between"
+            className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-[#FFF9EF] border-l border-[#B88A32]/25 shadow-[0_0_50px_rgba(42,33,24,0.18)] flex flex-col justify-between"
           >
             {/* Drawer Header */}
-            <div className="p-6 border-b border-white/10 flex items-center justify-between">
+            <div className="p-6 border-b border-[#B88A32]/20 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center">
-                  <ShoppingBag className="w-4 h-4 text-amber-400" />
+                <div className="w-9 h-9 rounded-xl bg-[#F4E9D5] border border-[#B88A32]/30 flex items-center justify-center shadow-sm">
+                  <ShoppingBag className="w-4 h-4 text-[#B88A32]" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-white font-sans">Your Shopping Bag</h2>
-                  <span className="text-[11px] font-mono text-neutral-400">
+                  <h2 className="text-lg font-bold text-[#2A2118] font-cinzel">Your Shopping Bag</h2>
+                  <span className="text-[11px] font-mono text-[#6B5740]">
                     {items.length} {items.length === 1 ? "design selected" : "designs selected"}
                   </span>
                 </div>
@@ -59,7 +59,7 @@ export default function CartDrawer() {
 
               <button
                 onClick={closeCart}
-                className="cursor-pointer p-2 rounded-full text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
+                className="cursor-pointer p-2 rounded-full text-[#6B5740] hover:text-[#2A2118] hover:bg-[#F4E9D5] transition-colors"
                 aria-label="Close Bag"
               >
                 <X className="w-5 h-5" />
@@ -68,20 +68,20 @@ export default function CartDrawer() {
 
             {/* Free Shipping Progress Indicator */}
             {items.length > 0 && (
-              <div className="px-6 py-3 bg-white/[0.02] border-b border-white/10">
+              <div className="px-6 py-3 bg-[#F4E9D5]/60 border-b border-[#B88A32]/15">
                 <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="text-neutral-300 font-medium flex items-center gap-1.5">
-                    <Truck className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="text-[#4A3928] font-medium flex items-center gap-1.5">
+                    <Truck className="w-3.5 h-3.5 text-[#B88A32]" />
                     {isFreeShipping ? "Free Express Delivery Unlocked! 🎉" : `Add ₹${freeShippingThreshold - cartTotal} for FREE Delivery`}
                   </span>
-                  <span className="font-mono text-amber-300 font-semibold">{progressPercent}%</span>
+                  <span className="font-mono text-[#B88A32] font-bold">{progressPercent}%</span>
                 </div>
-                <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+                <div className="w-full h-1.5 rounded-full bg-[#B88A32]/20 overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${progressPercent}%` }}
                     transition={{ duration: 0.5, ease: "easeOut" }}
-                    className="h-full bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"
+                    className="h-full bg-gradient-to-r from-[#B88A32] to-[#D4AF62] rounded-full"
                   />
                 </div>
               </div>
@@ -90,20 +90,20 @@ export default function CartDrawer() {
             {/* Items List */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {items.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center gap-4 text-neutral-400 py-12">
-                  <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center">
-                    <ShoppingBag className="w-8 h-8 text-neutral-600" />
+                <div className="h-full flex flex-col items-center justify-center text-center gap-4 text-[#6B5740] py-12">
+                  <div className="w-16 h-16 rounded-2xl bg-[#F4E9D5] border border-[#B88A32]/25 flex items-center justify-center shadow-sm">
+                    <ShoppingBag className="w-8 h-8 text-[#B88A32]/60" />
                   </div>
                   <div>
-                    <p className="text-base font-semibold text-white">Your bag is empty</p>
-                    <p className="text-xs text-neutral-400 mt-1 max-w-xs">
+                    <p className="text-base font-bold text-[#2A2118] font-cinzel">Your bag is empty</p>
+                    <p className="text-xs text-[#6B5740] mt-1 max-w-xs font-cormorant italic">
                       Explore our handcrafted titanium and acetate collections from Firozabad.
                     </p>
                   </div>
                   <Link
                     href="/shop"
                     onClick={closeCart}
-                    className="cursor-pointer mt-2 px-6 py-2.5 rounded-full bg-amber-400 text-black font-semibold text-xs hover:brightness-110 transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)]"
+                    className="cursor-pointer mt-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-[#B88A32] to-[#D4AF62] text-white font-bold text-xs uppercase tracking-wider transition-all shadow-[0_4px_15px_rgba(184,138,50,0.3)] hover:brightness-105 active:scale-95"
                   >
                     Browse Collections
                   </Link>
@@ -112,37 +112,37 @@ export default function CartDrawer() {
                 items.map((item) => (
                   <div
                     key={item.id}
-                    className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 flex gap-4 items-center justify-between hover:border-white/20 transition-all"
+                    className="p-4 rounded-2xl bg-white border border-[#B88A32]/20 flex gap-4 items-center justify-between hover:border-[#B88A32]/50 transition-all shadow-sm"
                   >
                     {/* Visual Placeholder */}
-                    <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-neutral-900 to-black border border-white/10 flex items-center justify-center text-2xl flex-shrink-0">
+                    <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-[#F4E9D5] to-[#E8D2A8] border border-[#B88A32]/20 flex items-center justify-center text-2xl flex-shrink-0 shadow-sm">
                       👓
                     </div>
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-semibold text-white truncate">{item.name}</h4>
+                      <h4 className="text-sm font-bold text-[#2A2118] font-cinzel truncate">{item.name}</h4>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[11px] font-mono text-neutral-400">{item.color}</span>
-                        <span className="text-[10px] text-neutral-600">&bull;</span>
-                        <span className="text-xs font-mono font-semibold text-amber-300">₹{item.price}</span>
+                        <span className="text-[11px] font-mono text-[#6B5740]">{item.color}</span>
+                        <span className="text-[10px] text-[#B88A32]">&bull;</span>
+                        <span className="text-xs font-mono font-bold text-[#B88A32]">₹{item.price}</span>
                       </div>
 
                       {/* Quantity Controls */}
                       <div className="flex items-center gap-3 mt-2.5">
-                        <div className="inline-flex items-center rounded-lg bg-white/[0.06] border border-white/15 p-0.5">
+                        <div className="inline-flex items-center rounded-lg bg-[#F4E9D5] border border-[#B88A32]/25 p-0.5">
                           <button
                             onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                            className="cursor-pointer p-1 text-neutral-400 hover:text-white"
+                            className="cursor-pointer p-1 text-[#6B5740] hover:text-[#2A2118]"
                           >
                             <Minus className="w-3 h-3" />
                           </button>
-                          <span className="px-2.5 text-xs font-mono font-bold text-white">
+                          <span className="px-2.5 text-xs font-mono font-bold text-[#2A2118]">
                             {item.quantity}
                           </span>
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="cursor-pointer p-1 text-neutral-400 hover:text-white"
+                            className="cursor-pointer p-1 text-[#6B5740] hover:text-[#2A2118]"
                           >
                             <Plus className="w-3 h-3" />
                           </button>
@@ -150,7 +150,7 @@ export default function CartDrawer() {
 
                         <button
                           onClick={() => removeFromCart(item.id)}
-                          className="cursor-pointer p-1.5 text-neutral-500 hover:text-red-400 transition-colors"
+                          className="cursor-pointer p-1.5 text-[#8B7355] hover:text-red-500 transition-colors"
                           title="Remove item"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -160,7 +160,7 @@ export default function CartDrawer() {
 
                     {/* Line Item Total */}
                     <div className="text-right">
-                      <span className="text-sm font-bold font-mono text-white">
+                      <span className="text-sm font-bold font-mono text-[#2A2118]">
                         ₹{item.price * item.quantity}
                       </span>
                     </div>
@@ -171,21 +171,21 @@ export default function CartDrawer() {
 
             {/* Footer / Summary & Actions */}
             {items.length > 0 && (
-              <div className="p-6 border-t border-white/10 bg-[#07080b]/90 backdrop-blur-xl space-y-4">
+              <div className="p-6 border-t border-[#B88A32]/20 bg-[#FAF7F0] space-y-4">
                 <div className="space-y-1.5 text-xs">
-                  <div className="flex justify-between text-neutral-400">
+                  <div className="flex justify-between text-[#6B5740]">
                     <span>Subtotal</span>
-                    <span className="font-mono font-medium text-white">₹{cartTotal}</span>
+                    <span className="font-mono font-bold text-[#2A2118]">₹{cartTotal}</span>
                   </div>
-                  <div className="flex justify-between text-neutral-400">
+                  <div className="flex justify-between text-[#6B5740]">
                     <span>Estimated Shipping</span>
-                    <span className="font-mono text-emerald-400">
+                    <span className="font-mono text-emerald-600 font-bold">
                       {isFreeShipping ? "FREE" : "₹99"}
                     </span>
                   </div>
-                  <div className="flex justify-between text-base font-bold text-white pt-2 border-t border-white/10">
+                  <div className="flex justify-between text-base font-bold text-[#2A2118] pt-2 border-t border-[#B88A32]/15">
                     <span>Total Amount</span>
-                    <span className="font-mono text-amber-300">
+                    <span className="font-mono text-[#B88A32]">
                       ₹{cartTotal + (isFreeShipping ? 0 : 99)}
                     </span>
                   </div>
@@ -195,24 +195,24 @@ export default function CartDrawer() {
                   <Link
                     href="/checkout"
                     onClick={closeCart}
-                    className="cursor-pointer w-full py-3.5 rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-black font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(212,175,55,0.4)] hover:shadow-[0_0_35px_rgba(212,175,55,0.6)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    className="cursor-pointer w-full py-3.5 rounded-full bg-gradient-to-r from-[#B88A32] via-[#D4AF62] to-[#B88A32] text-white font-bold text-xs font-mono tracking-wider uppercase flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(184,138,50,0.35)] hover:brightness-105 active:scale-95 transition-all"
                   >
                     <span>Proceed to Secure Checkout</span>
-                    <ArrowRight className="w-4 h-4 text-black" />
+                    <ArrowRight className="w-4 h-4 text-white" />
                   </Link>
 
                   <a
                     href={generateWhatsAppOrderLink()}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="cursor-pointer w-full py-2.5 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-medium text-xs flex items-center justify-center gap-2 transition-all"
+                    className="cursor-pointer w-full py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all"
                   >
                     <span>Order via WhatsApp Instead</span>
                   </a>
                 </div>
 
-                <div className="flex items-center justify-center gap-2 text-[10px] font-mono text-neutral-500 pt-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                <div className="flex items-center justify-center gap-2 text-[10px] font-mono text-[#8B7355] pt-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#B88A32]" />
                   <span>100% Genuine Optical Precision &bull; 7-Day Easy Exchange</span>
                 </div>
               </div>

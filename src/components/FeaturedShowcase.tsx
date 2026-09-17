@@ -1,16 +1,20 @@
+// src/components/FeaturedShowcase.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { DEFAULT_PRODUCTS, ProductType } from "@/lib/products-data";
 import { useCart } from "@/context/CartContext";
-import { ShoppingBag, ArrowRight, Sparkles, Check, Star } from "lucide-react";
+import { ShoppingBag, ArrowRight, Sparkles, Check, Star, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 
 export default function FeaturedShowcase() {
   const { addToCart } = useCart();
   const [selectedFilter, setSelectedFilter] = useState("all");
+  const [activeIndex, setActiveIndex] = useState(0);
   const [addedSlug, setAddedSlug] = useState<string | null>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const stageRef = useRef<HTMLDivElement>(null);
 
   const filters = [
     { id: "all", label: "All Curations" },
@@ -24,43 +28,74 @@ export default function FeaturedShowcase() {
     if (selectedFilter === "eyeglasses") return product.category === "eyeglasses";
     if (selectedFilter === "computer-glasses") return product.category === "computer-glasses";
     if (selectedFilter === "sunglasses") return product.category === "sunglasses";
-    if (selectedFilter === "titanium") return product.material === "titanium";
+    if (selectedFilter === "titanium") return product.material.toLowerCase().includes("titanium");
     return true;
-  }).slice(0, 6);
+  }).slice(0, 8);
+
+  const handleFilterChange = (id: string) => {
+    setSelectedFilter(id);
+    setActiveIndex(0);
+  };
 
   const handleQuickAdd = (product: ProductType) => {
-    addToCart({
-      productId: product._id,
-      name: product.name,
-      slug: product.slug,
-      price: product.price,
-      originalPrice: product.originalPrice,
-      image: product.images[0] || "/images/clarity-showcase.jpg",
-      color: product.colors[0] || "Black",
-      colorHex: "#111111",
-      weight: product.weight || "18g",
-    }, 1);
+    addToCart(
+      {
+        productId: product._id,
+        name: product.name,
+        slug: product.slug,
+        price: product.price,
+        originalPrice: product.originalPrice,
+        image: product.images[0] || "/images/clarity-showcase.jpg",
+        color: product.colors[0] || "Black",
+        colorHex: "#111111",
+        weight: product.weight || "18g",
+      },
+      1
+    );
     setAddedSlug(product.slug);
     setTimeout(() => setAddedSlug(null), 1800);
   };
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!stageRef.current) return;
+    const rect = stageRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    setMousePos({ x, y });
+  };
+
+  const handleMouseLeave = () => {
+    setMousePos({ x: 0, y: 0 });
+  };
+
+  const nextCard = () => {
+    setActiveIndex((prev) => (prev + 1) % filteredProducts.length);
+  };
+
+  const prevCard = () => {
+    setActiveIndex((prev) => (prev - 1 + filteredProducts.length) % filteredProducts.length);
+  };
+
   return (
-    <section className="relative pt-4 pb-10 sm:pt-10 sm:pb-16 px-2.5 sm:px-6 lg:px-8 max-w-7xl mx-auto overflow-hidden">
-      {/* Background Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-[#C6A463]/6 rounded-full blur-[140px] pointer-events-none -z-10" />
+    <section
+      id="collection"
+      className="relative pt-12 pb-20 sm:pt-20 sm:pb-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto overflow-hidden"
+    >
+      {/* Soft warm ambient lighting atmosphere */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-gradient-to-br from-[#E8D2A8]/30 via-[#D4AF62]/15 to-transparent rounded-full blur-[140px] pointer-events-none -z-10" />
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-5 sm:mb-8 gap-3 sm:gap-4 border-b border-[#C6A463]/15 pb-4 sm:pb-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 gap-4 border-b border-[#B88A32]/20 pb-5 sm:pb-7">
         <div>
-          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1 rounded-full bg-[#C6A463]/10 border border-[#C6A463]/20 text-[10px] sm:text-xs font-mono text-[#C6A463] uppercase tracking-widest mb-2 sm:mb-3">
-            <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#C6A463]" />
-            <span>Curated Atelier Collection</span>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FFF9EF] border border-[#B88A32]/30 text-[10px] sm:text-xs font-mono tracking-[0.26em] text-[#B88A32] uppercase font-bold mb-2.5 sm:mb-3 shadow-sm">
+            <Sparkles className="w-3.5 h-3.5 text-[#B88A32]" />
+            <span>3D ATELIER GALLERY</span>
           </div>
-          <h2 className="font-cinzel text-2xl sm:text-5xl font-bold tracking-[0.06em] text-[#3C2415]">
-            Signature Optical Frames
+          <h2 className="font-cinzel text-2xl sm:text-4xl md:text-5xl font-bold tracking-[0.08em] text-[#2A2118]">
+            Architectural Eyewear Collection
           </h2>
-          <p className="text-[#8B7355] mt-1 sm:mt-2 max-w-xl text-xs sm:text-base font-light">
-            Calibrated for ergonomics, optical clarity, and timeless luxury.
+          <p className="text-[#4A3928] mt-1.5 sm:mt-2.5 max-w-xl text-xs sm:text-base font-cormorant italic leading-relaxed">
+            Calibrated for facial ergonomics, optical clarity, and timeless Firozabad luxury.
           </p>
         </div>
 
@@ -69,11 +104,11 @@ export default function FeaturedShowcase() {
           {filters.map((f) => (
             <button
               key={f.id}
-              onClick={() => setSelectedFilter(f.id)}
-              className={`cursor-pointer px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-mono uppercase tracking-wider transition-all duration-300 shrink-0 ${
+              onClick={() => handleFilterChange(f.id)}
+              className={`cursor-pointer px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-mono uppercase tracking-wider transition-all duration-300 shrink-0 ${
                 selectedFilter === f.id
-                  ? "bg-[#C6A463] text-white font-semibold shadow-[0_2px_12px_rgba(198,164,99,0.3)]"
-                  : "bg-[#FAF7F0] text-[#8B7355] hover:text-[#3C2415] border border-[#C6A463]/15 hover:bg-[#C6A463]/10"
+                  ? "bg-gradient-to-r from-[#B88A32] to-[#D4AF62] text-white font-semibold shadow-[0_4px_15px_rgba(184,138,50,0.35)]"
+                  : "bg-[#FFF9EF] text-[#4A3928] hover:text-[#2A2118] border border-[#B88A32]/25 hover:bg-[#F4E9D5]"
               }`}
             >
               {f.label}
@@ -82,144 +117,268 @@ export default function FeaturedShowcase() {
         </div>
       </div>
 
-      {/* Products Grid: Sleek 2-Column Mobile, 3-Column Desktop */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-6">
-        <AnimatePresence mode="popLayout">
-          {filteredProducts.map((product) => (
-            <motion.div
-              layout
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.35 }}
-              key={product._id}
-              className="group relative rounded-2xl sm:rounded-3xl bg-white border border-[#C6A463]/12 hover:border-[#C6A463]/40 p-2.5 sm:p-6 flex flex-col justify-between transition-all duration-500 hover:shadow-[0_15px_40px_rgba(60,36,21,0.1)]"
-            >
-              {/* Card Badges */}
-              <div className="flex items-center justify-between mb-1.5 sm:mb-4 gap-1">
-                <span className="text-[9px] sm:text-[10px] font-mono text-[#8B7355] uppercase tracking-wider px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-[#FAF7F0] border border-[#C6A463]/15 truncate max-w-[80px] sm:max-w-none">
-                  {product.material.toUpperCase()}
-                </span>
+      {/* =========================================================================
+          3D EDITORIAL GALLERY STAGE
+         ========================================================================= */}
+      <div
+        ref={stageRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        className="relative w-full min-h-[520px] sm:min-h-[580px] flex items-center justify-center py-6 sm:py-10"
+        style={{ perspective: "1200px" }}
+      >
+        {/* Navigation Arrows */}
+        <button
+          type="button"
+          onClick={prevCard}
+          aria-label="Previous Frame"
+          className="cursor-pointer absolute left-2 sm:left-4 z-40 p-3 rounded-full bg-[#FFF9EF]/90 hover:bg-white border border-[#B88A32]/30 text-[#2A2118] hover:text-[#B88A32] shadow-[0_8px_25px_rgba(42,33,24,0.08)] transition-all duration-200 active:scale-95"
+        >
+          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+        </button>
 
-                {product.bestSeller && (
-                  <span className="inline-flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-[10px] font-mono text-[#C6A463] uppercase tracking-wider px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-[#C6A463]/15 border border-[#C6A463]/25 shrink-0">
-                    <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-[#C6A463] text-[#C6A463]" />
-                    <span className="hidden sm:inline">Bestseller</span>
-                    <span className="sm:hidden">Top</span>
+        <button
+          type="button"
+          onClick={nextCard}
+          aria-label="Next Frame"
+          className="cursor-pointer absolute right-2 sm:right-4 z-40 p-3 rounded-full bg-[#FFF9EF]/90 hover:bg-white border border-[#B88A32]/30 text-[#2A2118] hover:text-[#B88A32] shadow-[0_8px_25px_rgba(42,33,24,0.08)] transition-all duration-200 active:scale-95"
+        >
+          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+        </button>
+
+        {/* Floating Perspective Cards Stack */}
+        <div className="relative w-full max-w-4xl h-[480px] sm:h-[530px] flex items-center justify-center">
+          {filteredProducts.map((product, idx) => {
+            const offset = idx - activeIndex;
+            const isCenter = offset === 0;
+            const isPrev = offset === -1 || (activeIndex === 0 && idx === filteredProducts.length - 1);
+            const isNext = offset === 1 || (activeIndex === filteredProducts.length - 1 && idx === 0);
+
+            // Only render cards close to active for high performance
+            if (Math.abs(offset) > 2 && !isPrev && !isNext) return null;
+
+            // 3D positioning calculation
+            let xOffset = 0;
+            let zIndex = 10;
+            let scale = 0.75;
+            let rotateY = 0;
+            let opacity = 0.25;
+
+            if (isCenter) {
+              xOffset = 0;
+              zIndex = 30;
+              scale = 1.0;
+              rotateY = mousePos.x * 8; // subtle interactive tilt
+              opacity = 1.0;
+            } else if (offset === -1 || isPrev) {
+              xOffset = -300;
+              zIndex = 20;
+              scale = 0.85;
+              rotateY = 16;
+              opacity = 0.65;
+            } else if (offset === 1 || isNext) {
+              xOffset = 300;
+              zIndex = 20;
+              scale = 0.85;
+              rotateY = -16;
+              opacity = 0.65;
+            } else if (offset === -2) {
+              xOffset = -480;
+              zIndex = 10;
+              scale = 0.72;
+              rotateY = 25;
+              opacity = 0.35;
+            } else if (offset === 2) {
+              xOffset = 480;
+              zIndex = 10;
+              scale = 0.72;
+              rotateY = -25;
+              opacity = 0.35;
+            }
+
+            return (
+              <motion.div
+                key={product._id}
+                onClick={() => !isCenter && setActiveIndex(idx)}
+                initial={false}
+                animate={{
+                  x: xOffset,
+                  scale,
+                  rotateY,
+                  rotateX: isCenter ? -mousePos.y * 6 : 0,
+                  opacity,
+                  zIndex,
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 260,
+                  damping: 26,
+                }}
+                className={`absolute w-[300px] sm:w-[400px] md:w-[460px] rounded-3xl bg-[#FFF9EF] border transition-all duration-300 select-none ${
+                  isCenter
+                    ? "border-[#B88A32]/45 shadow-[0_20px_60px_rgba(42,33,24,0.14)] cursor-default p-5 sm:p-7"
+                    : "border-[#B88A32]/20 shadow-[0_10px_30px_rgba(42,33,24,0.06)] cursor-pointer p-4 sm:p-5 hover:border-[#B88A32]/50 hover:opacity-85"
+                }`}
+                style={{
+                  transformStyle: "preserve-3d",
+                }}
+              >
+                {/* Header Badge Row */}
+                <div className="flex items-center justify-between mb-3 gap-2">
+                  <span className="text-[9px] sm:text-[10px] font-mono font-bold text-[#8B7355] uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#F4E9D5] border border-[#B88A32]/20 truncate">
+                    {product.material.toUpperCase()}
                   </span>
-                )}
-              </div>
 
-              {/* Real Studio Photo Presentation */}
-              <Link href={`/shop/${product.slug}`} className="block relative my-1.5 sm:my-6 text-center group-hover:scale-105 transition-transform duration-500">
-                <div className="w-full h-24 sm:h-44 rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#FAF7F0] via-[#F5EFE0] to-[#EDE4D3] flex items-center justify-center relative overflow-hidden border border-[#C6A463]/10 p-1.5 sm:p-3">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-[#C6A463]/8 to-[#E2C485]/8 opacity-30 group-hover:opacity-70 transition-opacity duration-500" />
+                  {product.bestSeller && (
+                    <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-mono text-[#B88A32] uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#B88A32]/15 border border-[#B88A32]/30 font-bold shrink-0">
+                      <Star className="w-3 h-3 fill-[#B88A32] text-[#B88A32]" />
+                      <span>BESTSELLER</span>
+                    </span>
+                  )}
+                </div>
+
+                {/* Dominant Eyewear Photography Container */}
+                <div className="relative w-full h-36 sm:h-52 my-3 rounded-2xl bg-gradient-to-br from-[#F4E9D5]/90 via-[#FFF9EF] to-[#E8D2A8]/40 border border-[#B88A32]/15 flex items-center justify-center p-3 overflow-hidden group">
+                  {/* Subtle pedestal glow */}
+                  <div className="absolute inset-0 bg-radial from-[#D4AF62]/20 to-transparent opacity-50" />
                   
                   {product.images && product.images[0] ? (
                     <img
                       src={product.images[0]}
                       alt={product.name}
-                      className="max-h-full max-w-full object-contain filter drop-shadow-[0_8px_16px_rgba(60,36,21,0.15)] group-hover:scale-110 transition-transform duration-500 relative z-10"
+                      className={`max-h-full max-w-full object-contain filter drop-shadow-[0_12px_24px_rgba(42,33,24,0.18)] transition-transform duration-500 relative z-10 ${
+                        isCenter ? "group-hover:scale-108" : ""
+                      }`}
                       loading="lazy"
                     />
                   ) : (
                     <div className="relative flex flex-col items-center z-10">
-                      <span className="text-[10px] sm:text-xs font-mono text-[#C6A463] uppercase tracking-widest">
+                      <span className="text-xs font-mono text-[#B88A32] uppercase tracking-widest">
                         {product.frameShape} Frame
                       </span>
                     </div>
                   )}
                 </div>
-              </Link>
 
-              {/* Info & Details */}
-              <div>
-                <Link href={`/shop/${product.slug}`}>
-                  <h3 className="text-xs sm:text-lg font-semibold text-[#3C2415] group-hover:text-[#C6A463] transition-colors line-clamp-1">
-                    {product.name}
-                  </h3>
-                </Link>
+                {/* Eyewear Title & Details */}
+                <div className="mt-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-cinzel text-sm sm:text-lg font-bold text-[#2A2118] line-clamp-1">
+                      {product.name}
+                    </h3>
+                    <div className="text-right shrink-0">
+                      <span className="text-sm sm:text-base font-bold font-mono text-[#B88A32]">
+                        ₹{product.price}
+                      </span>
+                      {product.originalPrice && (
+                        <span className="text-[10px] sm:text-xs text-[#8B7355] line-through font-mono ml-1.5">
+                          ₹{product.originalPrice}
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
-                <p className="hidden sm:block text-xs text-[#8B7355] mt-1 line-clamp-2 leading-relaxed">
-                  {product.description}
-                </p>
+                  {isCenter && (
+                    <p className="text-xs text-[#4A3928] mt-1.5 line-clamp-2 leading-relaxed font-cormorant italic">
+                      {product.description}
+                    </p>
+                  )}
 
-                {/* Features & Color Swatches */}
-                <div className="flex items-center justify-between mt-2 sm:mt-4 pt-2 sm:pt-4 border-t border-[#C6A463]/10 gap-1">
-                  <div className="flex items-center gap-1">
-                    {product.colors.slice(0, 3).map((col) => (
-                      <span
-                        key={col}
-                        className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border border-[#C6A463]/30 shrink-0"
-                        title={col}
-                        style={{
-                          backgroundColor:
-                            col.toLowerCase().includes("gold") ? "#D4AF37" :
-                            col.toLowerCase().includes("green") || col.toLowerCase().includes("emerald") ? "#0F4C3A" :
-                            col.toLowerCase().includes("blue") || col.toLowerCase().includes("cobalt") ? "#1E3A8A" :
-                            col.toLowerCase().includes("red") || col.toLowerCase().includes("crimson") ? "#991B1B" :
-                            col.toLowerCase().includes("silver") ? "#E5E7EB" :
-                            col.toLowerCase().includes("tortoise") ? "#78350F" : "#171717"
-                        }}
-                      />
-                    ))}
-                    <span className="text-[9px] sm:text-[10px] text-[#A69580] font-mono ml-0.5 hidden xs:inline">
-                      {product.colors.length}
+                  {/* Finish Swatches & Specs */}
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#B88A32]/15">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-mono text-[#6B5740] mr-1">Finishes:</span>
+                      {product.colors.slice(0, 3).map((col) => (
+                        <span
+                          key={col}
+                          className="w-3 h-3 rounded-full border border-[#B88A32]/30 shrink-0 shadow-sm"
+                          title={col}
+                          style={{
+                            backgroundColor:
+                              col.toLowerCase().includes("gold") ? "#D4AF37" :
+                              col.toLowerCase().includes("green") || col.toLowerCase().includes("emerald") ? "#0F4C3A" :
+                              col.toLowerCase().includes("blue") || col.toLowerCase().includes("cobalt") ? "#1E3A8A" :
+                              col.toLowerCase().includes("red") || col.toLowerCase().includes("crimson") ? "#991B1B" :
+                              col.toLowerCase().includes("silver") ? "#E5E7EB" :
+                              col.toLowerCase().includes("tortoise") ? "#78350F" : "#171717"
+                          }}
+                        />
+                      ))}
+                    </div>
+
+                    <span className="text-[10px] font-mono text-[#8B7355] uppercase font-bold">
+                      {product.weight || "14g"} &bull; {product.frameWidth || "Medium"}
                     </span>
                   </div>
 
-                  {/* Pricing */}
-                  <div className="text-right shrink-0">
-                    <span className="text-[10px] sm:text-xs text-[#A69580] line-through mr-1 sm:mr-2 font-mono hidden xs:inline">
-                      ₹{product.originalPrice}
-                    </span>
-                    <span className="text-xs sm:text-base font-bold text-[#C6A463] font-mono">
-                      ₹{product.price}
-                    </span>
-                  </div>
-                </div>
+                  {/* Actions (Prominent on Center Active Card) */}
+                  {isCenter && (
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3 mt-4 pt-2">
+                      <Link
+                        href={`/shop/${product.slug}`}
+                        className="cursor-pointer py-2.5 px-3 rounded-xl bg-[#F4E9D5] hover:bg-white border border-[#B88A32]/30 text-xs font-mono font-bold uppercase tracking-wider text-[#2A2118] text-center transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
+                      >
+                        <Eye className="w-3.5 h-3.5 text-[#B88A32]" />
+                        <span>Specs</span>
+                      </Link>
 
-                {/* Actions */}
-                <div className="grid grid-cols-2 gap-1.5 sm:gap-2.5 mt-2.5 sm:mt-5">
-                  <Link
-                    href={`/shop/${product.slug}`}
-                    className="cursor-pointer text-center py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-lg sm:rounded-xl bg-[#FAF7F0] hover:bg-[#C6A463]/10 border border-[#C6A463]/15 text-[10px] sm:text-xs font-medium text-[#3C2415] transition-all duration-200 flex items-center justify-center"
-                  >
-                    Specs
-                  </Link>
-
-                  <button
-                    onClick={() => handleQuickAdd(product)}
-                    className="cursor-pointer flex items-center justify-center gap-1 py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-lg sm:rounded-xl bg-[#C6A463] hover:bg-[#A8884A] text-white text-[10px] sm:text-xs font-semibold active:scale-95 transition-all shadow-md"
-                  >
-                    {addedSlug === product.slug ? (
-                      <>
-                        <Check className="w-3 h-3 text-white shrink-0" />
-                        <span className="hidden sm:inline">Added!</span>
-                        <span className="sm:hidden">✓</span>
-                      </>
-                    ) : (
-                      <>
-                        <ShoppingBag className="w-3 h-3 text-white shrink-0" />
-                        <span className="truncate">Add</span>
-                      </>
-                    )}
-                  </button>
+                      <button
+                        type="button"
+                        onClick={() => handleQuickAdd(product)}
+                        className="cursor-pointer py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#B88A32] to-[#D4AF62] hover:brightness-105 text-white text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-[0_4px_15px_rgba(184,138,50,0.3)] active:scale-95"
+                      >
+                        {addedSlug === product.slug ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-white" />
+                            <span>Added!</span>
+                          </>
+                        ) : (
+                          <>
+                            <ShoppingBag className="w-3.5 h-3.5 text-white" />
+                            <span>Add to Bag</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Carousel Pagination & Indicator */}
+      <div className="flex flex-col items-center justify-center mt-4 gap-3">
+        <div className="flex items-center gap-1.5">
+          {filteredProducts.map((_, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => setActiveIndex(idx)}
+              aria-label={`Go to frame ${idx + 1}`}
+              className={`cursor-pointer transition-all duration-300 rounded-full ${
+                activeIndex === idx
+                  ? "w-8 h-2 bg-[#B88A32]"
+                  : "w-2 h-2 bg-[#B88A32]/30 hover:bg-[#B88A32]/60"
+              }`}
+            />
           ))}
-        </AnimatePresence>
+        </div>
+
+        <span className="text-xs font-mono text-[#6B5740] tracking-widest uppercase font-bold">
+          {String(activeIndex + 1).padStart(2, "0")} / {String(filteredProducts.length).padStart(2, "0")} ATELIER FRAMES
+        </span>
       </div>
 
       {/* Bottom CTA to Shop */}
-      <div className="text-center mt-10">
+      <div className="text-center mt-12">
         <Link
           href="/shop"
-          className="cursor-pointer inline-flex items-center gap-3 px-8 py-4 rounded-full bg-[#FAF7F0] hover:bg-[#C6A463]/10 border border-[#C6A463]/20 text-[#3C2415] font-medium text-sm hover:border-[#C6A463]/50 hover:scale-105 transition-all duration-300 backdrop-blur-xl"
+          className="cursor-pointer inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-[#FFF9EF] hover:bg-white border border-[#B88A32]/35 text-[#2A2118] font-bold text-xs font-mono tracking-[0.18em] uppercase hover:shadow-[0_4px_25px_rgba(184,138,50,0.25)] hover:scale-105 transition-all duration-300"
         >
-          <span>Explore All 12 Architectural Frames</span>
-          <ArrowRight className="w-4 h-4 text-[#C6A463]" />
+          <span>Explore Full 40+ Architectural Catalog</span>
+          <ArrowRight className="w-4 h-4 text-[#B88A32]" />
         </Link>
       </div>
     </section>

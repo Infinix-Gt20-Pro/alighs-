@@ -1,133 +1,173 @@
+﻿// src/components/DoctorSection.tsx
 "use client";
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Stethoscope, Eye, Activity, MapPin, MessageCircle, Phone, Sparkles } from "lucide-react";
+import { Stethoscope, Eye, Activity, MapPin, MessageCircle, Phone, Sparkles, ShieldCheck } from "lucide-react";
 
 export default function DoctorSection() {
   const services = [
     {
-      icon: <Eye className="w-6 h-6 text-[#C6A463]" />,
+      icon: <Eye className="w-6 h-6 text-[#B88A32]" />,
       title: "Comprehensive Eye Checkup",
-      desc: "Advanced diagnostic tools for perfect vision assessment."
+      desc: "Advanced refraction assessment and visual acuity profiling.",
     },
     {
-      icon: <Activity className="w-6 h-6 text-[#A8884A]" />,
-      title: "Power Testing",
-      desc: "Precise computerized eye testing and power calculation."
+      icon: <Activity className="w-6 h-6 text-[#D4AF62]" />,
+      title: "Computerized Power Testing",
+      desc: "Precise digital refractive measurement and astigmatism correction.",
     },
     {
-      icon: <Sparkles className="w-6 h-6 text-[#8B7355]" />,
-      title: "Frame Fitting",
-      desc: "Expert guidance on frames suiting your face profile."
+      icon: <Sparkles className="w-6 h-6 text-[#B88A32]" />,
+      title: "Facial Ergonomics & Fitting",
+      desc: "Custom pupillary distance (PD) calibration for zero slippage.",
     },
     {
-      icon: <Stethoscope className="w-6 h-6 text-[#5C8A5C]" />,
-      title: "Lens Consultation",
-      desc: "Specialized advice for blue-cut, progressive & contact lenses."
-    }
+      icon: <ShieldCheck className="w-6 h-6 text-[#4A3928]" />,
+      title: "Lens Coating Consultation",
+      desc: "Specialized advice for 420nm blue-cut, progressive & polarized optics.",
+    },
   ];
 
   return (
-    <section id="doctor-section" className="w-full pt-10 pb-16 sm:pt-14 sm:pb-20 bg-[#FAF7F0] relative overflow-hidden">
-      <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-[#C6A463]/8 rounded-full blur-[100px] -translate-y-1/2 pointer-events-none"></div>
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#E2C485]/6 rounded-full blur-[100px] pointer-events-none"></div>
+    <section id="doctor-section" className="w-full pt-16 pb-20 sm:pt-24 sm:pb-28 bg-[#F4E9D5] relative overflow-hidden border-t border-[#B88A32]/20">
+      {/* Ambient background glows */}
+      <div className="pointer-events-none absolute top-1/2 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-[#D4AF62]/20 via-[#B88A32]/10 to-transparent rounded-full blur-[130px] -translate-y-1/2" />
+      <div className="pointer-events-none absolute bottom-0 right-1/4 w-[450px] h-[450px] bg-gradient-to-tl from-[#E8D2A8]/30 via-[#D6B878]/15 to-transparent rounded-full blur-[120px]" />
 
-      <div className="container mx-auto px-4 md:px-6 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        
+        {/* Editorial Section Header: THE CLINICAL SIDE */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-10 sm:mb-12"
+          className="text-center mb-12 sm:mb-16"
         >
-          <h2 className="text-3xl md:text-5xl font-bold text-[#3C2415] font-cinzel mb-4">Meet The Expert</h2>
-          <p className="text-[#8B7355] max-w-2xl mx-auto">
-            Experience premium eye care rooted in Firozabad&apos;s heritage, elevated by modern medical precision.
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FFF9EF] border border-[#B88A32]/30 text-[10px] sm:text-xs font-mono tracking-[0.28em] text-[#B88A32] uppercase font-bold mb-3 sm:mb-4 shadow-sm">
+            <Stethoscope className="w-3.5 h-3.5 text-[#B88A32]" />
+            <span>OPTOMETRIC HERITAGE</span>
+          </div>
+
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-[#2A2118] font-cinzel tracking-[0.14em] uppercase mb-3 sm:mb-4 drop-shadow-sm">
+            THE CLINICAL SIDE
+          </h2>
+
+          <p className="text-sm sm:text-lg text-[#4A3928] font-cormorant italic max-w-2xl mx-auto leading-relaxed">
+            Where Japanese Beta-Titanium design meets clinical optometry certified by Aligarh Muslim University.
           </p>
         </motion.div>
 
+        {/* Two-Column Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
           
+          {/* Doctor Profile Card */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="glass-card p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-[#C6A463]/15 bg-white flex flex-col h-full shadow-[0_8px_30px_rgba(60,36,21,0.06)]"
+            className="p-6 sm:p-9 rounded-3xl sm:rounded-[36px] border-2 border-[#B88A32]/35 bg-[#FFF9EF] flex flex-col h-full shadow-[0_15px_45px_rgba(42,33,24,0.08)] relative overflow-hidden"
           >
-            <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-6 mb-6 sm:mb-8">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-2xl bg-gradient-to-br from-[#C6A463]/20 to-[#E2C485]/20 border border-[#C6A463]/20 flex items-center justify-center relative overflow-hidden shadow-sm">
-                <div className="absolute inset-0 bg-gradient-to-t from-[#C6A463]/10 to-transparent"></div>
-                <Stethoscope className="w-8 h-8 sm:w-10 sm:h-10 text-[#3C2415] relative z-10 drop-shadow-sm" />
+            {/* Top Identity Block: Dr. Sheeraz Ahmad */}
+            <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-6 mb-6 pb-6 border-b border-[#B88A32]/20">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-2xl bg-gradient-to-br from-[#F4E9D5] to-[#E8D2A8] border border-[#B88A32]/30 flex items-center justify-center relative overflow-hidden shadow-sm">
+                <Stethoscope className="w-9 h-9 sm:w-11 sm:h-11 text-[#B88A32] relative z-10 drop-shadow-sm" />
               </div>
+
               <div>
-                <h3 className="text-xl sm:text-2xl font-bold text-[#3C2415] font-cinzel mb-1.5">Dr. Sheeraz Ahmad</h3>
-                <p className="text-[#C6A463] font-medium text-xs sm:text-sm mb-2.5">AMU-Certified Optometrist & Eye Care Specialist</p>
+                <h3 className="text-2xl sm:text-3xl font-black text-[#2A2118] font-cinzel mb-1 tracking-tight">
+                  Dr. Sheeraz Ahmad
+                </h3>
+
+                <p className="text-sm sm:text-base font-cormorant italic font-bold text-[#B88A32] leading-snug mb-3">
+                  AMU-Certified Optometrist<br />
+                  &amp; Eye Care Specialist
+                </p>
+
                 <div className="flex flex-wrap justify-center sm:justify-start gap-2">
-                  <span className="glass-pill px-3 py-1 rounded-full text-xs font-mono text-[#5C3D2E] bg-[#FAF7F0] border border-[#C6A463]/15">MBBS</span>
-                  <span className="glass-pill px-3 py-1 rounded-full text-xs font-mono text-[#5C3D2E] bg-[#FAF7F0] border border-[#C6A463]/15">DOMS</span>
+                  <span className="px-3 py-1 rounded-full text-[11px] font-mono font-bold text-[#2A2118] bg-[#F4E9D5] border border-[#B88A32]/30">
+                    AMU Optometry
+                  </span>
+                  <span className="px-3 py-1 rounded-full text-[11px] font-mono font-bold text-[#2A2118] bg-[#F4E9D5] border border-[#B88A32]/30">
+                    MBBS
+                  </span>
+                  <span className="px-3 py-1 rounded-full text-[11px] font-mono font-bold text-[#2A2118] bg-[#F4E9D5] border border-[#B88A32]/30">
+                    DOMS
+                  </span>
                 </div>
               </div>
             </div>
 
-            <p className="text-[#8B7355] leading-relaxed mb-8 flex-1">
-              With years of experience in clinical optometry, Dr. Sheeraz provides meticulous eye care solutions. Our clinic blends Firozabad&apos;s historic craftsmanship with cutting-edge optical technology to bring you unparalleled visual clarity.
+            <p className="text-xs sm:text-sm text-[#4A3928] leading-relaxed mb-6 flex-1">
+              With extensive clinical experience at Aligarh Muslim University (AMU), Dr. Sheeraz Ahmad personally inspects and calibrates every ALIG&apos;S WARE frame. We bridge Firozabad&apos;s celebrated artisanal glassmaking heritage with strict optical diagnostic standards.
             </p>
 
-            <div className="flex items-center gap-3 text-[#8B7355] text-sm mb-8 p-4 rounded-xl bg-[#FFFDF5] border border-[#C6A463]/10">
-              <MapPin className="w-5 h-5 text-[#C6A463] shrink-0" />
-              <span>ALIGSWARE Main Clinic, Firozabad, Uttar Pradesh</span>
+            <div className="flex items-center gap-3 text-xs sm:text-sm text-[#4A3928] mb-6 p-4 rounded-2xl bg-[#F4E9D5]/80 border border-[#B88A32]/25">
+              <MapPin className="w-5 h-5 text-[#B88A32] shrink-0" />
+              <span className="font-mono text-xs text-[#2A2118]">
+                ALIG&apos;S WARE Flagship Clinic, Firozabad, Uttar Pradesh
+              </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mt-auto">
               <a
                 href="tel:+917217371499"
-                className="flex items-center justify-center gap-2 py-3 rounded-xl bg-[#FAF7F0] hover:bg-[#C6A463]/10 text-[#3C2415] font-medium transition-colors border border-[#C6A463]/15"
+                className="flex items-center justify-center gap-2 py-3.5 rounded-full bg-[#F4E9D5] hover:bg-white text-[#2A2118] font-bold text-xs font-mono uppercase tracking-wider transition-all border border-[#B88A32]/30 shadow-sm active:scale-95"
               >
-                <Phone className="w-4 h-4 text-[#3C2415]" />
+                <Phone className="w-4 h-4 text-[#B88A32]" />
                 Call Clinic
               </a>
               <a
-                href="https://wa.me/917217371499?text=I'd%20like%20to%20book%20a%20consultation%20with%20Dr.%20Sheeraz"
+                href="https://wa.me/917217371499?text=I'd%20like%20to%20book%20a%20consultation%20with%20Dr.%20Sheeraz%20Ahmad"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 py-3 rounded-xl bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#25D366] font-medium transition-colors border border-[#25D366]/20"
+                className="flex items-center justify-center gap-2 py-3.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs font-mono uppercase tracking-wider transition-all shadow-sm active:scale-95"
               >
                 <MessageCircle className="w-4 h-4" />
-                WhatsApp
+                WhatsApp Direct
               </a>
             </div>
           </motion.div>
 
+          {/* Right Column: Clinical Capabilities & Book Try-on */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-col h-full gap-8"
+            className="flex flex-col h-full gap-6"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
               {services.map((service, idx) => (
-                <div key={idx} className="glass-panel p-6 rounded-2xl border border-[#C6A463]/10 bg-white hover:border-[#C6A463]/25 transition-all shadow-[0_4px_20px_rgba(60,36,21,0.03)]">
-                  <div className="w-12 h-12 rounded-xl bg-[#FAF7F0] border border-[#C6A463]/15 flex items-center justify-center mb-4">
+                <div
+                  key={idx}
+                  className="p-5 sm:p-6 rounded-3xl border border-[#B88A32]/25 bg-[#FFF9EF]/90 hover:bg-[#FFF9EF] hover:border-[#B88A32]/60 transition-all shadow-[0_8px_30px_rgba(42,33,24,0.05)] hover:shadow-[0_12px_35px_rgba(184,138,50,0.12)] group"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-[#F4E9D5] border border-[#B88A32]/30 flex items-center justify-center mb-3.5 group-hover:scale-110 transition-transform duration-300">
                     {service.icon}
                   </div>
-                  <h4 className="text-lg font-semibold text-[#3C2415] mb-2">{service.title}</h4>
-                  <p className="text-[#8B7355] text-sm leading-relaxed">{service.desc}</p>
+                  <h4 className="font-cinzel text-base sm:text-lg font-bold text-[#2A2118] mb-1.5">
+                    {service.title}
+                  </h4>
+                  <p className="text-xs text-[#4A3928] leading-relaxed">
+                    {service.desc}
+                  </p>
                 </div>
               ))}
             </div>
 
             <Link
               href="/appointment"
-              className="w-full py-4 rounded-2xl text-center font-bold text-lg text-white bg-[#C6A463] hover:bg-[#A8884A] transition-all shadow-[0_0_20px_rgba(198,164,99,0.2)] hover:shadow-[0_0_30px_rgba(198,164,99,0.35)]"
+              className="w-full py-4 rounded-full text-center font-bold text-xs sm:text-sm font-mono tracking-[0.16em] uppercase text-white bg-gradient-to-r from-[#B88A32] via-[#D4AF62] to-[#B88A32] hover:brightness-105 transition-all shadow-[0_6px_25px_rgba(184,138,50,0.35)] active:scale-98"
             >
-              Book Try-On & Consultation
+              BOOK CLINICAL TRY-ON &amp; CONSULTATION
             </Link>
           </motion.div>
 
         </div>
+
       </div>
     </section>
   );

@@ -45,32 +45,32 @@ export default function FeaturedShowcase() {
   };
 
   return (
-    <section className="relative pt-6 pb-12 sm:pt-10 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto overflow-hidden">
+    <section className="relative pt-4 pb-10 sm:pt-10 sm:pb-16 px-2.5 sm:px-6 lg:px-8 max-w-7xl mx-auto overflow-hidden">
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-amber-500/8 rounded-full blur-[140px] pointer-events-none -z-10" />
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4 border-b border-white/10 pb-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-5 sm:mb-8 gap-3 sm:gap-4 border-b border-white/10 pb-4 sm:pb-6">
         <div>
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-400/10 border border-amber-400/20 text-xs font-mono text-amber-300 uppercase tracking-widest mb-3">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/20 text-[10px] sm:text-xs font-mono text-amber-300 uppercase tracking-widest mb-2 sm:mb-3">
+            <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400" />
             <span>Curated Atelier Collection</span>
           </div>
-          <h2 className="font-cinzel text-3xl sm:text-5xl font-bold tracking-[0.06em] text-white">
+          <h2 className="font-cinzel text-2xl sm:text-5xl font-bold tracking-[0.06em] text-white">
             Signature Optical Frames
           </h2>
-          <p className="text-neutral-400 mt-2 max-w-xl text-sm sm:text-base font-light">
-            Each piece is calibrated for precision ergonomics, optical clarity, and timeless elegance.
+          <p className="text-neutral-400 mt-1 sm:mt-2 max-w-xl text-xs sm:text-base font-light">
+            Calibrated for ergonomics, optical clarity, and timeless luxury.
           </p>
         </div>
 
         {/* Filter Chips */}
-        <div className="flex items-center gap-2 overflow-x-auto max-w-full py-1">
+        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto max-w-full py-1 scrollbar-none">
           {filters.map((f) => (
             <button
               key={f.id}
               onClick={() => setSelectedFilter(f.id)}
-              className={`cursor-pointer px-4 py-2 rounded-full text-xs font-mono uppercase tracking-wider transition-all duration-300 ${
+              className={`cursor-pointer px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-mono uppercase tracking-wider transition-all duration-300 shrink-0 ${
                 selectedFilter === f.id
                   ? "bg-amber-400 text-black font-semibold shadow-[0_0_20px_rgba(212,175,55,0.4)]"
                   : "bg-white/[0.04] text-neutral-400 hover:text-white border border-white/10 hover:bg-white/[0.08]"
@@ -82,8 +82,8 @@ export default function FeaturedShowcase() {
         </div>
       </div>
 
-      {/* Products Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Products Grid: Sleek 2-Column Mobile, 3-Column Desktop */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-6">
         <AnimatePresence mode="popLayout">
           {filteredProducts.map((product) => (
             <motion.div
@@ -93,37 +93,38 @@ export default function FeaturedShowcase() {
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.35 }}
               key={product._id}
-              className="group relative rounded-3xl bg-gradient-to-b from-white/[0.05] to-white/[0.02] border border-white/10 hover:border-amber-400/40 p-6 flex flex-col justify-between transition-all duration-500 hover:shadow-[0_15px_40px_rgba(0,0,0,0.7)]"
+              className="group relative rounded-2xl sm:rounded-3xl bg-gradient-to-b from-white/[0.05] to-white/[0.02] border border-white/10 hover:border-amber-400/40 p-2.5 sm:p-6 flex flex-col justify-between transition-all duration-500 hover:shadow-[0_15px_40px_rgba(0,0,0,0.7)]"
             >
               {/* Card Badges */}
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/10">
-                  {product.material.toUpperCase()} &bull; {product.weight}
+              <div className="flex items-center justify-between mb-1.5 sm:mb-4 gap-1">
+                <span className="text-[9px] sm:text-[10px] font-mono text-neutral-400 uppercase tracking-wider px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-white/[0.04] border border-white/10 truncate max-w-[80px] sm:max-w-none">
+                  {product.material.toUpperCase()}
                 </span>
 
                 {product.bestSeller && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-mono text-amber-300 uppercase tracking-widest px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-500/30">
-                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                    Bestseller
+                  <span className="inline-flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-[10px] font-mono text-amber-300 uppercase tracking-wider px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-amber-500/20 border border-amber-500/30 shrink-0">
+                    <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-amber-400 text-amber-400" />
+                    <span className="hidden sm:inline">Bestseller</span>
+                    <span className="sm:hidden">Top</span>
                   </span>
                 )}
               </div>
 
               {/* Real Studio Photo Presentation */}
-              <Link href={`/shop/${product.slug}`} className="block relative my-6 text-center group-hover:scale-105 transition-transform duration-500">
-                <div className="w-full h-44 rounded-2xl bg-gradient-to-br from-neutral-900 via-neutral-950 to-black flex items-center justify-center relative overflow-hidden border border-white/5 p-3">
+              <Link href={`/shop/${product.slug}`} className="block relative my-1.5 sm:my-6 text-center group-hover:scale-105 transition-transform duration-500">
+                <div className="w-full h-24 sm:h-44 rounded-xl sm:rounded-2xl bg-gradient-to-br from-neutral-900 via-neutral-950 to-black flex items-center justify-center relative overflow-hidden border border-white/5 p-1.5 sm:p-3">
                   <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/10 to-cyan-500/10 opacity-30 group-hover:opacity-70 transition-opacity duration-500" />
                   
                   {product.images && product.images[0] ? (
                     <img
                       src={product.images[0]}
                       alt={product.name}
-                      className="max-h-full max-w-full object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.9)] group-hover:scale-110 transition-transform duration-500 relative z-10"
+                      className="max-h-full max-w-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.85)] group-hover:scale-110 transition-transform duration-500 relative z-10"
                       loading="lazy"
                     />
                   ) : (
                     <div className="relative flex flex-col items-center z-10">
-                      <span className="text-xs font-mono text-amber-300 uppercase tracking-widest">
+                      <span className="text-[10px] sm:text-xs font-mono text-amber-300 uppercase tracking-widest">
                         {product.frameShape} Frame
                       </span>
                     </div>
@@ -134,22 +135,22 @@ export default function FeaturedShowcase() {
               {/* Info & Details */}
               <div>
                 <Link href={`/shop/${product.slug}`}>
-                  <h3 className="text-lg font-semibold text-white group-hover:text-amber-300 transition-colors">
+                  <h3 className="text-xs sm:text-lg font-semibold text-white group-hover:text-amber-300 transition-colors line-clamp-1">
                     {product.name}
                   </h3>
                 </Link>
 
-                <p className="text-xs text-neutral-400 mt-1 line-clamp-2 leading-relaxed">
+                <p className="hidden sm:block text-xs text-neutral-400 mt-1 line-clamp-2 leading-relaxed">
                   {product.description}
                 </p>
 
                 {/* Features & Color Swatches */}
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
-                  <div className="flex items-center gap-1.5">
+                <div className="flex items-center justify-between mt-2 sm:mt-4 pt-2 sm:pt-4 border-t border-white/10 gap-1">
+                  <div className="flex items-center gap-1">
                     {product.colors.slice(0, 3).map((col) => (
                       <span
                         key={col}
-                        className="w-3 h-3 rounded-full border border-white/30"
+                        className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border border-white/30 shrink-0"
                         title={col}
                         style={{
                           backgroundColor:
@@ -162,44 +163,45 @@ export default function FeaturedShowcase() {
                         }}
                       />
                     ))}
-                    <span className="text-[10px] text-neutral-500 font-mono ml-1">
-                      {product.colors.length} finishes
+                    <span className="text-[9px] sm:text-[10px] text-neutral-500 font-mono ml-0.5 hidden xs:inline">
+                      {product.colors.length}
                     </span>
                   </div>
 
                   {/* Pricing */}
-                  <div className="text-right">
-                    <span className="text-xs text-neutral-500 line-through mr-2 font-mono">
+                  <div className="text-right shrink-0">
+                    <span className="text-[10px] sm:text-xs text-neutral-500 line-through mr-1 sm:mr-2 font-mono hidden xs:inline">
                       ₹{product.originalPrice}
                     </span>
-                    <span className="text-base font-bold text-amber-300 font-mono">
+                    <span className="text-xs sm:text-base font-bold text-amber-300 font-mono">
                       ₹{product.price}
                     </span>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="grid grid-cols-2 gap-2.5 mt-5">
+                <div className="grid grid-cols-2 gap-1.5 sm:gap-2.5 mt-2.5 sm:mt-5">
                   <Link
                     href={`/shop/${product.slug}`}
-                    className="cursor-pointer text-center py-2.5 px-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.1] border border-white/15 text-xs font-medium text-white transition-all duration-200"
+                    className="cursor-pointer text-center py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-lg sm:rounded-xl bg-white/[0.04] hover:bg-white/[0.1] border border-white/15 text-[10px] sm:text-xs font-medium text-white transition-all duration-200 flex items-center justify-center"
                   >
-                    View Specs
+                    Specs
                   </Link>
 
                   <button
                     onClick={() => handleQuickAdd(product)}
-                    className="cursor-pointer flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-black text-xs font-semibold hover:brightness-110 active:scale-95 transition-all shadow-md"
+                    className="cursor-pointer flex items-center justify-center gap-1 py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-lg sm:rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-black text-[10px] sm:text-xs font-semibold hover:brightness-110 active:scale-95 transition-all shadow-md"
                   >
                     {addedSlug === product.slug ? (
                       <>
-                        <Check className="w-3.5 h-3.5 text-black" />
-                        <span>Added!</span>
+                        <Check className="w-3 h-3 text-black shrink-0" />
+                        <span className="hidden sm:inline">Added!</span>
+                        <span className="sm:hidden">✓</span>
                       </>
                     ) : (
                       <>
-                        <ShoppingBag className="w-3.5 h-3.5 text-black" />
-                        <span>Add to Bag</span>
+                        <ShoppingBag className="w-3 h-3 text-black shrink-0" />
+                        <span className="truncate">Add</span>
                       </>
                     )}
                   </button>

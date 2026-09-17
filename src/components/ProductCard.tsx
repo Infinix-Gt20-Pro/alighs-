@@ -109,25 +109,26 @@ export default function ProductCard({ product }: ProductProps) {
     <motion.div
       whileHover={{ y: -4 }}
       transition={{ duration: 0.25 }}
-      className="group relative flex flex-col justify-between rounded-3xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10 hover:border-amber-400/40 p-5 sm:p-6 transition-all duration-300 hover:shadow-[0_20px_45px_rgba(0,0,0,0.8)]"
+      className="group relative flex flex-col justify-between rounded-2xl sm:rounded-3xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10 hover:border-amber-400/40 p-2.5 sm:p-6 transition-all duration-300 hover:shadow-[0_20px_45px_rgba(0,0,0,0.8)]"
     >
       {/* Badges Bar */}
-      <div className="flex items-center justify-between z-10 mb-2 gap-2">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-[10px] font-mono text-neutral-300 uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-white/[0.06] border border-white/10">
+      <div className="flex items-center justify-between z-10 mb-1.5 sm:mb-2 gap-1">
+        <div className="flex items-center gap-1 flex-wrap">
+          <span className="text-[8px] sm:text-[10px] font-mono text-neutral-300 uppercase tracking-wider px-1.5 sm:px-2.5 py-0.5 rounded-full bg-white/[0.06] border border-white/10 truncate max-w-[70px] sm:max-w-none">
             {product.frameType?.replace("-", " ") || "Full Rim"}
           </span>
           {product.brandCollection && (
-            <span className="text-[10px] font-mono text-amber-300 uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 hidden sm:inline-block">
+            <span className="text-[10px] font-mono text-amber-300 uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 hidden md:inline-block">
               {product.brandCollection}
             </span>
           )}
         </div>
 
         {product.bestSeller && (
-          <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-400 uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 shrink-0">
-            <Star className="w-3 h-3 fill-emerald-400 text-emerald-400" />
-            Top Seller
+          <span className="inline-flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-[10px] font-mono text-emerald-400 uppercase tracking-wider px-1.5 sm:px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 shrink-0">
+            <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-emerald-400 text-emerald-400" />
+            <span className="hidden sm:inline">Top Seller</span>
+            <span className="sm:hidden">Top</span>
           </span>
         )}
       </div>
@@ -135,17 +136,17 @@ export default function ProductCard({ product }: ProductProps) {
       {/* Visual Presentation: Real Studio Photo with Silhouette Fallback */}
       <Link
         href={`/shop/${product.slug}`}
-        className="block relative my-4 text-center group-hover:scale-105 transition-transform duration-500"
+        className="block relative my-1.5 sm:my-4 text-center group-hover:scale-105 transition-transform duration-500"
       >
-        <div className="w-full h-48 sm:h-52 rounded-2xl bg-gradient-to-br from-neutral-950 via-[#0c0d12] to-black border border-white/5 flex flex-col items-center justify-center relative overflow-hidden p-3">
+        <div className="w-full h-24 sm:h-52 rounded-xl sm:rounded-2xl bg-gradient-to-br from-neutral-950 via-[#0c0d12] to-black border border-white/5 flex flex-col items-center justify-center relative overflow-hidden p-1.5 sm:p-3">
           <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/10 to-indigo-500/10 opacity-20 group-hover:opacity-60 transition-opacity duration-500" />
           
           {product.images && product.images[0] ? (
-            <div className="relative z-10 w-full h-32 sm:h-36 flex items-center justify-center p-2">
+            <div className="relative z-10 w-full h-20 sm:h-36 flex items-center justify-center p-1 sm:p-2">
               <img
                 src={product.images[0]}
                 alt={product.name}
-                className="max-h-full max-w-full object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.85)] group-hover:scale-110 transition-transform duration-500"
+                className="max-h-full max-w-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.85)] group-hover:scale-110 transition-transform duration-500"
                 loading="lazy"
                 onError={(e) => {
                   if (product.images && product.images[1] && e.currentTarget.src !== product.images[1]) {
@@ -161,17 +162,17 @@ export default function ProductCard({ product }: ProductProps) {
                 frameType={product.frameType || "full-rim"}
                 color={activeColorHex}
                 isSunglass={isSunglass}
-                className="w-44 sm:w-52 h-20 sm:h-24"
+                className="w-28 sm:w-52 h-14 sm:h-24"
               />
             </div>
           )}
           
-          <div className="relative z-10 flex items-center gap-2 mt-2">
-            <span className="text-[10px] font-mono text-amber-300/90 uppercase tracking-wider">
-              {activeColorName} finish
+          <div className="relative z-10 flex items-center gap-1 sm:gap-2 mt-1 sm:mt-2">
+            <span className="text-[8px] sm:text-[10px] font-mono text-amber-300/90 uppercase tracking-wider truncate max-w-[80px] sm:max-w-none">
+              {activeColorName}
             </span>
             {product.weight && (
-              <span className="text-[10px] font-mono text-neutral-400">
+              <span className="text-[8px] sm:text-[10px] font-mono text-neutral-400 hidden xs:inline">
                 &bull; {product.weight}
               </span>
             )}
@@ -180,31 +181,31 @@ export default function ProductCard({ product }: ProductProps) {
       </Link>
 
       {/* Product Information */}
-      <div className="flex flex-col gap-2.5">
-        <div className="flex items-start justify-between gap-2">
-          <div>
+      <div className="flex flex-col gap-1 sm:gap-2.5">
+        <div className="flex items-start justify-between gap-1 sm:gap-2">
+          <div className="min-w-0 flex-1">
             <Link href={`/shop/${product.slug}`}>
-              <h3 className="text-sm sm:text-base font-semibold text-white group-hover:text-amber-300 transition-colors font-sans line-clamp-1">
+              <h3 className="text-xs sm:text-base font-semibold text-white group-hover:text-amber-300 transition-colors font-sans line-clamp-1">
                 {product.name}
               </h3>
             </Link>
-            <div className="flex items-center gap-2 mt-0.5 text-[11px] font-mono text-neutral-400">
-              <span className="capitalize">{product.category.replace("-", " ")}</span>
-              {product.caliber && <span>&bull; {product.caliber}</span>}
+            <div className="flex items-center gap-1 sm:gap-2 mt-0.5 text-[9px] sm:text-[11px] font-mono text-neutral-400">
+              <span className="capitalize truncate">{product.category.replace("-", " ")}</span>
+              {product.caliber && <span className="hidden sm:inline">&bull; {product.caliber}</span>}
             </div>
           </div>
 
           <div className="text-right shrink-0">
-            <div className="text-base sm:text-lg font-bold font-mono text-amber-300">
+            <div className="text-xs sm:text-lg font-bold font-mono text-amber-300">
               ₹{product.price.toLocaleString()}
             </div>
             {product.originalPrice && (
-              <div className="flex items-center gap-1.5 justify-end">
-                <span className="text-xs text-neutral-500 line-through font-mono">
+              <div className="flex items-center gap-1 justify-end">
+                <span className="text-[10px] sm:text-xs text-neutral-500 line-through font-mono hidden xs:inline">
                   ₹{product.originalPrice.toLocaleString()}
                 </span>
-                <span className="text-[10px] font-mono text-emerald-400 font-semibold">
-                  {discount}% OFF
+                <span className="text-[8px] sm:text-[10px] font-mono text-emerald-400 font-semibold">
+                  {discount}%
                 </span>
               </div>
             )}
@@ -213,10 +214,10 @@ export default function ProductCard({ product }: ProductProps) {
 
         {/* Color Swatches */}
         {colors.length > 0 && (
-          <div className="flex items-center gap-2 pt-1">
-            <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider">Colors:</span>
-            <div className="flex items-center gap-1.5">
-              {colors.map((color, idx) => {
+          <div className="flex items-center gap-1 sm:gap-2 pt-0.5 sm:pt-1">
+            <span className="text-[8px] sm:text-[10px] font-mono text-neutral-500 uppercase tracking-wider hidden xs:inline">Colors:</span>
+            <div className="flex items-center gap-1">
+              {colors.slice(0, 4).map((color, idx) => {
                 const cName = typeof color === "string" ? color : color.name;
                 const cHex = typeof color === "string" ? COLOR_MAP[color.toLowerCase()] || "#374151" : color.hex;
                 const isSelected = selectedColorIdx === idx;
@@ -225,7 +226,7 @@ export default function ProductCard({ product }: ProductProps) {
                     key={idx}
                     type="button"
                     onClick={() => setSelectedColorIdx(idx)}
-                    className={`cursor-pointer w-4 h-4 rounded-full border transition-all ${
+                    className={`cursor-pointer w-3 h-3 sm:w-4 sm:h-4 rounded-full border transition-all ${
                       isSelected
                         ? "border-amber-400 scale-125 shadow-[0_0_8px_rgba(212,175,55,0.6)]"
                         : "border-white/30 hover:scale-110"
@@ -240,20 +241,21 @@ export default function ProductCard({ product }: ProductProps) {
         )}
 
         {/* Actions Bar */}
-        <div className="grid grid-cols-2 gap-2 pt-2.5 border-t border-white/10 mt-1">
+        <div className="grid grid-cols-2 gap-1.5 sm:gap-2 pt-1.5 sm:pt-2.5 border-t border-white/10 mt-0.5 sm:mt-1">
           <button
             onClick={handleAddToCart}
-            className="cursor-pointer w-full flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-black text-xs font-semibold shadow-md active:scale-95 transition-all"
+            className="cursor-pointer w-full flex items-center justify-center gap-1 py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-lg sm:rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-black text-[10px] sm:text-xs font-semibold shadow-md active:scale-95 transition-all"
           >
             {isAdded ? (
               <>
-                <Check className="w-3.5 h-3.5 text-black" />
-                <span>Added!</span>
+                <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black shrink-0" />
+                <span className="hidden sm:inline">Added!</span>
+                <span className="sm:hidden">✓</span>
               </>
             ) : (
               <>
-                <ShoppingBag className="w-3.5 h-3.5 text-black" />
-                <span>Add to Bag</span>
+                <ShoppingBag className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black shrink-0" />
+                <span className="truncate">Add</span>
               </>
             )}
           </button>
@@ -262,10 +264,10 @@ export default function ProductCard({ product }: ProductProps) {
             href={`https://wa.me/917217371499?text=Hi%20ALIG'S%20WARE!%20I'm%20interested%20in%20ordering%20${encodeURIComponent(product.name)}%20(${encodeURIComponent(activeColorName)}).%20Please%20guide%20me.`}
             target="_blank"
             rel="noopener noreferrer"
-            className="cursor-pointer w-full flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.1] text-neutral-300 hover:text-white text-xs font-medium border border-white/15 transition-all"
+            className="cursor-pointer w-full flex items-center justify-center gap-1 py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-lg sm:rounded-xl bg-white/[0.04] hover:bg-white/[0.1] text-neutral-300 hover:text-white text-[10px] sm:text-xs font-medium border border-white/15 transition-all"
           >
-            <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Enquire</span>
+            <MessageCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400 shrink-0" />
+            <span className="truncate">Enquire</span>
           </a>
         </div>
       </div>

@@ -336,44 +336,44 @@ export default function HeroSection() {
       </div>
 
       {/* BOTTOM ENTERPRISE ACTION BAR */}
-      <div className="relative z-20 w-full max-w-4xl mx-auto mt-4 sm:mt-6 px-2 sm:px-0">
-        <div className="glass-card p-4 sm:p-7 rounded-3xl border border-amber-400/30 bg-[#0c0d12]/90 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
+      <div className="relative z-20 w-full max-w-4xl mx-auto mt-3 sm:mt-6 px-2 sm:px-0">
+        <div className="glass-card p-3.5 sm:p-7 rounded-2xl sm:rounded-3xl border border-amber-400/30 bg-[#0c0d12]/90 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-6">
           <div className="text-center sm:text-left w-full sm:w-auto">
-            <div className="flex items-center justify-center sm:justify-start gap-1.5 text-[11px] sm:text-xs font-mono text-amber-400 mb-1">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <div className="flex items-center justify-center sm:justify-start gap-1.5 text-[10px] sm:text-xs font-mono text-amber-400 mb-0.5 sm:mb-1">
+              <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400 shrink-0" />
               <span>IN ATELIER STOCK &bull; DISPATCH TODAY</span>
             </div>
-            <h3 className="font-cinzel text-lg sm:text-2xl font-bold text-white">
+            <h3 className="font-cinzel text-base sm:text-2xl font-bold text-white leading-tight">
               Imperial Geometric Beta-Titanium
             </h3>
-            <div className="flex items-baseline justify-center sm:justify-start gap-2.5 mt-1">
-              <span className="text-2xl sm:text-3xl font-bold font-mono text-amber-400">
+            <div className="flex items-baseline justify-center sm:justify-start gap-2 mt-0.5 sm:mt-1">
+              <span className="text-xl sm:text-3xl font-bold font-mono text-amber-400">
                 ₹2,499
               </span>
-              <span className="text-xs sm:text-base font-mono text-zinc-500 line-through">
+              <span className="text-[11px] sm:text-base font-mono text-zinc-500 line-through">
                 ₹4,299
               </span>
-              <span className="text-[10px] sm:text-xs font-mono text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full border border-emerald-400/20">
+              <span className="text-[9px] sm:text-xs font-mono text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full border border-emerald-400/20">
                 Save 42% &bull; Free Delivery
               </span>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full sm:w-auto">
+          <div className="flex flex-row items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
             <button
               onClick={handleQuickAdd}
-              className="cursor-pointer w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-black font-bold text-xs sm:text-sm tracking-wider uppercase shadow-[0_0_25px_rgba(212,175,55,0.45)] hover:shadow-[0_0_40px_rgba(212,175,55,0.7)] hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center gap-2"
+              className="cursor-pointer flex-1 sm:flex-initial px-4 sm:px-8 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-black font-bold text-xs sm:text-sm tracking-wider uppercase shadow-[0_0_20px_rgba(212,175,55,0.45)] hover:shadow-[0_0_40px_rgba(212,175,55,0.7)] hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2"
             >
-              <ShoppingBag className="w-4 h-4 text-black" />
+              <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-black shrink-0" />
               <span>Add to Bag</span>
             </button>
 
             <Link
               href="/appointment"
-              className="cursor-pointer w-full sm:w-auto px-5 sm:px-6 py-3.5 sm:py-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] text-white font-semibold text-xs font-mono tracking-wider border border-white/15 hover:border-amber-400/50 backdrop-blur-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 text-center"
+              className="cursor-pointer flex-1 sm:flex-initial px-3 sm:px-6 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] text-white font-semibold text-xs font-mono tracking-wider border border-white/15 hover:border-amber-400/50 backdrop-blur-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-1.5 sm:gap-2 text-center"
             >
-              <Calendar className="w-3.5 h-3.5 text-amber-400" />
-              <span>Book Clinic Try-On</span>
+              <Calendar className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span className="truncate">Try-On</span>
             </Link>
           </div>
         </div>

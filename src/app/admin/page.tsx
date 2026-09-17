@@ -8,7 +8,7 @@ import {
   RefreshCw, Search, CheckCircle2, Truck, ExternalLink, Lock,
   LogOut, MapPin, TrendingUp, Archive, Plus, Trash2, Pencil,
   AlertTriangle, X, Settings2, Sparkles, Database, ArrowRight,
-  SlidersHorizontal, Check
+  SlidersHorizontal, Check, Globe
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -73,6 +73,21 @@ interface AirtableStatusInfo {
   };
 }
 
+interface WordPressStatusInfo {
+  configured: boolean;
+  connected: boolean;
+  siteName: string;
+  hasWooCommerce: boolean;
+  productCount: number;
+  error?: string;
+  config: {
+    siteUrl: string;
+    hasKeys: boolean;
+    syncEnabled?: boolean;
+    lastSync?: string | null;
+  };
+}
+
 const CATEGORIES = ["Eyeglasses", "Sunglasses", "Computer Glasses", "Kids Glasses", "Sports Glasses", "Lens Only", "Accessories"];
 const FRAME_SHAPES = ["Rectangle", "Round", "Oval", "Square", "Cat-Eye", "Aviator", "Clubmaster", "Hexagonal", "Wayfarer", "Rimless"];
 
@@ -108,7 +123,10 @@ export default function AdminDashboardPage() {
   const [stockEditId, setStockEditId] = useState<string | null>(null);
   const [stockEditVal, setStockEditVal] = useState<number>(0);
 
-  // ─── Airtable Plugin State ──────────────────────────────────────────────────
+  // ─── Plugins State ───────────────────────────────────────────────────────────
+  const [activePluginTab, setActivePluginTab] = useState<"wordpress" | "airtable">("wordpress");
+
+  // Airtable Plugin
   const [airtableStatus, setAirtableStatus] = useState<AirtableStatusInfo | null>(null);
   const [showAirtableModal, setShowAirtableModal] = useState(false);
   const [syncingAirtable, setSyncingAirtable] = useState(false);
@@ -117,6 +135,16 @@ export default function AdminDashboardPage() {
   const [airtableTableName, setAirtableTableName] = useState("Inventory");
   const [airtableSaving, setAirtableSaving] = useState(false);
   const [airtableFeedback, setAirtableFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  // WordPress Plugin
+  const [wpStatus, setWpStatus] = useState<WordPressStatusInfo | null>(null);
+  const [showWpModal, setShowWpModal] = useState(false);
+  const [syncingWp, setSyncingWp] = useState(false);
+  const [wpSiteUrl, setWpSiteUrl] = useState("");
+  const [wpConsumerKey, setWpConsumerKey] = useState("");
+  const [wpConsumerSecret, setWpConsumerSecret] = useState("");
+  const [wpSaving, setWpSaving] = useState(false);
+  const [wpFeedback, setWpFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   // Check persisted auth
   useEffect(() => {
@@ -157,6 +185,19 @@ export default function AdminDashboardPage() {
     }
   }, []);
 
+  const fetchWpStatus = useCallback(async () => {
+    try {
+      const res = await fetch("/api/wordpress");
+      if (res.ok) {
+        const data: WordPressStatusInfo = await res.json();
+        setWpStatus(data);
+        if (data.config.siteUrl) setWpSiteUrl(data.config.siteUrl);
+      }
+    } catch (err) {
+      console.error("Error checking WordPress status:", err);
+    }
+  }, []);
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -168,10 +209,10 @@ export default function AdminDashboardPage() {
       if (resOrders.ok) { const d = await resOrders.json(); setOrders(d.orders || []); }
       if (resApts.ok)   { const d = await resApts.json();   setAppointments(d.appointments || []); }
       if (resInv.ok)    { const d = await resInv.json();    setInventory(d.items || []); }
-      await fetchAirtableStatus();
+      await Promise.all([fetchAirtableStatus(), fetchWpStatus()]);
     } catch (err) { console.error("Error fetching admin data:", err); }
     finally { setLoading(false); }
-  }, [fetchAirtableStatus]);
+  }, [fetchAirtableStatus, fetchWpStatus]);
 
   useEffect(() => { if (isAuthenticated) fetchData(); }, [isAuthenticated, fetchData]);
 
@@ -244,13 +285,21 @@ export default function AdminDashboardPage() {
     if (res.ok) {
       setInventory((prev) => prev.map((i) => i.id === id ? { ...i, stock: stockEditVal } : i));
       setStockEditId(null);
-      // Also update Airtable if record starts with 'rec'
+      // Sync to Airtable if ID starts with 'rec'
       if (id.startsWith("rec")) {
         fetch("/api/inventory/airtable", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ recordId: id, stock: stockEditVal }),
         }).catch((e) => console.warn("Airtable sync note:", e));
+      }
+      // Sync to WooCommerce if ID starts with 'wc-'
+      if (id.startsWith("wc-")) {
+        fetch("/api/wordpress", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productId: id, stock: stockEditVal }),
+        }).catch((e) => console.warn("WooCommerce sync note:", e));
       }
     }
   };
@@ -290,7 +339,7 @@ export default function AdminDashboardPage() {
       } else {
         setAirtableFeedback({ type: "error", message: data.error || "Sync fail hua." });
       }
-    } catch (err) {
+    } catch {
       setAirtableFeedback({ type: "error", message: "Network error during Airtable sync." });
     } finally {
       setSyncingAirtable(false);
@@ -318,7 +367,6 @@ export default function AdminDashboardPage() {
         setAirtableApiKey("");
         setShowAirtableModal(false);
         await fetchAirtableStatus();
-        // Trigger initial sync automatically
         handleTriggerAirtableSync();
       } else {
         setAirtableFeedback({ type: "error", message: data.error || "Airtable settings save nahi ho saki." });
@@ -327,6 +375,64 @@ export default function AdminDashboardPage() {
       setAirtableFeedback({ type: "error", message: "Network error while saving settings." });
     } finally {
       setAirtableSaving(false);
+    }
+  };
+
+  // ─── WordPress Plugin Handlers ─────────────────────────────────────────────
+  const handleTriggerWpSync = async () => {
+    setSyncingWp(true);
+    setWpFeedback(null);
+    try {
+      const res = await fetch("/api/wordpress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "sync" }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setWpFeedback({ type: "success", message: data.message || "WordPress / WooCommerce se products sync ho gaye!" });
+        if (data.items) setInventory(data.items);
+        await fetchWpStatus();
+      } else {
+        setWpFeedback({ type: "error", message: data.error || "Sync fail hua. WooCommerce API keys check karein." });
+      }
+    } catch {
+      setWpFeedback({ type: "error", message: "Network error during WordPress sync." });
+    } finally {
+      setSyncingWp(false);
+    }
+  };
+
+  const handleSaveWpSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setWpSaving(true);
+    setWpFeedback(null);
+    try {
+      const res = await fetch("/api/wordpress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "save_config",
+          siteUrl: wpSiteUrl,
+          consumerKey: wpConsumerKey,
+          consumerSecret: wpConsumerSecret,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setWpFeedback({ type: "success", message: "WordPress connection settings save ho gayi hain!" });
+        setShowWpModal(false);
+        await fetchWpStatus();
+        if (data.testResult?.hasWooCommerce) {
+          handleTriggerWpSync();
+        }
+      } else {
+        setWpFeedback({ type: "error", message: data.error || "WordPress connect nahi ho saka." });
+      }
+    } catch {
+      setWpFeedback({ type: "error", message: "Network error saving WordPress settings." });
+    } finally {
+      setWpSaving(false);
     }
   };
 
@@ -442,7 +548,7 @@ export default function AdminDashboardPage() {
             {[
               { key: "orders", label: `Customer Orders (${orders.length})`, icon: <Package className="w-3.5 h-3.5" />, active: "from-amber-400 to-amber-500 text-black shadow-[0_0_15px_rgba(212,175,55,0.4)]" },
               { key: "appointments", label: `Appointments (${appointments.length})`, icon: <Calendar className="w-3.5 h-3.5" />, active: "from-cyan-400 to-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]" },
-              { key: "inventory", label: `Inventory & Airtable (${inventory.length})${lowStockCount > 0 ? ` ⚠ ${lowStockCount}` : ""}`, icon: <Archive className="w-3.5 h-3.5" />, active: "from-violet-400 to-violet-500 text-black shadow-[0_0_15px_rgba(139,92,246,0.4)]" },
+              { key: "inventory", label: `Inventory & Plugins (${inventory.length})${lowStockCount > 0 ? ` ⚠ ${lowStockCount}` : ""}`, icon: <Archive className="w-3.5 h-3.5" />, active: "from-violet-400 to-violet-500 text-black shadow-[0_0_15px_rgba(139,92,246,0.4)]" },
             ].map((tab) => (
               <button key={tab.key} onClick={() => setActiveTab(tab.key as typeof activeTab)}
                 className={`cursor-pointer px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 ${
@@ -634,88 +740,288 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* ══════════════════════════════════════════════════════ TAB: INVENTORY */}
+        {/* ══════════════════════════════════════════════════════ TAB: INVENTORY & PLUGINS */}
         {activeTab === "inventory" && (
           <div>
-            {/* ─── AIRTABLE LIVE SYNC PLUGIN BANNER ─── */}
-            <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-teal-950/40 via-[#0e1626] to-violet-950/40 border border-teal-500/30 shadow-lg relative overflow-hidden">
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-11 h-11 rounded-2xl bg-[#FCB400]/10 border border-[#FCB400]/30 flex items-center justify-center shrink-0">
-                    <Database className="w-6 h-6 text-[#FCB400]" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-bold text-white text-sm sm:text-base font-cinzel">Airtable Live Sync Plugin</h3>
-                      {airtableStatus?.connected ? (
-                        <span className="text-[10px] font-mono text-emerald-300 bg-emerald-500/20 border border-emerald-500/40 px-2 py-0.5 rounded-full flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                          Live Connected ({airtableStatus.recordCount} records)
-                        </span>
-                      ) : airtableStatus?.configured ? (
-                        <span className="text-[10px] font-mono text-amber-300 bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 rounded-full">
-                          Checking Connection...
-                        </span>
-                      ) : (
-                        <span className="text-[10px] font-mono text-neutral-400 bg-white/[0.05] border border-white/10 px-2 py-0.5 rounded-full">
-                          Not Connected (Free Setup Available)
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-neutral-400 font-mono mt-0.5">
-                      {airtableStatus?.config?.lastSync
-                        ? `Last synced: ${new Date(airtableStatus.config.lastSync).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}`
-                        : "Airtable app par stock update karo, website par live update ho jayega."}
-                    </p>
-                  </div>
-                </div>
+            {/* ─── PLUGIN SELECTOR TABS ─── */}
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest mr-1">Active Plugin:</span>
+              <button
+                onClick={() => setActivePluginTab("wordpress")}
+                className={`cursor-pointer px-3 py-1.5 rounded-xl text-xs font-mono transition-all flex items-center gap-1.5 ${
+                  activePluginTab === "wordpress"
+                    ? "bg-[#21759B]/20 text-[#21759B] border border-[#21759B]/50 font-bold shadow-[0_0_12px_rgba(33,117,155,0.3)]"
+                    : "bg-white/[0.04] text-neutral-400 hover:text-white border border-white/10"
+                }`}
+              >
+                <Globe className="w-3.5 h-3.5" />
+                <span>WordPress / WooCommerce Plugin</span>
+              </button>
+              <button
+                onClick={() => setActivePluginTab("airtable")}
+                className={`cursor-pointer px-3 py-1.5 rounded-xl text-xs font-mono transition-all flex items-center gap-1.5 ${
+                  activePluginTab === "airtable"
+                    ? "bg-teal-500/20 text-teal-300 border border-teal-500/50 font-bold shadow-[0_0_12px_rgba(20,184,166,0.3)]"
+                    : "bg-white/[0.04] text-neutral-400 hover:text-white border border-white/10"
+                }`}
+              >
+                <Database className="w-3.5 h-3.5 text-[#FCB400]" />
+                <span>Airtable Plugin</span>
+              </button>
+            </div>
 
-                <div className="flex items-center gap-2 flex-wrap w-full md:w-auto justify-start md:justify-end">
-                  {airtableStatus?.connected && airtableStatus.config.baseId && (
-                    <a
-                      href={`https://airtable.com/${airtableStatus.config.baseId}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+            {/* ─── WORDPRESS & WOOCOMMERCE PLUGIN BANNER ─── */}
+            {activePluginTab === "wordpress" && (
+              <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#0d1e2d] via-[#091522] to-[#161226] border border-[#21759B]/40 shadow-lg relative overflow-hidden">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-2xl bg-[#21759B]/20 border border-[#21759B]/40 flex items-center justify-center shrink-0">
+                      <Globe className="w-6 h-6 text-[#21759B]" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-bold text-white text-sm sm:text-base font-cinzel">WordPress &amp; WooCommerce Plugin</h3>
+                        {wpStatus?.connected ? (
+                          <span className="text-[10px] font-mono text-emerald-300 bg-emerald-500/20 border border-emerald-500/40 px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            Connected to {wpStatus.siteName || "WordPress"} ({wpStatus.productCount} WooCommerce items)
+                          </span>
+                        ) : wpStatus?.configured ? (
+                          <span className="text-[10px] font-mono text-amber-300 bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 rounded-full">
+                            Checking WordPress Site...
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-mono text-neutral-400 bg-white/[0.05] border border-white/10 px-2 py-0.5 rounded-full">
+                            Not Connected (100% Free Setup)
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-neutral-400 font-mono mt-0.5">
+                        {wpStatus?.config?.lastSync
+                          ? `Last synced: ${new Date(wpStatus.config.lastSync).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}`
+                          : "WordPress / WooCommerce app se products aur stock manage karein, website par auto-sync hoga."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-wrap w-full md:w-auto justify-start md:justify-end">
+                    {wpStatus?.config?.siteUrl && (
+                      <a
+                        href={`${wpStatus.config.siteUrl}/wp-admin`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs font-mono text-neutral-300 hover:text-white transition-all"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5 text-[#21759B]" />
+                        <span>WP Admin</span>
+                      </a>
+                    )}
+
+                    <button
+                      onClick={handleTriggerWpSync}
+                      disabled={syncingWp || !wpStatus?.config?.hasKeys}
+                      className="cursor-pointer flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#21759B] to-cyan-500 text-white font-bold text-xs font-mono uppercase tracking-wider hover:brightness-110 disabled:opacity-40 transition-all shadow-[0_0_15px_rgba(33,117,155,0.4)]"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${syncingWp ? "animate-spin" : ""}`} />
+                      <span>{syncingWp ? "Syncing..." : "Sync Products"}</span>
+                    </button>
+
+                    <button
+                      onClick={() => { setShowWpModal(true); setWpFeedback(null); }}
                       className="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs font-mono text-neutral-300 hover:text-white transition-all"
                     >
-                      <ExternalLink className="w-3.5 h-3.5 text-[#FCB400]" />
-                      <span>Open in Airtable</span>
-                    </a>
-                  )}
+                      <Settings2 className="w-3.5 h-3.5 text-neutral-400" />
+                      <span>Settings</span>
+                    </button>
+                  </div>
+                </div>
 
-                  <button
-                    onClick={handleTriggerAirtableSync}
-                    disabled={syncingAirtable || !airtableStatus?.configured}
-                    className="cursor-pointer flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-black font-bold text-xs font-mono uppercase tracking-wider hover:brightness-110 disabled:opacity-40 transition-all shadow-[0_0_15px_rgba(20,184,166,0.3)]"
-                  >
-                    <RefreshCw className={`w-3.5 h-3.5 ${syncingAirtable ? "animate-spin" : ""}`} />
-                    <span>{syncingAirtable ? "Syncing..." : "Sync Now"}</span>
-                  </button>
+                {/* Feedback toast */}
+                {wpFeedback && (
+                  <div className={`mt-3 p-2.5 rounded-xl text-xs font-mono flex items-center justify-between ${
+                    wpFeedback.type === "success"
+                      ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-300"
+                      : "bg-rose-500/15 border border-rose-500/30 text-rose-300"
+                  }`}>
+                    <span>{wpFeedback.message}</span>
+                    <button onClick={() => setWpFeedback(null)} className="cursor-pointer ml-2 hover:opacity-75">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
-                  <button
-                    onClick={() => { setShowAirtableModal(true); setAirtableFeedback(null); }}
-                    className="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs font-mono text-neutral-300 hover:text-white transition-all"
-                  >
-                    <Settings2 className="w-3.5 h-3.5 text-neutral-400" />
-                    <span>Config</span>
-                  </button>
+            {/* ─── AIRTABLE LIVE SYNC PLUGIN BANNER ─── */}
+            {activePluginTab === "airtable" && (
+              <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-teal-950/40 via-[#0e1626] to-violet-950/40 border border-teal-500/30 shadow-lg relative overflow-hidden">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-2xl bg-[#FCB400]/10 border border-[#FCB400]/30 flex items-center justify-center shrink-0">
+                      <Database className="w-6 h-6 text-[#FCB400]" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-bold text-white text-sm sm:text-base font-cinzel">Airtable Live Sync Plugin</h3>
+                        {airtableStatus?.connected ? (
+                          <span className="text-[10px] font-mono text-emerald-300 bg-emerald-500/20 border border-emerald-500/40 px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            Live Connected ({airtableStatus.recordCount} records)
+                          </span>
+                        ) : airtableStatus?.configured ? (
+                          <span className="text-[10px] font-mono text-amber-300 bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 rounded-full">
+                            Checking Connection...
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-mono text-neutral-400 bg-white/[0.05] border border-white/10 px-2 py-0.5 rounded-full">
+                            Not Connected (Free Setup Available)
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-neutral-400 font-mono mt-0.5">
+                        {airtableStatus?.config?.lastSync
+                          ? `Last synced: ${new Date(airtableStatus.config.lastSync).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}`
+                          : "Airtable app par stock update karo, website par live update ho jayega."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-wrap w-full md:w-auto justify-start md:justify-end">
+                    {airtableStatus?.connected && airtableStatus.config.baseId && (
+                      <a
+                        href={`https://airtable.com/${airtableStatus.config.baseId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs font-mono text-neutral-300 hover:text-white transition-all"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5 text-[#FCB400]" />
+                        <span>Open in Airtable</span>
+                      </a>
+                    )}
+
+                    <button
+                      onClick={handleTriggerAirtableSync}
+                      disabled={syncingAirtable || !airtableStatus?.configured}
+                      className="cursor-pointer flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-black font-bold text-xs font-mono uppercase tracking-wider hover:brightness-110 disabled:opacity-40 transition-all shadow-[0_0_15px_rgba(20,184,166,0.3)]"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${syncingAirtable ? "animate-spin" : ""}`} />
+                      <span>{syncingAirtable ? "Syncing..." : "Sync Now"}</span>
+                    </button>
+
+                    <button
+                      onClick={() => { setShowAirtableModal(true); setAirtableFeedback(null); }}
+                      className="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs font-mono text-neutral-300 hover:text-white transition-all"
+                    >
+                      <Settings2 className="w-3.5 h-3.5 text-neutral-400" />
+                      <span>Config</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Feedback toast */}
+                {airtableFeedback && (
+                  <div className={`mt-3 p-2.5 rounded-xl text-xs font-mono flex items-center justify-between ${
+                    airtableFeedback.type === "success"
+                      ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-300"
+                      : "bg-rose-500/15 border border-rose-500/30 text-rose-300"
+                  }`}>
+                    <span>{airtableFeedback.message}</span>
+                    <button onClick={() => setAirtableFeedback(null)} className="cursor-pointer ml-2 hover:opacity-75">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ─── WORDPRESS CONFIG MODAL ─── */}
+            {showWpModal && (
+              <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                <div className="w-full max-w-lg p-6 rounded-3xl bg-[#0c0d12] border border-[#21759B]/40 shadow-2xl relative">
+                  <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
+                    <div className="flex items-center gap-2">
+                      <Globe className="w-5 h-5 text-[#21759B]" />
+                      <h3 className="font-cinzel text-lg font-bold text-white">WordPress &amp; WooCommerce Settings</h3>
+                    </div>
+                    <button onClick={() => setShowWpModal(false)} className="cursor-pointer p-1 rounded-lg hover:bg-white/[0.1] text-neutral-400 hover:text-white">
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* 3 Step Guide */}
+                  <div className="mb-5 p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2 text-xs font-mono text-neutral-300">
+                    <div className="font-bold text-cyan-300 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" /> Free WordPress Setup Guide:
+                    </div>
+                    <div className="pl-2 space-y-1 text-neutral-400">
+                      <div>1. Apne WordPress Admin mein jayein aur free <span className="text-white">WooCommerce</span> plugin install karein.</div>
+                      <div>2. <span className="text-white">WooCommerce &rarr; Settings &rarr; Advanced &rarr; REST API</span> mein jayein aur &quot;Add Key&quot; par click karein.</div>
+                      <div>3. Permissions mein <code className="text-amber-300 bg-white/[0.05] px-1 py-0.5 rounded">Read/Write</code> select karke Consumer Key aur Secret neeche paste karein.</div>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleSaveWpSettings} className="space-y-3.5">
+                    <div>
+                      <label className="text-[11px] font-mono uppercase text-neutral-400 block mb-1">
+                        WordPress Site URL *
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. https://aligsware.ct.ws or https://myaligs.wordpress.com"
+                        value={wpSiteUrl}
+                        onChange={(e) => setWpSiteUrl(e.target.value)}
+                        required
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#21759B] font-mono"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-mono uppercase text-neutral-400 block mb-1">
+                        WooCommerce Consumer Key (ck_...)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="ck_XXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+                        value={wpConsumerKey}
+                        onChange={(e) => setWpConsumerKey(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#21759B] font-mono"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-mono uppercase text-neutral-400 block mb-1">
+                        WooCommerce Consumer Secret (cs_...)
+                      </label>
+                      <input
+                        type="password"
+                        placeholder="cs_XXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+                        value={wpConsumerSecret}
+                        onChange={(e) => setWpConsumerSecret(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#21759B] font-mono"
+                      />
+                    </div>
+
+                    <div className="pt-3 border-t border-white/10 flex items-center justify-end gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => setShowWpModal(false)}
+                        className="cursor-pointer px-4 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-mono text-neutral-400 hover:text-white"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={wpSaving || !wpSiteUrl}
+                        className="cursor-pointer flex items-center gap-1.5 px-5 py-2 rounded-xl bg-gradient-to-r from-[#21759B] to-cyan-500 text-white font-bold text-xs font-mono uppercase tracking-wider hover:brightness-110 disabled:opacity-40 shadow-[0_0_15px_rgba(33,117,155,0.4)]"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>{wpSaving ? "Testing & Saving..." : "Connect & Save"}</span>
+                      </button>
+                    </div>
+                  </form>
                 </div>
               </div>
-
-              {/* Feedback toast */}
-              {airtableFeedback && (
-                <div className={`mt-3 p-2.5 rounded-xl text-xs font-mono flex items-center justify-between ${
-                  airtableFeedback.type === "success"
-                    ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-300"
-                    : "bg-rose-500/15 border border-rose-500/30 text-rose-300"
-                }`}>
-                  <span>{airtableFeedback.message}</span>
-                  <button onClick={() => setAirtableFeedback(null)} className="cursor-pointer ml-2 hover:opacity-75">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              )}
-            </div>
+            )}
 
             {/* ─── AIRTABLE CONFIG MODAL ─── */}
             {showAirtableModal && (
@@ -945,9 +1251,13 @@ export default function AdminDashboardPage() {
                 <Archive className="w-12 h-12 text-neutral-600 mx-auto mb-3" />
                 <h3 className="text-lg font-cinzel text-white">Inventory Khali Hai</h3>
                 <p className="text-xs text-neutral-400 font-mono mt-1 mb-4">
-                  Airtable connect karke live sync karein ya direct naya product add karein.
+                  WordPress / WooCommerce ya Airtable connect karke products sync karein, ya manual add karein.
                 </p>
                 <div className="flex items-center justify-center gap-3 flex-wrap">
+                  <button onClick={() => setShowWpModal(true)}
+                    className="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#21759B]/20 hover:bg-[#21759B]/30 border border-[#21759B]/40 text-cyan-300 text-xs font-mono transition-all">
+                    <Globe className="w-4 h-4 text-[#21759B]" />WordPress Connect Karein
+                  </button>
                   <button onClick={() => setShowAirtableModal(true)}
                     className="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 border border-teal-500/40 text-teal-300 text-xs font-mono transition-all">
                     <Database className="w-4 h-4 text-[#FCB400]" />Airtable Connect Karein
@@ -976,15 +1286,21 @@ export default function AdminDashboardPage() {
                     const isLow = item.stock <= item.lowStockThreshold;
                     const isOut = item.stock === 0;
                     const isAirtableItem = item.id.startsWith("rec");
+                    const isWcItem = item.id.startsWith("wc-");
                     return (
                       <div key={item.id} className="grid grid-cols-12 gap-2 px-4 py-3 hover:bg-white/[0.02] transition-colors items-center">
                         {/* Product name + sku */}
                         <div className="col-span-4">
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-1.5 flex-wrap">
                             <span className="text-sm font-medium text-white leading-tight">{item.name}</span>
                             {isAirtableItem && (
                               <span className="text-[9px] font-mono text-[#FCB400] bg-[#FCB400]/10 border border-[#FCB400]/30 px-1.5 py-0.2 rounded shrink-0">
                                 Airtable
+                              </span>
+                            )}
+                            {isWcItem && (
+                              <span className="text-[9px] font-mono text-cyan-300 bg-[#21759B]/20 border border-[#21759B]/40 px-1.5 py-0.2 rounded shrink-0">
+                                WooCommerce
                               </span>
                             )}
                           </div>

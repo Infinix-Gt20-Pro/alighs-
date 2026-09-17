@@ -1,7 +1,7 @@
 // src/components/ModelScrollExperience.tsx
 "use client";
 
-import React, { useRef, useState, useSyncExternalStore } from "react";
+import React, { useRef, useState, useEffect, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Canvas, useFrame } from "@react-three/fiber";
@@ -19,7 +19,8 @@ import {
   Maximize2,
   RotateCw,
   Zap,
-  MessageCircle
+  Play,
+  Film
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 
@@ -41,7 +42,6 @@ function InteractiveScrollGlasses({
   const leftLensRef = useRef<THREE.Mesh>(null);
   const rightLensRef = useRef<THREE.Mesh>(null);
 
-  // Optical physical lens material with sapphire blue-cut refraction
   const lensMaterial = React.useMemo(() => {
     return new THREE.MeshPhysicalMaterial({
       color: "#e0f2fe",
@@ -69,10 +69,8 @@ function InteractiveScrollGlasses({
 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
-    const p = scrollProgress.current; // 0.0 to 1.0
+    const p = scrollProgress.current;
 
-    // Smooth lerp rotation based on scroll progress
-    // Early: high angle 3D tilt -> Mid: perfectly face-on at the model's eyes -> Late: slight showcase angle
     const targetRotX = p < 0.35 ? THREE.MathUtils.lerp(0.4, 0.0, p / 0.35) : THREE.MathUtils.lerp(0.0, -0.15, (p - 0.35) / 0.65);
     const targetRotY = p < 0.5 ? THREE.MathUtils.lerp(-0.7, 0.0, p / 0.5) : THREE.MathUtils.lerp(0.0, 0.4, (p - 0.5) / 0.5);
     const targetScale = p < 0.4 ? THREE.MathUtils.lerp(1.5, 1.25, p / 0.4) : THREE.MathUtils.lerp(1.25, 1.45, (p - 0.4) / 0.6);
@@ -87,39 +85,31 @@ function InteractiveScrollGlasses({
   return (
     <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.25}>
       <group ref={groupRef} position={[0, 0.2, 0]}>
-        {/* Left Eye Rim */}
         <mesh position={[-0.95, 0, 0]} material={frameMaterial}>
           <torusGeometry args={[0.72, 0.045, 24, 64]} />
         </mesh>
-        {/* Left Lens */}
         <mesh ref={leftLensRef} position={[-0.95, 0, 0]} material={lensMaterial}>
           <cylinderGeometry args={[0.7, 0.7, 0.02, 48]} />
         </mesh>
 
-        {/* Right Eye Rim */}
         <mesh position={[0.95, 0, 0]} material={frameMaterial}>
           <torusGeometry args={[0.72, 0.045, 24, 64]} />
         </mesh>
-        {/* Right Lens */}
         <mesh ref={rightLensRef} position={[0.95, 0, 0]} material={lensMaterial}>
           <cylinderGeometry args={[0.7, 0.7, 0.02, 48]} />
         </mesh>
 
-        {/* Nose Bridge with architectural arch */}
         <mesh position={[0, 0.25, 0.02]} rotation={[0, 0, Math.PI / 2]} material={frameMaterial}>
           <cylinderGeometry args={[0.038, 0.038, 0.48, 20]} />
         </mesh>
 
-        {/* Left Temple Bar */}
         <mesh position={[-1.7, 0.12, -1.0]} rotation={[0, 0.18, 0]} material={frameMaterial}>
           <boxGeometry args={[0.04, 0.04, 2.0]} />
         </mesh>
-        {/* Right Temple Bar */}
         <mesh position={[1.7, 0.12, -1.0]} rotation={[0, -0.18, 0]} material={frameMaterial}>
           <boxGeometry args={[0.04, 0.04, 2.0]} />
         </mesh>
 
-        {/* Golden Hinge Accents */}
         <mesh position={[-1.68, 0.12, 0]} material={frameMaterial}>
           <sphereGeometry args={[0.065, 16, 16]} />
         </mesh>
@@ -132,6 +122,21 @@ function InteractiveScrollGlasses({
 }
 
 const MODELS = [
+  {
+    id: "cinema",
+    name: "Motion Reel",
+    label: "Putting On Glasses",
+    video: "/videos/man-putting-on-glasses.mp4",
+    image: "/images/model-dark.jpg",
+    frameName: "Imperial Classic Titanium",
+    slug: "nocturne-bold-clubmaster",
+    price: 2799,
+    originalPrice: 4599,
+    finishColor: "#D4AF37",
+    colorName: "24K Champagne Gold",
+    tagline: "Live Motion Capture: High-definition 1080p study of eyewear resting naturally on the facial profile",
+    spec: "Ergonomic Curve • 18g Weight • Lens 52mm • Bridge 19mm"
+  },
   {
     id: "elena",
     name: "Elena Rostova",
@@ -164,6 +169,7 @@ const MODELS = [
 
 export default function ModelScrollExperience() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const progressRef = useRef(0);
   const [activeModelIdx, setActiveModelIdx] = useState(0);
   const [addedNotice, setAddedNotice] = useState(false);
@@ -183,14 +189,22 @@ export default function ModelScrollExperience() {
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     progressRef.current = latest;
+
+    // Scroll-scrub video playback if active model has video
+    if (videoRef.current && MODELS[activeModelIdx].video && videoRef.current.duration) {
+      const duration = videoRef.current.duration;
+      // Map scroll progress to video duration with gentle easing
+      const targetTime = latest * duration;
+      if (!isNaN(targetTime)) {
+        videoRef.current.currentTime = targetTime;
+      }
+    }
   });
 
-  // Dynamic transforms based on scroll
-  const modelScale = useTransform(scrollYProgress, [0, 0.45, 1], [1.0, 1.08, 1.15]);
+  const modelScale = useTransform(scrollYProgress, [0, 0.45, 1], [1.0, 1.06, 1.14]);
   const modelOpacity = useTransform(scrollYProgress, [0, 0.1, 0.85, 1], [0.85, 1, 1, 0.75]);
-  const overlayDarkness = useTransform(scrollYProgress, [0, 0.4, 0.85], [0.15, 0.4, 0.65]);
+  const overlayDarkness = useTransform(scrollYProgress, [0, 0.4, 0.85], [0.2, 0.35, 0.6]);
 
-  // Floating text badges fade in and out at specific scroll milestones
   const phase1Opacity = useTransform(scrollYProgress, [0.05, 0.22, 0.35], [0, 1, 0]);
   const phase1Y = useTransform(scrollYProgress, [0.05, 0.22, 0.35], [30, 0, -20]);
 
@@ -243,21 +257,21 @@ export default function ModelScrollExperience() {
           </div>
 
           {/* Model Switcher Buttons */}
-          <div className="pointer-events-auto flex items-center gap-2 bg-black/60 p-1.5 rounded-full border border-white/10 backdrop-blur-xl shadow-2xl">
+          <div className="pointer-events-auto flex flex-wrap justify-center items-center gap-2 bg-black/70 p-1.5 rounded-full border border-white/10 backdrop-blur-xl shadow-2xl">
             {MODELS.map((m, idx) => {
               const isSelected = activeModelIdx === idx;
               return (
                 <button
                   key={m.id}
                   onClick={() => setActiveModelIdx(idx)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-mono transition-all flex items-center gap-2 ${
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-mono transition-all flex items-center gap-2 ${
                     isSelected
                       ? "bg-gradient-to-r from-amber-400 to-amber-500 text-black font-bold shadow-[0_0_15px_rgba(212,175,55,0.4)]"
                       : "text-zinc-400 hover:text-white"
                   }`}
                 >
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: m.finishColor }} />
-                  {m.name} ({m.frameName.split(" ")[0]})
+                  {m.video ? <Film className="w-3 h-3 text-amber-400" /> : <span className="w-2 h-2 rounded-full" style={{ backgroundColor: m.finishColor }} />}
+                  {m.name}
                 </button>
               );
             })}
@@ -265,7 +279,7 @@ export default function ModelScrollExperience() {
         </div>
 
         {/* ====================================================================
-            REAL EDITORIAL MODEL PHOTO WITH DYNAMIC SCROLL PARALLAX
+            REAL EDITORIAL MODEL PHOTO OR MOTION VIDEO WITH DYNAMIC SCROLL PARALLAX
             ==================================================================== */}
         <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
           <motion.div
@@ -281,14 +295,26 @@ export default function ModelScrollExperience() {
                 transition={{ duration: 0.6 }}
                 className="relative w-full h-full max-h-[85vh] sm:max-h-[90vh] rounded-3xl overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.9)]"
               >
-                <Image
-                  src={activeModel.image}
-                  alt={activeModel.name}
-                  fill
-                  priority
-                  className="object-contain object-center brightness-95 contrast-105"
-                  sizes="(max-width: 1024px) 100vw, 1200px"
-                />
+                {activeModel.video ? (
+                  <video
+                    ref={videoRef}
+                    muted
+                    playsInline
+                    preload="auto"
+                    className="w-full h-full object-cover object-center brightness-90 contrast-105"
+                  >
+                    <source src={activeModel.video} type="video/mp4" />
+                  </video>
+                ) : (
+                  <Image
+                    src={activeModel.image}
+                    alt={activeModel.name}
+                    fill
+                    priority
+                    className="object-contain object-center brightness-95 contrast-105"
+                    sizes="(max-width: 1024px) 100vw, 1200px"
+                  />
+                )}
 
                 {/* Dark Vignette and Gradient Overlays */}
                 <motion.div
@@ -298,7 +324,7 @@ export default function ModelScrollExperience() {
                 <div className="absolute inset-0 bg-gradient-to-t from-[#070709] via-transparent to-[#070709]/80 pointer-events-none" />
                 <div className="absolute inset-0 bg-gradient-to-r from-[#070709] via-transparent to-[#070709] pointer-events-none" />
 
-                {/* Blue-Cut Sapphire Optical Sheen Simulation (Toggled or Animated) */}
+                {/* Blue-Cut Sapphire Optical Sheen Simulation */}
                 {blueCutActive && (
                   <motion.div
                     animate={{ opacity: [0.35, 0.65, 0.35] }}
@@ -354,15 +380,15 @@ export default function ModelScrollExperience() {
               <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
               <span>01 • ATELIER SILHOUETTE</span>
             </div>
-            <h3 className="text-2xl font-serif font-bold text-white mb-2">
-              Worn by {activeModel.name}
+            <h3 className="font-cinzel text-xl sm:text-2xl font-bold text-white mb-2">
+              {activeModel.name}
             </h3>
             <p className="text-xs text-zinc-300 leading-relaxed mb-4">
               {activeModel.tagline}. Designed to mold gracefully to distinct Indian facial bone structures.
             </p>
             <div className="flex items-center gap-2 text-[11px] font-mono text-zinc-400 border-t border-white/5 pt-3">
               <Eye className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Scroll down to initiate 3D Glass Orbit</span>
+              <span>Scroll down to control live frame placement</span>
             </div>
           </div>
         </motion.div>
@@ -377,7 +403,7 @@ export default function ModelScrollExperience() {
               <RotateCw className="w-3.5 h-3.5 animate-spin" />
               <span>02 • REAL-TIME 3D ALIGNMENT</span>
             </div>
-            <h3 className="text-2xl font-serif font-bold text-white mb-2">
+            <h3 className="font-cinzel text-xl sm:text-2xl font-bold text-white mb-2">
               {activeModel.frameName}
             </h3>
             <p className="text-xs text-zinc-300 leading-relaxed mb-4">
@@ -410,7 +436,7 @@ export default function ModelScrollExperience() {
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                 <span>IN STOCK • READY FOR DISPATCH</span>
               </div>
-              <h4 className="text-xl sm:text-2xl font-serif font-bold text-white">
+              <h4 className="font-cinzel text-xl sm:text-2xl font-bold text-white">
                 {activeModel.frameName}
               </h4>
               <div className="flex items-baseline justify-center sm:justify-start gap-3 mt-1">

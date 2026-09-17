@@ -59,11 +59,37 @@ export default function HeroSection() {
   const bgOrbY1 = useTransform(scrollYProgress, [0, 1], [0, -120]);
   const bgOrbY2 = useTransform(scrollYProgress, [0, 1], [0, 140]);
 
+  // Cinematic Video Scroll Parallax & Zoom
+  const videoY = useTransform(scrollYProgress, [0, 1], [0, 140]);
+  const videoScale = useTransform(scrollYProgress, [0, 1], [1.02, 1.24]);
+  const videoOpacity = useTransform(scrollYProgress, [0, 0.7, 1], [0.55, 0.35, 0.05]);
+
   return (
     <section
       ref={sectionRef}
       className="relative min-h-[96vh] flex flex-col items-center justify-start overflow-hidden px-4 sm:px-6 pt-10 sm:pt-14 pb-20"
     >
+      {/* Cinematic Editorial Video Background with Scroll Parallax */}
+      <motion.div
+        style={{ y: videoY, scale: videoScale, opacity: videoOpacity }}
+        className="absolute inset-0 pointer-events-none z-0 overflow-hidden"
+      >
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover object-center brightness-55 contrast-110"
+        >
+          <source src="/videos/man-putting-on-glasses.mp4" type="video/mp4" />
+        </video>
+
+        {/* Deep Luxury Obsidian Gradients for seamless integration */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#070709] via-transparent to-[#070709]/80 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#070709] via-transparent to-[#070709] pointer-events-none" />
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] pointer-events-none" />
+      </motion.div>
+
       {/* Dynamic Ambient Background Aura with Parallax Motion */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
         <motion.div

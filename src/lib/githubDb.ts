@@ -28,10 +28,19 @@ interface InventoryItem {
   updatedAt: string;
 }
 
+interface AirtableConfigData {
+  apiKey?: string;
+  baseId?: string;
+  tableName?: string;
+  syncEnabled?: boolean;
+  lastSync?: string;
+}
+
 interface DbData {
   orders: Record<string, unknown>[];
   appointments: Record<string, unknown>[];
   inventory: InventoryItem[];
+  airtableConfig?: AirtableConfigData;
 }
 
 
@@ -182,3 +191,40 @@ export async function dbUpdateInventoryStock(id: string, stock: number): Promise
   const newData: DbData = { ...file.data, inventory };
   return writeFileContent(newData, file.sha, `inv: stock update ${id} -> ${stock}`);
 }
+
+/** Bulk replace inventory (used for full sync with Airtable) */
+export async function dbSetInventory(items: InventoryItem[]): Promise<boolean> {
+  const file = await getFileInfo();
+  if (!file) return false;
+  const newData: DbData = { ...file.data, inventory: items };
+  return writeFileContent(newData, file.sha, `inv: bulk sync ${items.length} items from Airtable`);
+}
+
+/** Get saved Airtable configuration */
+export async function dbGetAirtableConfig(): Promise<AirtableConfigData> {
+  const file = await getFileInfo();
+  if (!file || !file.data.airtableConfig) {
+    return {
+      apiKey: process.env.AIRTABLE_PERSONAL_ACCESS_TOKEN || process.env.AIRTABLE_API_KEY || '',
+      baseId: process.env.AIRTABLE_BASE_ID || '',
+      tableName: process.env.AIRTABLE_TABLE_NAME || 'Inventory',
+      syncEnabled: true,
+    };
+  }
+  return file.data.airtableConfig;
+}
+
+/** Save Airtable configuration to persistent DB */
+export async function dbSaveAirtableConfig(config: AirtableConfigData): Promise<boolean> {
+  const file = await getFileInfo();
+  if (!file) return false;
+  const newData: DbData = {
+    ...file.data,
+    airtableConfig: {
+      ...file.data.airtableConfig,
+      ...config,
+    },
+  };
+  return writeFileContent(newData, file.sha, `airtable: update config (table ${config.tableName || 'Inventory'})`);
+}
+

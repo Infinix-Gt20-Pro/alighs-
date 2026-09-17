@@ -7,7 +7,8 @@ import {
   ShieldCheck, Package, Calendar, Phone, MessageCircle, Clock,
   RefreshCw, Search, CheckCircle2, Truck, ExternalLink, Lock,
   LogOut, MapPin, TrendingUp, Archive, Plus, Trash2, Pencil,
-  AlertTriangle, X, ChevronDown, ChevronUp, Layers
+  AlertTriangle, X, Settings2, Sparkles, Database, ArrowRight,
+  SlidersHorizontal, Check
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -58,6 +59,20 @@ interface InventoryItem {
   updatedAt: string;
 }
 
+interface AirtableStatusInfo {
+  configured: boolean;
+  connected: boolean;
+  recordCount: number;
+  error?: string;
+  config: {
+    baseId?: string;
+    tableName?: string;
+    maskedKey?: string;
+    syncEnabled?: boolean;
+    lastSync?: string | null;
+  };
+}
+
 const CATEGORIES = ["Eyeglasses", "Sunglasses", "Computer Glasses", "Kids Glasses", "Sports Glasses", "Lens Only", "Accessories"];
 const FRAME_SHAPES = ["Rectangle", "Round", "Oval", "Square", "Cat-Eye", "Aviator", "Clubmaster", "Hexagonal", "Wayfarer", "Rimless"];
 
@@ -93,6 +108,16 @@ export default function AdminDashboardPage() {
   const [stockEditId, setStockEditId] = useState<string | null>(null);
   const [stockEditVal, setStockEditVal] = useState<number>(0);
 
+  // ─── Airtable Plugin State ──────────────────────────────────────────────────
+  const [airtableStatus, setAirtableStatus] = useState<AirtableStatusInfo | null>(null);
+  const [showAirtableModal, setShowAirtableModal] = useState(false);
+  const [syncingAirtable, setSyncingAirtable] = useState(false);
+  const [airtableApiKey, setAirtableApiKey] = useState("");
+  const [airtableBaseId, setAirtableBaseId] = useState("");
+  const [airtableTableName, setAirtableTableName] = useState("Inventory");
+  const [airtableSaving, setAirtableSaving] = useState(false);
+  const [airtableFeedback, setAirtableFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
   // Check persisted auth
   useEffect(() => {
     const saved = localStorage.getItem("aligs_admin_authenticated");
@@ -118,6 +143,20 @@ export default function AdminDashboardPage() {
   };
 
   // ─── Fetch Data ─────────────────────────────────────────────────────────────
+  const fetchAirtableStatus = useCallback(async () => {
+    try {
+      const res = await fetch("/api/inventory/airtable");
+      if (res.ok) {
+        const data: AirtableStatusInfo = await res.json();
+        setAirtableStatus(data);
+        if (data.config.baseId) setAirtableBaseId(data.config.baseId);
+        if (data.config.tableName) setAirtableTableName(data.config.tableName);
+      }
+    } catch (err) {
+      console.error("Error checking Airtable status:", err);
+    }
+  }, []);
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -129,9 +168,10 @@ export default function AdminDashboardPage() {
       if (resOrders.ok) { const d = await resOrders.json(); setOrders(d.orders || []); }
       if (resApts.ok)   { const d = await resApts.json();   setAppointments(d.appointments || []); }
       if (resInv.ok)    { const d = await resInv.json();    setInventory(d.items || []); }
+      await fetchAirtableStatus();
     } catch (err) { console.error("Error fetching admin data:", err); }
     finally { setLoading(false); }
-  }, []);
+  }, [fetchAirtableStatus]);
 
   useEffect(() => { if (isAuthenticated) fetchData(); }, [isAuthenticated, fetchData]);
 
@@ -204,6 +244,14 @@ export default function AdminDashboardPage() {
     if (res.ok) {
       setInventory((prev) => prev.map((i) => i.id === id ? { ...i, stock: stockEditVal } : i));
       setStockEditId(null);
+      // Also update Airtable if record starts with 'rec'
+      if (id.startsWith("rec")) {
+        fetch("/api/inventory/airtable", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ recordId: id, stock: stockEditVal }),
+        }).catch((e) => console.warn("Airtable sync note:", e));
+      }
     }
   };
 
@@ -223,6 +271,64 @@ export default function AdminDashboardPage() {
   };
 
   const removeColor = (c: string) => setFormData((p) => ({ ...p, colors: (p.colors || []).filter((x) => x !== c) }));
+
+  // ─── Airtable Plugin Handlers ───────────────────────────────────────────────
+  const handleTriggerAirtableSync = async () => {
+    setSyncingAirtable(true);
+    setAirtableFeedback(null);
+    try {
+      const res = await fetch("/api/inventory/airtable", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "sync" }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setAirtableFeedback({ type: "success", message: data.message || "Airtable se live sync safal raha!" });
+        if (data.items) setInventory(data.items);
+        await fetchAirtableStatus();
+      } else {
+        setAirtableFeedback({ type: "error", message: data.error || "Sync fail hua." });
+      }
+    } catch (err) {
+      setAirtableFeedback({ type: "error", message: "Network error during Airtable sync." });
+    } finally {
+      setSyncingAirtable(false);
+    }
+  };
+
+  const handleSaveAirtableSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAirtableSaving(true);
+    setAirtableFeedback(null);
+    try {
+      const res = await fetch("/api/inventory/airtable", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "save_config",
+          apiKey: airtableApiKey,
+          baseId: airtableBaseId,
+          tableName: airtableTableName || "Inventory",
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setAirtableFeedback({ type: "success", message: "Airtable successfully connect ho gaya!" });
+        setAirtableApiKey("");
+        setShowAirtableModal(false);
+        await fetchAirtableStatus();
+        // Trigger initial sync automatically
+        handleTriggerAirtableSync();
+      } else {
+        setAirtableFeedback({ type: "error", message: data.error || "Airtable settings save nahi ho saki." });
+      }
+    } catch {
+      setAirtableFeedback({ type: "error", message: "Network error while saving settings." });
+    } finally {
+      setAirtableSaving(false);
+    }
+  };
 
   // ─── Computed Values ─────────────────────────────────────────────────────────
   const totalRevenue = useMemo(() => orders.reduce((s, o) => s + (Number(o.totalAmount) || 0), 0), [orders]);
@@ -336,7 +442,7 @@ export default function AdminDashboardPage() {
             {[
               { key: "orders", label: `Customer Orders (${orders.length})`, icon: <Package className="w-3.5 h-3.5" />, active: "from-amber-400 to-amber-500 text-black shadow-[0_0_15px_rgba(212,175,55,0.4)]" },
               { key: "appointments", label: `Appointments (${appointments.length})`, icon: <Calendar className="w-3.5 h-3.5" />, active: "from-cyan-400 to-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]" },
-              { key: "inventory", label: `Inventory (${inventory.length})${lowStockCount > 0 ? ` ⚠ ${lowStockCount}` : ""}`, icon: <Archive className="w-3.5 h-3.5" />, active: "from-violet-400 to-violet-500 text-black shadow-[0_0_15px_rgba(139,92,246,0.4)]" },
+              { key: "inventory", label: `Inventory & Airtable (${inventory.length})${lowStockCount > 0 ? ` ⚠ ${lowStockCount}` : ""}`, icon: <Archive className="w-3.5 h-3.5" />, active: "from-violet-400 to-violet-500 text-black shadow-[0_0_15px_rgba(139,92,246,0.4)]" },
             ].map((tab) => (
               <button key={tab.key} onClick={() => setActiveTab(tab.key as typeof activeTab)}
                 className={`cursor-pointer px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 ${
@@ -367,8 +473,8 @@ export default function AdminDashboardPage() {
           )}
 
           {activeTab === "inventory" && (
-            <div className="flex items-center gap-2.5 w-full sm:w-auto">
-              <div className="relative flex-1 sm:w-52">
+            <div className="flex items-center gap-2.5 w-full sm:w-auto flex-wrap">
+              <div className="relative flex-1 sm:w-48">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500" />
                 <input type="text" placeholder="Search products..." value={invSearch} onChange={(e) => setInvSearch(e.target.value)}
                   className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-violet-400 font-mono" />
@@ -531,6 +637,181 @@ export default function AdminDashboardPage() {
         {/* ══════════════════════════════════════════════════════ TAB: INVENTORY */}
         {activeTab === "inventory" && (
           <div>
+            {/* ─── AIRTABLE LIVE SYNC PLUGIN BANNER ─── */}
+            <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-teal-950/40 via-[#0e1626] to-violet-950/40 border border-teal-500/30 shadow-lg relative overflow-hidden">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-11 h-11 rounded-2xl bg-[#FCB400]/10 border border-[#FCB400]/30 flex items-center justify-center shrink-0">
+                    <Database className="w-6 h-6 text-[#FCB400]" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-bold text-white text-sm sm:text-base font-cinzel">Airtable Live Sync Plugin</h3>
+                      {airtableStatus?.connected ? (
+                        <span className="text-[10px] font-mono text-emerald-300 bg-emerald-500/20 border border-emerald-500/40 px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          Live Connected ({airtableStatus.recordCount} records)
+                        </span>
+                      ) : airtableStatus?.configured ? (
+                        <span className="text-[10px] font-mono text-amber-300 bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 rounded-full">
+                          Checking Connection...
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-mono text-neutral-400 bg-white/[0.05] border border-white/10 px-2 py-0.5 rounded-full">
+                          Not Connected (Free Setup Available)
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-neutral-400 font-mono mt-0.5">
+                      {airtableStatus?.config?.lastSync
+                        ? `Last synced: ${new Date(airtableStatus.config.lastSync).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}`
+                        : "Airtable app par stock update karo, website par live update ho jayega."}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 flex-wrap w-full md:w-auto justify-start md:justify-end">
+                  {airtableStatus?.connected && airtableStatus.config.baseId && (
+                    <a
+                      href={`https://airtable.com/${airtableStatus.config.baseId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs font-mono text-neutral-300 hover:text-white transition-all"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5 text-[#FCB400]" />
+                      <span>Open in Airtable</span>
+                    </a>
+                  )}
+
+                  <button
+                    onClick={handleTriggerAirtableSync}
+                    disabled={syncingAirtable || !airtableStatus?.configured}
+                    className="cursor-pointer flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-black font-bold text-xs font-mono uppercase tracking-wider hover:brightness-110 disabled:opacity-40 transition-all shadow-[0_0_15px_rgba(20,184,166,0.3)]"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${syncingAirtable ? "animate-spin" : ""}`} />
+                    <span>{syncingAirtable ? "Syncing..." : "Sync Now"}</span>
+                  </button>
+
+                  <button
+                    onClick={() => { setShowAirtableModal(true); setAirtableFeedback(null); }}
+                    className="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs font-mono text-neutral-300 hover:text-white transition-all"
+                  >
+                    <Settings2 className="w-3.5 h-3.5 text-neutral-400" />
+                    <span>Config</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Feedback toast */}
+              {airtableFeedback && (
+                <div className={`mt-3 p-2.5 rounded-xl text-xs font-mono flex items-center justify-between ${
+                  airtableFeedback.type === "success"
+                    ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-300"
+                    : "bg-rose-500/15 border border-rose-500/30 text-rose-300"
+                }`}>
+                  <span>{airtableFeedback.message}</span>
+                  <button onClick={() => setAirtableFeedback(null)} className="cursor-pointer ml-2 hover:opacity-75">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* ─── AIRTABLE CONFIG MODAL ─── */}
+            {showAirtableModal && (
+              <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                <div className="w-full max-w-lg p-6 rounded-3xl bg-[#0c0d12] border border-teal-500/40 shadow-2xl relative">
+                  <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
+                    <div className="flex items-center gap-2">
+                      <Database className="w-5 h-5 text-[#FCB400]" />
+                      <h3 className="font-cinzel text-lg font-bold text-white">Airtable Plugin Settings</h3>
+                    </div>
+                    <button onClick={() => setShowAirtableModal(false)} className="cursor-pointer p-1 rounded-lg hover:bg-white/[0.1] text-neutral-400 hover:text-white">
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* 3 Step Guide */}
+                  <div className="mb-5 p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2 text-xs font-mono text-neutral-300">
+                    <div className="font-bold text-teal-300 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" /> 3 Step Free Setup Guide:
+                    </div>
+                    <div className="pl-2 space-y-1 text-neutral-400">
+                      <div>1. <a href="https://airtable.com" target="_blank" rel="noopener noreferrer" className="text-teal-400 underline">airtable.com</a> par free account banayein aur ek Base banayein.</div>
+                      <div>2. Table ka naam <code className="text-amber-300 bg-white/[0.05] px-1 py-0.5 rounded">Inventory</code> rakhein with columns: <span className="text-white">Name, Category, Price, Stock, SKU</span>.</div>
+                      <div>3. <a href="https://airtable.com/create/tokens" target="_blank" rel="noopener noreferrer" className="text-teal-400 underline">airtable.com/create/tokens</a> se Access Token generate karke neeche paste karein.</div>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleSaveAirtableSettings} className="space-y-3.5">
+                    <div>
+                      <label className="text-[11px] font-mono uppercase text-neutral-400 block mb-1">
+                        Personal Access Token *
+                      </label>
+                      <input
+                        type="password"
+                        placeholder={airtableStatus?.config?.maskedKey || "pat... (Airtable Token)"}
+                        value={airtableApiKey}
+                        onChange={(e) => setAirtableApiKey(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-teal-400 font-mono"
+                      />
+                      <span className="text-[10px] text-neutral-500 font-mono mt-0.5 block">
+                        Scopes chahiye: <code className="text-teal-300">data.records:read</code>, <code className="text-teal-300">data.records:write</code>
+                      </span>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-mono uppercase text-neutral-400 block mb-1">
+                        Base ID (starts with &apos;app&apos;) *
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. appXXXXXXXXXXXXXX"
+                        value={airtableBaseId}
+                        onChange={(e) => setAirtableBaseId(e.target.value)}
+                        required
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-teal-400 font-mono"
+                      />
+                      <span className="text-[10px] text-neutral-500 font-mono mt-0.5 block">
+                        Apne Airtable base URL mein dekhein: <code className="text-neutral-400">airtable.com/appXXXXXXXX/...</code>
+                      </span>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-mono uppercase text-neutral-400 block mb-1">
+                        Table Name
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Inventory"
+                        value={airtableTableName}
+                        onChange={(e) => setAirtableTableName(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-teal-400 font-mono"
+                      />
+                    </div>
+
+                    <div className="pt-3 border-t border-white/10 flex items-center justify-end gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => setShowAirtableModal(false)}
+                        className="cursor-pointer px-4 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-mono text-neutral-400 hover:text-white"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={airtableSaving || !airtableBaseId}
+                        className="cursor-pointer flex items-center gap-1.5 px-5 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-black font-bold text-xs font-mono uppercase tracking-wider hover:brightness-110 disabled:opacity-40 shadow-[0_0_15px_rgba(20,184,166,0.3)]"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>{airtableSaving ? "Testing & Saving..." : "Connect & Save"}</span>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+
             {/* ADD / EDIT FORM */}
             {showAddForm && (
               <div className="mb-6 p-5 rounded-2xl bg-violet-500/5 border border-violet-500/30">
@@ -663,11 +944,19 @@ export default function AdminDashboardPage() {
               <div className="p-12 text-center rounded-3xl bg-white/[0.02] border border-white/10">
                 <Archive className="w-12 h-12 text-neutral-600 mx-auto mb-3" />
                 <h3 className="text-lg font-cinzel text-white">Inventory Khali Hai</h3>
-                <p className="text-xs text-neutral-400 font-mono mt-1 mb-4">Apne eyewear products add karein toh stock track ho sake.</p>
-                <button onClick={() => { setShowAddForm(true); setEditingItem(null); setFormData(blankForm()); }}
-                  className="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/40 text-violet-300 text-xs font-mono transition-all">
-                  <Plus className="w-4 h-4" />Pehla Product Add Karein
-                </button>
+                <p className="text-xs text-neutral-400 font-mono mt-1 mb-4">
+                  Airtable connect karke live sync karein ya direct naya product add karein.
+                </p>
+                <div className="flex items-center justify-center gap-3 flex-wrap">
+                  <button onClick={() => setShowAirtableModal(true)}
+                    className="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 border border-teal-500/40 text-teal-300 text-xs font-mono transition-all">
+                    <Database className="w-4 h-4 text-[#FCB400]" />Airtable Connect Karein
+                  </button>
+                  <button onClick={() => { setShowAddForm(true); setEditingItem(null); setFormData(blankForm()); }}
+                    className="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/40 text-violet-300 text-xs font-mono transition-all">
+                    <Plus className="w-4 h-4" />Manual Product Add Karein
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="rounded-2xl border border-white/10 overflow-hidden">
@@ -676,7 +965,7 @@ export default function AdminDashboardPage() {
                   <div className="col-span-4">Product</div>
                   <div className="col-span-2">Category</div>
                   <div className="col-span-1 text-right">Price</div>
-                  <div className="col-span-2 text-center">Stock</div>
+                  <div className="col-span-2 text-center">Stock (Editable)</div>
                   <div className="col-span-1 text-center">Status</div>
                   <div className="col-span-2 text-right">Actions</div>
                 </div>
@@ -686,11 +975,19 @@ export default function AdminDashboardPage() {
                   {filteredInventory.map((item) => {
                     const isLow = item.stock <= item.lowStockThreshold;
                     const isOut = item.stock === 0;
+                    const isAirtableItem = item.id.startsWith("rec");
                     return (
                       <div key={item.id} className="grid grid-cols-12 gap-2 px-4 py-3 hover:bg-white/[0.02] transition-colors items-center">
                         {/* Product name + sku */}
                         <div className="col-span-4">
-                          <div className="text-sm font-medium text-white leading-tight">{item.name}</div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-sm font-medium text-white leading-tight">{item.name}</span>
+                            {isAirtableItem && (
+                              <span className="text-[9px] font-mono text-[#FCB400] bg-[#FCB400]/10 border border-[#FCB400]/30 px-1.5 py-0.2 rounded shrink-0">
+                                Airtable
+                              </span>
+                            )}
+                          </div>
                           <div className="flex items-center gap-1.5 mt-0.5">
                             {item.sku && <span className="text-[10px] font-mono text-neutral-500">{item.sku}</span>}
                             {item.frameShape && <span className="text-[10px] font-mono text-violet-400/80">{item.frameShape}</span>}
@@ -762,7 +1059,7 @@ export default function AdminDashboardPage() {
                 </div>
 
                 {/* Table Footer */}
-                <div className="px-4 py-3 bg-white/[0.02] border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-neutral-500">
+                <div className="px-4 py-3 bg-white/[0.02] border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-neutral-500 flex-wrap gap-2">
                   <span>{filteredInventory.length} products showing</span>
                   <div className="flex items-center gap-4">
                     <span className="text-emerald-400">{inventory.filter((i) => i.stock > i.lowStockThreshold).length} in stock</span>

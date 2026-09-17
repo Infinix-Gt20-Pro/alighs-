@@ -5,6 +5,7 @@ import Preloader from "@/components/Preloader";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import FeaturedShowcase from "@/components/FeaturedShowcase";
+import ModelScrollExperience from "@/components/ModelScrollExperience";
 import ExplodedSection from "@/components/ExplodedSection";
 import LensRevealSection from "@/components/LensRevealSection";
 import LeadGenSection from "@/components/LeadGenSection";
@@ -42,7 +43,10 @@ export default function Home() {
         {/* 2. FEATURED ATELIER SHOWCASE: Signature 3D Eyewear Curation */}
         <FeaturedShowcase />
 
-        {/* 3. 3D SCROLL EXPLODE: Blue-Cut, Ultra-Lightweight, Anti-Glare */}
+        {/* 3. 3D EDITORIAL MODEL SCROLL EXPERIENCE: Real Fashion Icons & 3D Glass Orbit */}
+        <ModelScrollExperience />
+
+        {/* 4. 3D SCROLL EXPLODE: Blue-Cut, Ultra-Lightweight, Anti-Glare */}
         <ExplodedSection />
 
         {/* 4. MAGIC LENS: Interactive Optical Clarity Simulation */}

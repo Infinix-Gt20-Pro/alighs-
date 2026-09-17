@@ -30,6 +30,8 @@ interface AirtableListResponse {
 const _pat1 = 'patiKe6tyNOmvOpQD.';
 const _pat2 = '05a125030b8998e247e3bf15d3b16c5bbd65c2837be948a3ddb50340b9151407';
 const DEFAULT_AIRTABLE_PAT = _pat1 + _pat2;
+const DEFAULT_AIRTABLE_BASE_ID = 'appnBxUI0WjdBqC2I';
+const DEFAULT_AIRTABLE_TABLE_NAME = 'tblSM7XsSRn8UEap7';
 
 /**
  * Resolves active Airtable configuration from parameters, environment variables, or defaults
@@ -37,8 +39,8 @@ const DEFAULT_AIRTABLE_PAT = _pat1 + _pat2;
 export function resolveAirtableConfig(override?: Partial<AirtableConfig>): AirtableConfig {
   return {
     apiKey: override?.apiKey || process.env.AIRTABLE_PERSONAL_ACCESS_TOKEN || process.env.AIRTABLE_API_KEY || DEFAULT_AIRTABLE_PAT,
-    baseId: override?.baseId || process.env.AIRTABLE_BASE_ID || '',
-    tableName: override?.tableName || process.env.AIRTABLE_TABLE_NAME || 'Inventory',
+    baseId: override?.baseId || process.env.AIRTABLE_BASE_ID || DEFAULT_AIRTABLE_BASE_ID,
+    tableName: override?.tableName || process.env.AIRTABLE_TABLE_NAME || DEFAULT_AIRTABLE_TABLE_NAME,
     syncEnabled: override?.syncEnabled !== undefined ? override.syncEnabled : true,
     lastSync: override?.lastSync,
   };

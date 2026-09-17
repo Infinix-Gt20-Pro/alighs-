@@ -20,6 +20,7 @@ import {
   Calendar
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import FrameSilhouette from "@/components/FrameSilhouette";
 import { DEFAULT_PRODUCTS, ProductType, getFallbackProductBySlug } from "@/lib/products-data";
 
 const COLOR_MAP: Record<string, string> = {
@@ -147,9 +148,15 @@ export default function ProductDetailPage() {
                 style={{ backgroundColor: activeColorHex }}
               />
 
-              {/* Central Optical Motif */}
-              <div className="relative text-8xl sm:text-9xl filter drop-shadow-[0_0_35px_rgba(212,175,55,0.4)] my-8">
-                👓
+              {/* Central Optical Motif with Authentic Frame Silhouette */}
+              <div className="relative filter drop-shadow-[0_0_25px_rgba(212,175,55,0.4)] my-8 flex items-center justify-center">
+                <FrameSilhouette
+                  shape={product.frameShape || "rectangle"}
+                  frameType={(product as any).frameType || "full-rim"}
+                  color={activeColorHex}
+                  isSunglass={product.category === "sunglasses"}
+                  className="w-64 sm:w-80 h-32 sm:h-40"
+                />
               </div>
 
               <div className="relative text-center">

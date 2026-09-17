@@ -3,14 +3,17 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 export interface IProduct extends Document {
   name: string;
   slug: string;
-  category: "eyeglasses" | "sunglasses" | "computer-glasses";
+  category: "eyeglasses" | "sunglasses" | "computer-glasses" | "reading-glasses" | "clip-on";
+  frameType: "full-rim" | "half-rim" | "rimless";
+  frameShape: string;
+  frameMaterial: string;
+  frameWidth: "narrow" | "medium" | "wide";
+  brandCollection?: string;
+  gender?: "unisex" | "men" | "women" | "kids";
   price: number;
   originalPrice?: number;
   description: string;
   features: string[];
-  frameShape: string;
-  frameMaterial: string;
-  frameWidth: "narrow" | "medium" | "wide";
   colors: { name: string; hex: string }[];
   images: string[];
   weight: string;
@@ -25,8 +28,13 @@ const ProductSchema = new Schema<IProduct>(
     slug: { type: String, required: true, unique: true },
     category: {
       type: String,
-      enum: ["eyeglasses", "sunglasses", "computer-glasses"],
+      enum: ["eyeglasses", "sunglasses", "computer-glasses", "reading-glasses", "clip-on"],
       required: true,
+    },
+    frameType: {
+      type: String,
+      enum: ["full-rim", "half-rim", "rimless"],
+      default: "full-rim",
     },
     price: { type: Number, required: true },
     originalPrice: { type: Number },
@@ -37,7 +45,13 @@ const ProductSchema = new Schema<IProduct>(
     frameWidth: {
       type: String,
       enum: ["narrow", "medium", "wide"],
-      required: true,
+      default: "medium",
+    },
+    brandCollection: { type: String, default: "Vincent Chase" },
+    gender: {
+      type: String,
+      enum: ["unisex", "men", "women", "kids"],
+      default: "unisex",
     },
     colors: [
       {

@@ -14,15 +14,17 @@ export default function FeaturedShowcase() {
 
   const filters = [
     { id: "all", label: "All Curations" },
-    { id: "bestsellers", label: "Bestsellers" },
-    { id: "titanium", label: "Aerospace Titanium" },
-    { id: "acetate", label: "Hand-Polished Acetate" },
+    { id: "eyeglasses", label: "👓 Eyeglasses" },
+    { id: "computer-glasses", label: "💻 Computer (BLU)" },
+    { id: "sunglasses", label: "🕶️ Polarized Sun" },
+    { id: "titanium", label: "Air Titanium" },
   ];
 
   const filteredProducts = DEFAULT_PRODUCTS.filter((product) => {
-    if (selectedFilter === "bestsellers") return product.bestSeller;
+    if (selectedFilter === "eyeglasses") return product.category === "eyeglasses";
+    if (selectedFilter === "computer-glasses") return product.category === "computer-glasses";
+    if (selectedFilter === "sunglasses") return product.category === "sunglasses";
     if (selectedFilter === "titanium") return product.material === "titanium";
-    if (selectedFilter === "acetate") return product.material === "acetate";
     return true;
   }).slice(0, 6);
 

@@ -48,6 +48,10 @@ export const metadata: Metadata = {
       "Firozabad ki bharosemand offline quality, ab online. Premium titanium frames, 420nm blue-cut crystal clarity, aur AMU-certified optometrist ki eye care.",
     type: "website",
   },
+  icons: {
+    icon: "/images/aligsware-logo.png",
+    apple: "/images/aligsware-logo.png",
+  },
 };
 
 export default function RootLayout({

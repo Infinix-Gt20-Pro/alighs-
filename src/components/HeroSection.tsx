@@ -61,7 +61,7 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative flex flex-col items-center justify-start overflow-hidden px-3 sm:px-6 pt-4 sm:pt-8 pb-8 sm:pb-12 bg-[#070709] w-full max-w-full">
+    <section className="relative flex flex-col items-center justify-start overflow-hidden px-3 sm:px-6 pt-24 sm:pt-28 md:pt-32 pb-8 sm:pb-12 bg-[#070709] w-full max-w-full">
       {/* Editorial Motion Video Ambient Layer */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden opacity-25">
         <video
@@ -78,23 +78,18 @@ export default function HeroSection() {
         <div className="absolute inset-0 bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none" />
       </div>
 
-      {/* TOP ATELIER STATUS BADGE */}
-      <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2.5 mb-3 sm:mb-5">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#0c0d12]/90 border border-amber-400/30 text-[10px] sm:text-xs font-mono text-amber-300 uppercase tracking-[0.18em] shadow-[0_0_15px_rgba(212,175,55,0.15)] backdrop-blur-xl">
+      {/* TOP CENTERED ATELIER BADGE (Clears Navbar Cleanly) */}
+      <div className="relative z-10 w-full max-w-3xl mx-auto flex items-center justify-center mb-3 sm:mb-4">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0c0d12]/90 border border-amber-400/30 text-[10px] sm:text-xs font-mono text-amber-300 uppercase tracking-[0.18em] shadow-[0_0_20px_rgba(212,175,55,0.18)] backdrop-blur-xl">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span>ENTERPRISE 3D ATELIER &bull; FIROZABAD 1988</span>
-        </div>
-
-        <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-mono text-zinc-400 bg-white/[0.03] border border-white/10 px-3 py-1 rounded-full backdrop-blur-md">
-          <Award className="w-3 h-3 text-amber-400" />
-          <span>AMU CLINICAL OPTOMETRY VERIFIED</span>
+          <span>ENTERPRISE 3D ATELIER &bull; FIROZABAD &bull; AMU VERIFIED</span>
         </div>
       </div>
 
       {/* BRAND ARCHITECTURAL HEADLINE */}
       <div className="relative z-10 text-center max-w-4xl mx-auto mb-2 sm:mb-3 px-2">
         <h1 className="font-cinzel text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-[0.08em] sm:tracking-[0.16em] uppercase leading-[1.02] text-gold-gradient gold-glow drop-shadow-[0_0_60px_rgba(212,175,55,0.3)]">
-          ALIGH&apos;S WARE
+          ALIG&apos;S WARE
         </h1>
         <p className="font-cormorant text-base sm:text-xl md:text-2xl italic font-light text-neutral-300 mt-1 max-w-2xl mx-auto leading-snug">
           Sculpted Japanese Beta-Titanium with Sapphire 420nm Clarity &bull;{" "}

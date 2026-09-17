@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import FeaturedShowcase from "@/components/FeaturedShowcase";
 import ModelScrollExperience from "@/components/ModelScrollExperience";
+import InstagramSection from "@/components/InstagramSection";
 import DoctorSection from "@/components/DoctorSection";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
@@ -43,7 +44,10 @@ export default function Home() {
         {/* 3. 3D EDITORIAL MODEL SCROLL EXPERIENCE: Real Fashion Icons & Motion Capture Reel */}
         <ModelScrollExperience />
 
-        {/* 4. DOCTOR SECTION: Dr. Sheeraz Ahmad — AMU-Certified Optometrist */}
+        {/* 4. INSTAGRAM COMMUNITY & REELS SHOWCASE: @aligsware */}
+        <InstagramSection />
+
+        {/* 5. DOCTOR SECTION: Dr. Sheeraz Ahmad — AMU-Certified Optometrist */}
         <DoctorSection />
 
         {/* 5. Luxury Atelier Footer */}

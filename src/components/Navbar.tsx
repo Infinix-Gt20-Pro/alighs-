@@ -1,11 +1,31 @@
 "use client";
 
+import Image from "next/image";
+
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, ShoppingBag, Menu, X, Sparkles, Phone, Calendar, ArrowRight, MessageCircle } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+
+function InstagramIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+    </svg>
+  );
+}
 
 export default function Navbar() {
   const { cartCount, openCart } = useCart();
@@ -33,24 +53,29 @@ export default function Navbar() {
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled
-            ? "py-3 bg-[#070709]/85 backdrop-blur-xl border-b border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.8)]"
-            : "py-5 bg-transparent"
+            ? "py-2.5 sm:py-3 bg-[#070709]/90 backdrop-blur-xl border-b border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.8)]"
+            : "py-3 sm:py-4 bg-[#070709]/80 backdrop-blur-lg border-b border-white/10"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          {/* Brand Logo */}
-          <Link href="/" className="cursor-pointer flex items-center gap-3 group">
-            <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 via-amber-400 to-amber-600 flex items-center justify-center p-[1px] shadow-[0_0_20px_rgba(212,175,55,0.4)] group-hover:scale-105 transition-transform duration-300">
-              <div className="w-full h-full bg-[#0c0d12] rounded-[15px] flex items-center justify-center">
-                <Eye className="w-5 h-5 text-amber-400 group-hover:text-amber-300 transition-colors" />
-              </div>
+          {/* Brand Logo with Official Alig's Ware Insignia */}
+          <Link href="/" className="cursor-pointer flex items-center gap-2.5 sm:gap-3 group">
+            <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-xl overflow-hidden border border-amber-500/40 bg-black shadow-[0_0_15px_rgba(212,175,55,0.3)] group-hover:scale-105 transition-transform duration-300 shrink-0">
+              <Image
+                src="/images/aligsware-logo.png"
+                alt="ALIG'S WARE"
+                fill
+                sizes="44px"
+                className="object-contain p-0.5"
+                priority
+              />
             </div>
             <div className="flex flex-col">
               <span className="font-cinzel text-base sm:text-lg font-bold tracking-[0.14em] uppercase text-white group-hover:text-amber-300 transition-colors">
-                ALIGH&apos;S WARE
+                ALIG&apos;S WARE
               </span>
-              <span className="text-[9px] font-mono text-neutral-400 tracking-[0.25em] uppercase -mt-1">
-                Firozabad &bull; 1988
+              <span className="text-[9px] font-mono text-neutral-400 tracking-[0.22em] uppercase -mt-0.5">
+                Firozabad &bull; @aligsware
               </span>
             </div>
           </Link>
@@ -78,7 +103,7 @@ export default function Navbar() {
           {/* Right Action Bar */}
           <div className="flex items-center gap-3">
             {/* Heritage Status Badge */}
-            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-mono text-emerald-400">
+            <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-mono text-emerald-400">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span>CLINIC OPEN &bull; ONLINE</span>
             </div>
@@ -91,6 +116,17 @@ export default function Navbar() {
               <Calendar className="w-3.5 h-3.5 text-amber-400" />
               <span>Book Try-On</span>
             </Link>
+
+            {/* Instagram Link */}
+            <a
+              href="https://www.instagram.com/aligsware/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Follow ALIG'S WARE on Instagram"
+              className="cursor-pointer relative p-2.5 rounded-full bg-white/[0.05] hover:bg-gradient-to-tr hover:from-[#f09433] hover:via-[#dc2743] hover:to-[#bc1888] border border-white/15 text-neutral-200 hover:text-white transition-all duration-300 shadow-sm"
+            >
+              <InstagramIcon className="w-4 h-4" />
+            </a>
 
             {/* Slide-in Cart Trigger Button */}
             <button
@@ -173,6 +209,14 @@ export default function Navbar() {
                 >
                   Book Doctor Appointment
                 </Link>
+                <a
+                  href="https://www.instagram.com/aligsware/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-[#f09433]/20 via-[#dc2743]/20 to-[#bc1888]/20 hover:from-[#f09433]/30 hover:via-[#dc2743]/30 hover:to-[#bc1888]/30 border border-[#dc2743]/40 text-xs font-mono text-pink-300 transition-colors"
+                >
+                  <InstagramIcon className="w-4 h-4 text-pink-400" /> Follow @aligsware on Instagram
+                </a>
                 <div className="grid grid-cols-2 gap-2 mt-1">
                   <a
                     href="tel:+917217371499"

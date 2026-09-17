@@ -114,13 +114,21 @@ export default function ProductDetailClient() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Navigation Breadcrumb */}
-        <Link
-          href="/shop"
-          className="cursor-pointer inline-flex items-center gap-2 text-xs font-mono text-neutral-400 hover:text-amber-300 transition-colors mb-8 group"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span>Back to Atelier Collection</span>
-        </Link>
+        <div className="flex items-center justify-between gap-4 mb-8">
+          <Link
+            href="/shop"
+            className="cursor-pointer inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-amber-400/40 text-xs font-mono text-neutral-300 hover:text-amber-300 transition-all group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform text-amber-400" />
+            <span>&larr; Back to Collection</span>
+          </Link>
+          <Link
+            href="/"
+            className="cursor-pointer inline-flex items-center gap-1.5 text-xs font-mono text-neutral-400 hover:text-white transition-colors"
+          >
+            <span>Home</span>
+          </Link>
+        </div>
 
         {/* Main Product Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">

@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar,
@@ -16,7 +17,8 @@ import {
   ShieldCheck,
   MapPin,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  ArrowLeft
 } from "lucide-react";
 
 export default function AppointmentPage() {
@@ -122,6 +124,27 @@ export default function AppointmentPage() {
       <div className="absolute bottom-10 right-10 w-[600px] h-[600px] bg-amber-600/10 rounded-full blur-[160px] -z-10" />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
+        {/* Navigation / Back Button */}
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-8 pt-2">
+          <Link
+            href="/"
+            className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-amber-400/40 text-xs font-mono text-zinc-300 hover:text-amber-300 transition-all duration-200 group shadow-lg backdrop-blur-md"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform text-amber-400" />
+            <span>&larr; Back to Storefront</span>
+          </Link>
+
+          <div className="flex items-center gap-2">
+            <Link
+              href="/shop"
+              className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-cyan-400/40 text-xs font-mono text-zinc-300 hover:text-cyan-300 transition-all duration-200 group shadow-lg backdrop-blur-md"
+            >
+              <span>Explore Collection</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform text-cyan-400" />
+            </Link>
+          </div>
+        </div>
+
         {/* Page Header */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 mb-6">
@@ -455,6 +478,14 @@ export default function AppointmentPage() {
                       Book Another
                     </button>
                   </div>
+
+                  <Link
+                    href="/"
+                    className="mt-6 inline-flex items-center gap-2 text-xs font-mono text-zinc-400 hover:text-amber-300 transition-colors group"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform text-amber-400" />
+                    <span>Return to Storefront</span>
+                  </Link>
                 </motion.div>
               )}
             </AnimatePresence>

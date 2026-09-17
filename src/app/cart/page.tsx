@@ -51,13 +51,30 @@ export default function CartPage() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white pt-32 pb-16 px-4">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-end justify-between mb-12 border-b border-white/10 pb-6">
-          <h1 className="text-4xl font-sans font-bold flex items-center gap-4">
-            Shopping Cart
-            <span className="text-sm font-mono font-normal px-3 py-1 bg-white/10 rounded-full text-cyan-300">
-              {cartCount} {cartCount === 1 ? "Item" : "Items"}
-            </span>
-          </h1>
+        <div className="flex items-center justify-between mb-12 border-b border-white/10 pb-6 flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/shop"
+              className="p-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-zinc-400 hover:text-white transition-colors"
+              title="Back to Frames"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <h1 className="text-3xl sm:text-4xl font-sans font-bold flex items-center gap-3">
+              Shopping Cart
+              <span className="text-sm font-mono font-normal px-3 py-1 bg-white/10 rounded-full text-cyan-300">
+                {cartCount} {cartCount === 1 ? "Item" : "Items"}
+              </span>
+            </h1>
+          </div>
+
+          <Link
+            href="/shop"
+            className="hidden sm:inline-flex items-center gap-2 text-xs font-mono text-zinc-400 hover:text-cyan-300 transition-colors"
+          >
+            <span>Continue Shopping</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-12">

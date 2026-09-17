@@ -44,6 +44,7 @@ export default function Navbar() {
   const navLinks = [
     { name: "Atelier Home", href: "/" },
     { name: "Eyewear Collection", href: "/shop" },
+    { name: "Instagram @aligsware", href: "/instagram" },
     { name: "Dr. Sheeraz Ahmad", href: "/#doctor-section" },
     { name: "Book Consultation", href: "/appointment" },
   ];

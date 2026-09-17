@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -73,7 +75,7 @@ export default function Preloader({ onComplete, isLoading = true }: PreloaderPro
           {/* Subtle Ambient Radial Glow */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-indigo-500/10 via-purple-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
 
-          {/* Brand Header: ALIGH'S WARE at Starting Screen */}
+          {/* Brand Header: ALIG'S WARE at Starting Screen */}
           <motion.div
             initial={{ opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -84,21 +86,32 @@ export default function Preloader({ onComplete, isLoading = true }: PreloaderPro
               <span>FIROZABAD &bull; EST. QUALITY</span>
             </div>
             <h2 className="text-3xl sm:text-5xl font-black tracking-wider sm:tracking-[0.18em] text-white uppercase drop-shadow-[0_0_35px_rgba(6,182,212,0.7)]">
-              ALIGH&apos;S <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400 font-light">WARE</span>
+              ALIG&apos;S <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400 font-light">WARE</span>
             </h2>
             <p className="text-xs font-mono tracking-[0.35em] text-neutral-400 uppercase mt-2">
               Luxury Eyewear &bull; 3D Optics
             </p>
           </motion.div>
 
-          {/* Central Animated Glass Orb */}
+          {/* Central Animated Official ALIG'S WARE Insignia */}
           <div className="relative mb-8 flex items-center justify-center">
-            {/* Outer Rotating Glowing Ring */}
+            {/* Outer Rotating Gold Calibration Ring */}
             <motion.div
               animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
-              className="w-24 h-24 rounded-full border border-white/10 border-t-white/80 border-r-white/30 shadow-[0_0_25px_rgba(255,255,255,0.15)]"
+              transition={{ repeat: Infinity, duration: 5, ease: "linear" }}
+              className="w-28 h-28 rounded-full border border-amber-500/20 border-t-amber-400 border-r-amber-500/50 shadow-[0_0_30px_rgba(212,175,55,0.3)]"
             />
+            {/* Centered Official Logo */}
+            <div className="absolute w-16 h-16 rounded-full overflow-hidden border border-amber-500/40 bg-black flex items-center justify-center shadow-2xl">
+              <Image
+                src="/images/aligsware-logo.png"
+                alt="ALIG'S WARE"
+                fill
+                sizes="64px"
+                className="object-contain p-1.5"
+                priority
+              />
+            </div>
 
             {/* Inner Counter-Rotating Ring */}
             <motion.div

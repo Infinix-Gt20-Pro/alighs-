@@ -5,30 +5,27 @@ import React, { Suspense, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, OrbitControls } from "@react-three/drei";
 import GlassesModel, { FRAME_MATERIALS } from "./GlassesModel";
-import StudioPedestal from "./StudioPedestal";
 import { useInViewFast } from "@/hooks/useInViewFast";
 
 export default function GlassesHeroCanvas({
   materialId = "gold",
   viewAngle = "orbit",
-  lightingTheme = "obsidian",
 }: {
   materialId?: string;
   viewAngle?: "orbit" | "front" | "profile" | "macro";
-  lightingTheme?: "obsidian" | "champagne" | "cyber";
+  lightingTheme?: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInViewFast(containerRef, "200px");
 
-  const activeMat = FRAME_MATERIALS.find((m) => m.id === materialId) || FRAME_MATERIALS[0];
-
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-[320px] sm:h-[420px] md:h-[540px] flex items-center justify-center cursor-grab active:cursor-grabbing select-none" style={{ touchAction: "pan-y" }}
+      className="relative w-full h-[320px] sm:h-[400px] md:h-[460px] flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
+      style={{ touchAction: "pan-y" }}
     >
       <Canvas
-        camera={{ position: [0, 0.35, 4.6], fov: 38 }}
+        camera={{ position: [0, 0.25, 4.4], fov: 36 }}
         frameloop={isInView ? "always" : "never"}
         gl={{
           antialias: true,
@@ -39,48 +36,25 @@ export default function GlassesHeroCanvas({
         }}
         dpr={typeof window !== "undefined" ? Math.min(window.devicePixelRatio, 1.5) : 1}
       >
-        {/* Dynamic Studio Lighting Rig */}
-        {lightingTheme === "champagne" ? (
-          <>
-            <ambientLight intensity={1.8} color="#fffbeb" />
-            <directionalLight position={[6, 8, 6]} intensity={3.5} color="#fef08a" castShadow />
-            <directionalLight position={[-6, -2, -4]} intensity={1.8} color="#fed7aa" />
-            <pointLight position={[0, 4, 3]} intensity={2.2} color="#fbbf24" />
-          </>
-        ) : lightingTheme === "cyber" ? (
-          <>
-            <ambientLight intensity={1.5} color="#ecfeff" />
-            <directionalLight position={[6, 8, 6]} intensity={3.2} color="#38bdf8" castShadow />
-            <directionalLight position={[-6, -2, -4]} intensity={2.0} color="#a855f7" />
-            <pointLight position={[0, 4, 3]} intensity={2.0} color="#06b6d4" />
-          </>
-        ) : (
-          /* Default: Obsidian Luxury Studio */
-          <>
-            <ambientLight intensity={1.7} />
-            <directionalLight position={[6, 8, 6]} intensity={3.4} castShadow />
-            <directionalLight position={[-6, -3, -4]} intensity={1.8} color="#38bdf8" />
-            <pointLight position={[0, 3, 3]} intensity={1.8} color="#fef08a" />
-            <pointLight position={[0, -2, 2]} intensity={1.4} color="#06b6d4" />
-          </>
-        )}
+        {/* Soft, High-End Studio Photographic Lighting */}
+        <ambientLight intensity={1.4} color="#f8fafc" />
+        <directionalLight position={[4, 6, 5]} intensity={2.6} color="#fffbeb" />
+        <directionalLight position={[-4, -1, -3]} intensity={1.4} color="#e0f2fe" />
+        <pointLight position={[0, 2.8, 2]} intensity={1.0} color="#fef08a" />
 
         <Suspense fallback={null}>
-          <Environment preset="city" />
+          <Environment preset="studio" />
 
-          {/* Luxury Eyewear Model */}
+          {/* Slender, Physically-Proportioned Eyewear */}
           <GlassesModel materialId={materialId} viewAngle={viewAngle} autoRotate={viewAngle === "orbit"} />
 
-          {/* Floating Titanium Studio Pedestal with Calibration Rings */}
-          <StudioPedestal color={activeMat.color} />
-
-          {/* Soft Ground Contact Shadow */}
+          {/* Clean, Natural Soft Studio Drop Shadow (No cartoon pedestal) */}
           <ContactShadows
-            position={[0, -1.24, 0]}
-            opacity={0.7}
-            scale={7.5}
-            blur={2.5}
-            far={4.5}
+            position={[0, -0.65, 0]}
+            opacity={0.48}
+            scale={4.8}
+            blur={2.0}
+            far={2.2}
             color="#000000"
           />
 
@@ -89,7 +63,7 @@ export default function GlassesHeroCanvas({
             enableZoom={false}
             enablePan={false}
             minPolarAngle={Math.PI / 3.2}
-            maxPolarAngle={Math.PI / 1.75}
+            maxPolarAngle={Math.PI / 1.8}
             dampingFactor={0.06}
             enableDamping={true}
             rotateSpeed={0.8}

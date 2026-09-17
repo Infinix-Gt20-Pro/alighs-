@@ -18,11 +18,56 @@ export interface MaterialOption {
 }
 
 export const FRAME_MATERIALS: MaterialOption[] = [
-  { id: "gold", name: "24K Champagne Gold", color: "#D4AF37", metalness: 0.96, roughness: 0.14, badge: "Royal Titanium", lensTint: "#e0f2fe", accentColor: "#FFE57F" },
-  { id: "onyx", name: "Matte Onyx Black", color: "#16171B", metalness: 0.55, roughness: 0.35, badge: "Italian Acetate", lensTint: "#bae6fd", accentColor: "#D4AF37" },
-  { id: "rose", name: "Rose Gold Mirage", color: "#C5838C", metalness: 0.92, roughness: 0.18, badge: "Aerospace Alloy", lensTint: "#fce7f3", accentColor: "#FFF0F5" },
-  { id: "silver", name: "Arctic Chrome", color: "#E8ECF2", metalness: 0.98, roughness: 0.08, badge: "Pure Platinum", lensTint: "#e0f2fe", accentColor: "#38bdf8" },
-  { id: "emerald", name: "Firozabad Emerald", color: "#0F5240", metalness: 0.72, roughness: 0.22, badge: "Heritage Glass", lensTint: "#d1fae5", accentColor: "#34D399" },
+  {
+    id: "gold",
+    name: "24K Champagne Gold",
+    color: "#C6A463",
+    metalness: 0.98,
+    roughness: 0.18,
+    badge: "Beta Titanium",
+    lensTint: "#f0f9ff",
+    accentColor: "#E2C485"
+  },
+  {
+    id: "onyx",
+    name: "Matte Onyx Black",
+    color: "#1E1F24",
+    metalness: 0.7,
+    roughness: 0.32,
+    badge: "Italian Acetate",
+    lensTint: "#e0f2fe",
+    accentColor: "#C6A463"
+  },
+  {
+    id: "rose",
+    name: "Rose Gold Mirage",
+    color: "#C99494",
+    metalness: 0.95,
+    roughness: 0.2,
+    badge: "Aerospace Alloy",
+    lensTint: "#fdf2f8",
+    accentColor: "#E8BABA"
+  },
+  {
+    id: "silver",
+    name: "Arctic Chrome",
+    color: "#DFE3EA",
+    metalness: 0.99,
+    roughness: 0.12,
+    badge: "Pure Platinum",
+    lensTint: "#f0f9ff",
+    accentColor: "#FFFFFF"
+  },
+  {
+    id: "emerald",
+    name: "Firozabad Emerald",
+    color: "#163E32",
+    metalness: 0.8,
+    roughness: 0.25,
+    badge: "Heritage Edition",
+    lensTint: "#ecfdf5",
+    accentColor: "#C6A463"
+  },
 ];
 
 export default function GlassesModel({
@@ -43,71 +88,71 @@ export default function GlassesModel({
     [materialId]
   );
 
-  // Ultra-Luxury PBR Materials
+  // Physically-Accurate High-End Materials
   const materials = useMemo(() => {
-    // 1. Primary Frame Material
+    // 1. Primary Titanium Frame Wire
     const frame = new THREE.MeshStandardMaterial({
       color: new THREE.Color(selectedMat.color),
       metalness: selectedMat.metalness,
       roughness: selectedMat.roughness,
-      envMapIntensity: 2.8,
+      envMapIntensity: 1.6,
     });
 
-    // 2. High-Polish Specular Chamfer Bevels
+    // 2. High-Polish Specular Chamfers
     const bevel = new THREE.MeshStandardMaterial({
-      color: selectedMat.accentColor || "#FFD700",
-      metalness: 0.98,
-      roughness: 0.08,
-      envMapIntensity: 3.2,
-    });
-
-    // 3. Jewelry Accent for Micro-Screws & Rivets
-    const goldAccent = new THREE.MeshStandardMaterial({
-      color: "#fbbf24",
-      metalness: 0.98,
+      color: new THREE.Color(selectedMat.accentColor || selectedMat.color),
+      metalness: 0.99,
       roughness: 0.1,
-      envMapIntensity: 3.0,
-    });
-
-    // 4. Optical Sapphire Crystal Lens with Blue-Cut Anti-Glare Sheen
-    const lens = new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color(selectedMat.lensTint),
-      transmission: 0.95,
-      opacity: 0.94,
-      transparent: true,
-      roughness: 0.02,
-      ior: 1.54,
-      reflectivity: 0.98,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.03,
-      attenuationColor: new THREE.Color("#38bdf8"),
-      attenuationDistance: 0.8,
-    });
-
-    // 5. Medical Silicone Nose Pads
-    const silicone = new THREE.MeshPhysicalMaterial({
-      color: "#f8fafc",
-      transparent: true,
-      opacity: 0.75,
-      roughness: 0.3,
-      transmission: 0.6,
-      ior: 1.42,
-    });
-
-    // 6. Midnight Acetate Ear Tips
-    const acetate = new THREE.MeshPhysicalMaterial({
-      color: "#0a0d14",
-      roughness: 0.1,
-      metalness: 0.15,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.04,
       envMapIntensity: 2.0,
     });
 
-    return { frame, bevel, goldAccent, lens, silicone, acetate };
+    // 3. Micro Precision Screws & Core Hinges
+    const screw = new THREE.MeshStandardMaterial({
+      color: "#E5E7EB",
+      metalness: 0.98,
+      roughness: 0.15,
+      envMapIntensity: 1.8,
+    });
+
+    // 4. Genuine Sapphire Crystal Lens with 420nm Blue-Cut Anti-Reflective Sheen
+    const lens = new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color(selectedMat.lensTint),
+      transmission: 0.96,
+      opacity: 0.98,
+      transparent: true,
+      roughness: 0.015,
+      ior: 1.52,
+      reflectivity: 0.65,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.03,
+      attenuationColor: new THREE.Color("#38bdf8"),
+      attenuationDistance: 0.9,
+    });
+
+    // 5. Translucent Medical Silicone Nose Pads
+    const silicone = new THREE.MeshPhysicalMaterial({
+      color: "#FFFFFF",
+      transparent: true,
+      opacity: 0.7,
+      roughness: 0.25,
+      transmission: 0.8,
+      ior: 1.41,
+    });
+
+    // 6. Midnight Italian Acetate Temple Tips
+    const acetate = new THREE.MeshPhysicalMaterial({
+      color: "#0F1117",
+      roughness: 0.08,
+      metalness: 0.1,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.03,
+      envMapIntensity: 1.4,
+    });
+
+    return { frame, bevel, screw, lens, silicone, acetate };
   }, [selectedMat]);
 
-  // Architectural Luxury Geometric Contours (Pantos Browline Profile)
+  // Slender, Ultra-Refined Eyewear Contours (Refined Pantos Profile)
   const { leftRimGeo, rightRimGeo, leftLensGeo, rightLensGeo } = useMemo(() => {
     const createPoints = (isLeft: boolean) => {
       const s = isLeft ? -1 : 1;
@@ -128,8 +173,9 @@ export default function GlassesModel({
     const leftCurve = new THREE.CatmullRomCurve3(createPoints(true), true, "centripetal");
     const rightCurve = new THREE.CatmullRomCurve3(createPoints(false), true, "centripetal");
 
-    const leftRim = new THREE.TubeGeometry(leftCurve, 64, 0.038, 12, true);
-    const rightRim = new THREE.TubeGeometry(rightCurve, 64, 0.038, 12, true);
+    // Ultra-thin 0.0125 wire radius for true luxury realism
+    const leftRim = new THREE.TubeGeometry(leftCurve, 128, 0.0125, 16, true);
+    const rightRim = new THREE.TubeGeometry(rightCurve, 128, 0.0125, 16, true);
 
     const createLensShape = (isLeft: boolean) => {
       const shape = new THREE.Shape();
@@ -143,23 +189,23 @@ export default function GlassesModel({
     };
 
     const extrudeSettings: THREE.ExtrudeGeometryOptions = {
-      depth: 0.03,
+      depth: 0.005,
       bevelEnabled: true,
       bevelSegments: 2,
       steps: 1,
-      bevelSize: 0.012,
-      bevelThickness: 0.012,
+      bevelSize: 0.004,
+      bevelThickness: 0.004,
     };
 
     const leftLens = new THREE.ExtrudeGeometry(createLensShape(true), extrudeSettings);
     const rightLens = new THREE.ExtrudeGeometry(createLensShape(false), extrudeSettings);
-    leftLens.translate(0, 0, -0.015);
-    rightLens.translate(0, 0, -0.015);
+    leftLens.translate(0, 0, -0.004);
+    rightLens.translate(0, 0, -0.004);
 
     return { leftRimGeo: leftRim, rightRimGeo: rightRim, leftLensGeo: leftLens, rightLensGeo: rightLens };
   }, []);
 
-  // Temples, Bridges & Hardware
+  // Temples, Bridges & Hardware (Slender, physically proportionate)
   const {
     topBarGeo,
     keyholeBridgeGeo,
@@ -172,15 +218,15 @@ export default function GlassesModel({
   } = useMemo(() => {
     const topBarCurve = new THREE.CatmullRomCurve3([
       new THREE.Vector3(-0.65, 0.63, 0.02),
-      new THREE.Vector3(0.0, 0.66, 0.04),
+      new THREE.Vector3(0.0, 0.65, 0.04),
       new THREE.Vector3(0.65, 0.63, 0.02),
     ]);
 
     const keyholeCurve = new THREE.CatmullRomCurve3([
       new THREE.Vector3(-0.24, 0.12, 0.06),
-      new THREE.Vector3(-0.16, 0.26, 0.08),
-      new THREE.Vector3(0.0, 0.32, 0.09),
-      new THREE.Vector3(0.16, 0.26, 0.08),
+      new THREE.Vector3(-0.16, 0.25, 0.08),
+      new THREE.Vector3(0.0, 0.30, 0.085),
+      new THREE.Vector3(0.16, 0.25, 0.08),
       new THREE.Vector3(0.24, 0.12, 0.06),
     ]);
 
@@ -188,83 +234,83 @@ export default function GlassesModel({
       new THREE.Vector3(-1.46, 0.28, -0.11),
       new THREE.Vector3(-1.48, 0.27, -0.6),
       new THREE.Vector3(-1.49, 0.25, -1.3),
-      new THREE.Vector3(-1.50, 0.23, -2.0),
+      new THREE.Vector3(-1.50, 0.23, -1.95),
     ]);
 
     const rightTempleCurve = new THREE.CatmullRomCurve3([
       new THREE.Vector3(1.46, 0.28, -0.11),
       new THREE.Vector3(1.48, 0.27, -0.6),
       new THREE.Vector3(1.49, 0.25, -1.3),
-      new THREE.Vector3(1.50, 0.23, -2.0),
+      new THREE.Vector3(1.50, 0.23, -1.95),
     ]);
 
     const leftEarCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-1.50, 0.23, -2.0),
-      new THREE.Vector3(-1.51, 0.15, -2.4),
-      new THREE.Vector3(-1.50, -0.12, -2.75),
-      new THREE.Vector3(-1.48, -0.36, -2.95),
+      new THREE.Vector3(-1.50, 0.23, -1.95),
+      new THREE.Vector3(-1.51, 0.16, -2.35),
+      new THREE.Vector3(-1.50, -0.10, -2.70),
+      new THREE.Vector3(-1.48, -0.32, -2.90),
     ]);
 
     const rightEarCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(1.50, 0.23, -2.0),
-      new THREE.Vector3(1.51, 0.15, -2.4),
-      new THREE.Vector3(1.50, -0.12, -2.75),
-      new THREE.Vector3(1.48, -0.36, -2.95),
+      new THREE.Vector3(1.50, 0.23, -1.95),
+      new THREE.Vector3(1.51, 0.16, -2.35),
+      new THREE.Vector3(1.50, -0.10, -2.70),
+      new THREE.Vector3(1.48, -0.32, -2.90),
     ]);
 
     const leftArmCurve = new THREE.CatmullRomCurve3([
       new THREE.Vector3(-0.20, -0.15, 0.05),
-      new THREE.Vector3(-0.25, -0.26, 0.16),
-      new THREE.Vector3(-0.28, -0.32, 0.25),
+      new THREE.Vector3(-0.24, -0.24, 0.14),
+      new THREE.Vector3(-0.26, -0.30, 0.22),
     ]);
     const rightArmCurve = new THREE.CatmullRomCurve3([
       new THREE.Vector3(0.20, -0.15, 0.05),
-      new THREE.Vector3(0.25, -0.26, 0.16),
-      new THREE.Vector3(0.28, -0.32, 0.25),
+      new THREE.Vector3(0.24, -0.24, 0.14),
+      new THREE.Vector3(0.26, -0.30, 0.22),
     ]);
 
     return {
-      topBarGeo: new THREE.TubeGeometry(topBarCurve, 28, 0.034, 10, false),
-      keyholeBridgeGeo: new THREE.TubeGeometry(keyholeCurve, 28, 0.036, 10, false),
-      leftTempleArmGeo: new THREE.TubeGeometry(leftTempleCurve, 36, 0.034, 10, false),
-      rightTempleArmGeo: new THREE.TubeGeometry(rightTempleCurve, 36, 0.034, 10, false),
-      leftEarSockGeo: new THREE.TubeGeometry(leftEarCurve, 28, 0.052, 12, false),
-      rightEarSockGeo: new THREE.TubeGeometry(rightEarCurve, 28, 0.052, 12, false),
-      leftPadArmGeo: new THREE.TubeGeometry(leftArmCurve, 20, 0.02, 8, false),
-      rightPadArmGeo: new THREE.TubeGeometry(rightArmCurve, 20, 0.02, 8, false),
+      topBarGeo: new THREE.TubeGeometry(topBarCurve, 48, 0.009, 12, false),
+      keyholeBridgeGeo: new THREE.TubeGeometry(keyholeCurve, 48, 0.011, 12, false),
+      leftTempleArmGeo: new THREE.TubeGeometry(leftTempleCurve, 48, 0.0095, 12, false),
+      rightTempleArmGeo: new THREE.TubeGeometry(rightTempleCurve, 48, 0.0095, 12, false),
+      leftEarSockGeo: new THREE.TubeGeometry(leftEarCurve, 36, 0.016, 14, false),
+      rightEarSockGeo: new THREE.TubeGeometry(rightEarCurve, 36, 0.016, 14, false),
+      leftPadArmGeo: new THREE.TubeGeometry(leftArmCurve, 24, 0.0055, 8, false),
+      rightPadArmGeo: new THREE.TubeGeometry(rightArmCurve, 24, 0.0055, 8, false),
     };
   }, []);
 
   // Studio Turntable Rotation & View Presets
-  const targetRotation = useRef({ x: 0.08, y: -0.35, z: 0 });
-  const targetPosition = useRef({ x: 0, y: 0.1, z: 0 });
-  const targetScale = useRef(1.35);
+  const targetRotation = useRef({ x: 0.05, y: -0.25, z: 0 });
+  const targetPosition = useRef({ x: 0, y: 0.05, z: 0 });
+  const targetScale = useRef(1.42);
 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
 
     if (viewAngle === "front") {
-      targetRotation.current = { x: 0.02, y: 0, z: 0 };
-      targetPosition.current = { x: 0, y: 0.05, z: 0.2 };
-      targetScale.current = 1.45;
+      targetRotation.current = { x: 0.0, y: 0, z: 0 };
+      targetPosition.current = { x: 0, y: 0.02, z: 0.1 };
+      targetScale.current = 1.48;
     } else if (viewAngle === "profile") {
-      targetRotation.current = { x: 0.12, y: -0.75, z: 0.04 };
-      targetPosition.current = { x: 0.1, y: 0.08, z: 0.1 };
-      targetScale.current = 1.42;
+      targetRotation.current = { x: 0.08, y: -0.75, z: 0.02 };
+      targetPosition.current = { x: 0.05, y: 0.05, z: 0.05 };
+      targetScale.current = 1.44;
     } else if (viewAngle === "macro") {
-      targetRotation.current = { x: 0.18, y: -1.35, z: 0.06 };
-      targetPosition.current = { x: 0.6, y: 0.0, z: 0.8 };
+      targetRotation.current = { x: 0.12, y: -1.2, z: 0.04 };
+      targetPosition.current = { x: 0.5, y: 0.0, z: 0.7 };
       targetScale.current = 1.95;
     } else {
-      // "orbit" mode: Gentle slow luxury turntable spin
+      // orbit mode: Gentle slow luxury turntable spin
       if (autoRotate) {
-        groupRef.current.rotation.y += delta * 0.35;
+        groupRef.current.rotation.y += delta * 0.28;
       }
-      const mouseX = state.pointer.x * 0.18;
-      const mouseY = state.pointer.y * 0.12;
-      targetRotation.current.x = 0.12 - mouseY;
-      targetPosition.current = { x: 0, y: 0.08, z: 0 };
-      targetScale.current = 1.38;
+      const mouseX = state.pointer.x * 0.14;
+      const mouseY = state.pointer.y * 0.08;
+      targetRotation.current.x = 0.06 - mouseY;
+      targetPosition.current = { x: 0, y: 0.05, z: 0 };
+      targetScale.current = 1.42;
     }
 
     if (viewAngle !== "orbit") {
@@ -279,75 +325,62 @@ export default function GlassesModel({
   });
 
   return (
-    <Float speed={1.6} rotationIntensity={0.15} floatIntensity={0.25} floatingRange={[-0.03, 0.03]}>
-      <group ref={groupRef} position={[0, 0.08, 0]} scale={1.38}>
-        {/* Core Rims & Specular Bevels */}
+    <Float speed={1.2} rotationIntensity={0.08} floatIntensity={0.15} floatingRange={[-0.02, 0.02]}>
+      <group ref={groupRef} position={[0, 0.05, 0]} scale={1.42}>
+        {/* Slender Titanium Wire Rims */}
         <mesh geometry={leftRimGeo} material={materials.frame} castShadow receiveShadow />
         <mesh geometry={rightRimGeo} material={materials.frame} castShadow receiveShadow />
-        <mesh geometry={leftRimGeo} material={materials.bevel} scale={[0.985, 0.985, 0.985]} />
-        <mesh geometry={rightRimGeo} material={materials.bevel} scale={[0.985, 0.985, 0.985]} />
 
-        {/* Sapphire Crystal Lenses with Anti-Reflective Sheen */}
+        {/* Optical Sapphire Crystal Lenses */}
         <mesh ref={leftLensRef} geometry={leftLensGeo} material={materials.lens} />
         <mesh ref={rightLensRef} geometry={rightLensGeo} material={materials.lens} />
 
-        {/* Double Architectural Brow Bar & Keyhole Bridge */}
+        {/* Clean Double Bridge */}
         <mesh geometry={topBarGeo} material={materials.bevel} castShadow />
         <mesh geometry={keyholeBridgeGeo} material={materials.frame} castShadow />
-        <mesh position={[0, 0.32, 0.09]} material={materials.goldAccent}>
-          <sphereGeometry args={[0.045, 16, 16]} />
-        </mesh>
 
-        {/* 5-Barrel Precision Titanium Hinges with Gold Screws */}
+        {/* Precision Micro Hinges */}
         <group position={[-1.46, 0.28, -0.11]}>
-          <mesh material={materials.bevel} rotation={[Math.PI / 2, 0, 0]}>
-            <cylinderGeometry args={[0.045, 0.045, 0.16, 14]} />
+          <mesh material={materials.frame} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.018, 0.018, 0.07, 14]} />
           </mesh>
-          <mesh position={[0, 0.09, 0]} material={materials.goldAccent}>
-            <cylinderGeometry args={[0.038, 0.038, 0.03, 10]} />
-          </mesh>
-          <mesh position={[0, -0.09, 0]} material={materials.goldAccent}>
-            <cylinderGeometry args={[0.038, 0.038, 0.03, 10]} />
+          <mesh position={[0, 0.04, 0]} material={materials.screw}>
+            <cylinderGeometry args={[0.014, 0.014, 0.012, 10]} />
           </mesh>
         </group>
 
         <group position={[1.46, 0.28, -0.11]}>
-          <mesh material={materials.bevel} rotation={[Math.PI / 2, 0, 0]}>
-            <cylinderGeometry args={[0.045, 0.045, 0.16, 14]} />
+          <mesh material={materials.frame} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.018, 0.018, 0.07, 14]} />
           </mesh>
-          <mesh position={[0, 0.09, 0]} material={materials.goldAccent}>
-            <cylinderGeometry args={[0.038, 0.038, 0.03, 10]} />
-          </mesh>
-          <mesh position={[0, -0.09, 0]} material={materials.goldAccent}>
-            <cylinderGeometry args={[0.038, 0.038, 0.03, 10]} />
+          <mesh position={[0, 0.04, 0]} material={materials.screw}>
+            <cylinderGeometry args={[0.014, 0.014, 0.012, 10]} />
           </mesh>
         </group>
 
-        {/* Temple Arms with Midnight Acetate Ear Socks */}
+        {/* Slender Temple Arms & Midnight Acetate Tips */}
         <mesh geometry={leftTempleArmGeo} material={materials.frame} castShadow />
         <mesh geometry={rightTempleArmGeo} material={materials.frame} castShadow />
         <mesh geometry={leftEarSockGeo} material={materials.acetate} castShadow />
         <mesh geometry={rightEarSockGeo} material={materials.acetate} castShadow />
 
-        {/* Gold Accent Joints on Temples */}
-        <mesh position={[-1.50, 0.23, -2.0]} material={materials.goldAccent}>
-          <cylinderGeometry args={[0.054, 0.054, 0.04, 14]} />
-        </mesh>
-        <mesh position={[1.50, 0.23, -2.0]} material={materials.goldAccent}>
-          <cylinderGeometry args={[0.054, 0.054, 0.04, 14]} />
-        </mesh>
-
-        {/* Hypoallergenic Silicone Nose Pads on Titanium Goose-Necks */}
+        {/* Discreet Silicone Nose Pads on Goose-Necks */}
         <mesh geometry={leftPadArmGeo} material={materials.bevel} />
         <mesh geometry={rightPadArmGeo} material={materials.bevel} />
-        <group position={[-0.28, -0.32, 0.25]} rotation={[0.25, -0.4, 0.2]}>
+        <group position={[-0.26, -0.30, 0.22]} rotation={[0.3, -0.35, 0.15]}>
           <mesh material={materials.silicone}>
-            <capsuleGeometry args={[0.055, 0.14, 8, 14]} />
+            <cylinderGeometry args={[0.035, 0.035, 0.012, 16]} />
+          </mesh>
+          <mesh position={[0, 0, -0.006]} material={materials.frame}>
+            <cylinderGeometry args={[0.018, 0.018, 0.005, 12]} />
           </mesh>
         </group>
-        <group position={[0.28, -0.32, 0.25]} rotation={[0.25, 0.4, -0.2]}>
+        <group position={[0.26, -0.30, 0.22]} rotation={[0.3, 0.35, -0.15]}>
           <mesh material={materials.silicone}>
-            <capsuleGeometry args={[0.055, 0.14, 8, 14]} />
+            <cylinderGeometry args={[0.035, 0.035, 0.012, 16]} />
+          </mesh>
+          <mesh position={[0, 0, -0.006]} material={materials.frame}>
+            <cylinderGeometry args={[0.018, 0.018, 0.005, 12]} />
           </mesh>
         </group>
       </group>

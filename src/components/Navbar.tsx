@@ -1,138 +1,186 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, ShoppingBag, Menu, X } from "lucide-react";
+import { Eye, ShoppingBag, Menu, X, Sparkles, Phone, Calendar, ArrowRight } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 
 export default function Navbar() {
-  const { cartCount } = useCart();
+  const { cartCount, openCart } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "Shop", href: "/shop" },
-    { name: "Dr. Sheeraz", href: "#doctor-section" },
-    { name: "Book Appointment", href: "/appointment" },
+    { name: "Atelier Home", href: "/" },
+    { name: "Eyewear Collection", href: "/shop" },
+    { name: "Dr. Sheeraz Ahmad", href: "/#doctor-section" },
+    { name: "Book Consultation", href: "/appointment" },
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full glass-panel border-b border-white/10 bg-[#0a0a0a]/80 backdrop-blur-md">
-      <div className="container mx-auto px-4 md:px-6 h-20 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group">
-          <motion.div
-            whileHover={{ rotate: 180 }}
-            transition={{ duration: 0.3 }}
-            className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-cyan-400 flex items-center justify-center"
-          >
-            <Eye className="text-white w-6 h-6" />
-          </motion.div>
-          <span className="text-xl font-bold font-sans tracking-wider text-white group-hover:text-cyan-400 transition-colors">
-            ALIGH&apos;S WARE
-          </span>
-        </Link>
-
-        <div className="hidden md:flex items-center gap-8">
-          <nav className="flex items-center gap-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="text-sm font-medium text-gray-300 hover:text-white transition-colors"
-              >
-                {link.name}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-4 border-l border-white/10 pl-6">
-            <div className="glass-pill px-3 py-1 rounded-full text-xs font-mono text-cyan-400 bg-cyan-400/10 border border-cyan-400/20">
-              FIROZABAD • ONLINE
+    <>
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? "py-3 bg-[#070709]/85 backdrop-blur-xl border-b border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.8)]"
+            : "py-5 bg-transparent"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+          {/* Brand Logo */}
+          <Link href="/" className="cursor-pointer flex items-center gap-3 group">
+            <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 via-amber-400 to-amber-600 flex items-center justify-center p-[1px] shadow-[0_0_20px_rgba(212,175,55,0.4)] group-hover:scale-105 transition-transform duration-300">
+              <div className="w-full h-full bg-[#0c0d12] rounded-[15px] flex items-center justify-center">
+                <Eye className="w-5 h-5 text-amber-400 group-hover:text-amber-300 transition-colors" />
+              </div>
             </div>
-            
-            <Link href="/appointment" className="glass-pill px-4 py-2 rounded-full text-sm font-medium text-white bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-500/50 transition-colors">
-              Book Free Try-On
-            </Link>
-
-            <Link href="/cart" className="relative p-2 text-gray-300 hover:text-white transition-colors">
-              <ShoppingBag className="w-6 h-6" />
-              {cartCount > 0 && (
-                <span className="absolute top-0 right-0 w-5 h-5 bg-red-500 rounded-full text-[10px] font-bold flex items-center justify-center text-white">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4 md:hidden">
-          <Link href="/cart" className="relative p-2 text-gray-300 hover:text-white transition-colors">
-            <ShoppingBag className="w-6 h-6" />
-            {cartCount > 0 && (
-              <span className="absolute top-0 right-0 w-5 h-5 bg-red-500 rounded-full text-[10px] font-bold flex items-center justify-center text-white">
-                {cartCount}
+            <div className="flex flex-col">
+              <span className="text-lg font-black tracking-wider uppercase text-white group-hover:text-amber-300 transition-colors font-sans">
+                ALIGH&apos;S WARE
               </span>
-            )}
+              <span className="text-[9px] font-mono text-neutral-400 tracking-[0.25em] uppercase -mt-1">
+                Firozabad &bull; 1988
+              </span>
+            </div>
           </Link>
-          <button
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="p-2 text-gray-300 hover:text-white transition-colors"
-          >
-            <Menu className="w-6 h-6" />
-          </button>
-        </div>
-      </div>
 
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, x: "100%" }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-[60] bg-[#0a0a0a] flex flex-col"
-          >
-            <div className="h-20 flex items-center justify-between px-4 border-b border-white/10">
-              <span className="text-xl font-bold font-sans tracking-wider text-white">
-                MENU
-              </span>
-              <button
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="p-2 text-gray-300 hover:text-white transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            
-            <nav className="flex-1 flex flex-col p-6 gap-6">
-              {navLinks.map((link) => (
+          {/* Center Nav Pill Links (Desktop) */}
+          <nav className="hidden md:flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-xl">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
                 <Link
                   key={link.name}
                   href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-2xl font-medium text-gray-300 hover:text-white transition-colors"
+                  className={`cursor-pointer px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                    isActive
+                      ? "bg-white/15 text-white font-semibold shadow-sm"
+                      : "text-neutral-400 hover:text-white hover:bg-white/[0.06]"
+                  }`}
                 >
                   {link.name}
                 </Link>
-              ))}
-            </nav>
+              );
+            })}
+          </nav>
 
-            <div className="p-6 border-t border-white/10 flex flex-col gap-4">
-              <div className="glass-pill self-start px-3 py-1 rounded-full text-xs font-mono text-cyan-400 bg-cyan-400/10 border border-cyan-400/20">
-                FIROZABAD • ONLINE
-              </div>
-              <Link
-                href="/appointment"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="w-full py-3 rounded-xl text-center font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
-              >
-                Book Free Try-On
-              </Link>
+          {/* Right Action Bar */}
+          <div className="flex items-center gap-3">
+            {/* Heritage Status Badge */}
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-mono text-emerald-400">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>CLINIC OPEN &bull; ONLINE</span>
             </div>
-          </motion.div>
+
+            {/* Book Appointment CTA */}
+            <Link
+              href="/appointment"
+              className="cursor-pointer hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold bg-gradient-to-r from-amber-500/20 to-amber-500/10 hover:from-amber-500/30 hover:to-amber-500/20 text-amber-300 border border-amber-500/40 hover:border-amber-400 transition-all duration-300"
+            >
+              <Calendar className="w-3.5 h-3.5 text-amber-400" />
+              <span>Book Try-On</span>
+            </Link>
+
+            {/* Slide-in Cart Trigger Button */}
+            <button
+              onClick={openCart}
+              aria-label="Open Shopping Bag"
+              className="cursor-pointer relative p-2.5 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/15 text-neutral-200 hover:text-white transition-all duration-200 shadow-sm"
+            >
+              <ShoppingBag className="w-5 h-5 text-neutral-200" />
+              {cartCount > 0 && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-amber-500 to-amber-600 rounded-full text-[10px] font-black font-mono flex items-center justify-center text-black shadow-[0_0_10px_rgba(212,175,55,0.7)]"
+                >
+                  {cartCount}
+                </motion.span>
+              )}
+            </button>
+
+            {/* Mobile Hamburger Toggle */}
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open Menu"
+              className="cursor-pointer p-2.5 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/15 text-neutral-200 hover:text-white md:hidden"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile Slide-Out Drawer */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md md:hidden"
+            />
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 220 }}
+              className="fixed inset-y-0 right-0 z-50 w-4/5 max-w-sm bg-[#0a0a0d] border-l border-white/15 p-6 flex flex-col justify-between md:hidden shadow-2xl"
+            >
+              <div>
+                <div className="flex items-center justify-between pb-6 border-b border-white/10">
+                  <span className="text-base font-bold tracking-wider text-white">ALIGH&apos;S WARE</span>
+                  <button
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="p-2 text-neutral-400 hover:text-white rounded-full hover:bg-white/10"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-2 mt-6">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="px-4 py-3 rounded-2xl text-base font-medium text-neutral-300 hover:text-white hover:bg-white/10 transition-colors"
+                    >
+                      {link.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3 pt-6 border-t border-white/10">
+                <Link
+                  href="/appointment"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full text-center py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-black font-semibold text-sm shadow-[0_0_20px_rgba(212,175,55,0.4)]"
+                >
+                  Book Doctor Appointment
+                </Link>
+                <div className="text-center text-xs text-neutral-500 font-mono">
+                  Firozabad, Uttar Pradesh &bull; +91 98765 43210
+                </div>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
-    </header>
+    </>
   );
 }

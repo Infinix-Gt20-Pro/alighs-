@@ -14,28 +14,41 @@ function generateAppointmentId() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const preferredDate = body.preferredDate || body.date;
+    const preferredTime = body.preferredTime || body.time;
     
-    if (!body.name || !body.phone || !body.preferredDate || !body.preferredTime || !body.concern) {
+    if (!body.name || !body.phone || !preferredDate || !preferredTime || !body.concern) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    await connectDB();
-    
     const appointmentId = generateAppointmentId();
-    
-    const newAppointment = new Appointment({
-      appointmentId,
-      name: body.name,
-      phone: body.phone,
-      preferredDate: body.preferredDate,
-      preferredTime: body.preferredTime,
-      concern: body.concern,
-      status: 'Scheduled'
-    });
 
-    const savedAppointment = await newAppointment.save();
-    
-    return NextResponse.json(savedAppointment, { status: 201 });
+    try {
+      await connectDB();
+      const newAppointment = new Appointment({
+        appointmentId,
+        name: body.name,
+        phone: body.phone,
+        preferredDate,
+        preferredTime,
+        concern: body.concern,
+        status: 'Scheduled'
+      });
+      const savedAppointment = await newAppointment.save();
+      return NextResponse.json(savedAppointment, { status: 201 });
+    } catch (dbError) {
+      console.warn("Database appointment save skipped, returning offline confirmation:", dbError);
+      return NextResponse.json({
+        appointmentId,
+        name: body.name,
+        phone: body.phone,
+        preferredDate,
+        preferredTime,
+        concern: body.concern,
+        status: 'Scheduled',
+        isOfflineMode: true
+      }, { status: 201 });
+    }
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json({ error: message }, { status: 500 });

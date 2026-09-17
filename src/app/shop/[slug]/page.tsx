@@ -1,306 +1,401 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowLeft, CheckCircle2, ShoppingBag, MessageCircle, Truck, ShieldCheck } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  ShoppingBag,
+  MessageCircle,
+  Truck,
+  ShieldCheck,
+  Award,
+  Sparkles,
+  Plus,
+  Minus,
+  Eye,
+  FileText,
+  Calendar
+} from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { DEFAULT_PRODUCTS, ProductType, getFallbackProductBySlug } from "@/lib/products-data";
 
-type ProductDetails = {
-  _id: string;
-  name: string;
-  slug: string;
-  price: number;
-  originalPrice?: number;
-  description: string;
-  category: string;
-  frameShape: string;
-  material: string;
-  weight: string;
-  width: string;
-  features: string[];
-  colors: { name: string; hex: string }[];
-  image: string;
-  gallery: string[];
+const COLOR_MAP: Record<string, string> = {
+  black: "#141416",
+  gold: "#D4AF37",
+  silver: "#E0E5EC",
+  gunmetal: "#374151",
+  emerald: "#0F4C3A",
+  "emerald green": "#0F4C3A",
+  tortoise: "#78350F",
+  "amber tortoise": "#78350F",
+  crimson: "#991B1B",
+  "crimson red": "#991B1B",
+  "rose gold": "#B76E79",
+  cobalt: "#1E3A8A",
+  "cobalt blue": "#1E3A8A",
+  clear: "#E2E8F0",
+  "crystal clear": "#E2E8F0",
+  graphite: "#475569",
+  champagne: "#D4AF37",
 };
 
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { addToCart } = useCart();
-  
-  const [product, setProduct] = useState<ProductDetails | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [selectedColor, setSelectedColor] = useState<string>("");
+
+  const slug = Array.isArray(params?.slug) ? params.slug[0] : (params?.slug as string) || "";
+  const initialProduct = useMemo(() => getFallbackProductBySlug(slug), [slug]);
+
+  const [product, setProduct] = useState<ProductType>(initialProduct);
+  const [selectedColorIdx, setSelectedColorIdx] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [activeImage, setActiveImage] = useState<string>("");
+  const [lensType, setLensType] = useState("zero-power");
+  const [isAdded, setIsAdded] = useState(false);
 
   useEffect(() => {
+    if (!slug) return;
     const fetchProduct = async () => {
-      if (!params.slug) return;
       try {
-        const res = await fetch(`/api/products/${params.slug}`);
+        const res = await fetch(`/api/products/${slug}`);
         if (res.ok) {
           const data = await res.json();
-          setProduct(data);
-          if (data.colors?.length > 0) {
-            setSelectedColor(data.colors[0].name);
+          if (data && data.name) {
+            setProduct(data);
           }
-          setActiveImage(data.image);
         }
-      } catch (error) {
-        console.error("Error fetching product", error);
-      } finally {
-        setLoading(false);
+      } catch (err) {
+        console.warn("Using local catalog data for:", slug);
       }
     };
     fetchProduct();
-  }, [params.slug]);
+  }, [slug]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0a] pt-24 flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 border-cyan-500 border-t-transparent animate-spin" />
-      </div>
-    );
-  }
+  const colors = product?.colors || ["Black"];
+  const activeColor = colors[selectedColorIdx] || colors[0];
+  const activeColorHex = COLOR_MAP[activeColor.toLowerCase()] || "#374151";
 
-  if (!product) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0a] pt-24 flex flex-col items-center justify-center text-white">
-        <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
-        <button onClick={() => router.push("/shop")} className="text-cyan-400 hover:underline">
-          Return to Shop
-        </button>
-      </div>
-    );
-  }
-
-  const discount = product.originalPrice 
+  const discount = product?.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
-  const handleWhatsAppBuy = () => {
-    const message = encodeURIComponent(`Hi, I'm interested in buying the ${product.name} frame (Color: ${selectedColor}). Is it available?`);
-    window.open(`https://wa.me/919876543210?text=${message}`, '_blank');
-  };
-
   const handleAddToCart = () => {
-    const selectedColorObj = product.colors?.find((c) => c.name === selectedColor) || product.colors?.[0];
     addToCart(
       {
-        productId: product._id,
+        productId: product._id || product.slug,
         slug: product.slug,
         name: product.name,
         price: product.price,
         originalPrice: product.originalPrice,
-        image: product.image,
-        color: selectedColorObj?.name || selectedColor,
-        colorHex: selectedColorObj?.hex || "#a1a1aa",
-        weight: product.weight || "",
+        image: product.images?.[0] || "/images/clarity-showcase.jpg",
+        color: activeColor,
+        colorHex: activeColorHex,
+        weight: product.weight || "14g",
       },
       quantity
     );
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 1800);
   };
 
-  return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white pt-24 pb-20 relative overflow-hidden">
-      {/* Background gradients */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-cyan-900/10 rounded-full blur-[120px] -z-10" />
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-900/10 rounded-full blur-[150px] -z-10" />
+  const handleWhatsAppBuy = () => {
+    const msg = `Hi Dr. Sheeraz & ALIGH'S WARE Team! I am interested in ordering the ${product.name} (Finish: ${activeColor}, Lens: ${lensType}, Qty: ${quantity}). Please guide me with power verification.`;
+    window.open(`https://wa.me/919876543210?text=${encodeURIComponent(msg)}`, "_blank");
+  };
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-        <button 
-          onClick={() => router.push("/shop")}
-          className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-8 group"
+  const relatedProducts = DEFAULT_PRODUCTS.filter((p) => p.slug !== product.slug).slice(0, 3);
+
+  return (
+    <main className="min-h-screen bg-[#070709] text-white pt-28 pb-24 relative overflow-hidden">
+      {/* Ambient Lighting */}
+      <div className="absolute top-20 right-1/4 w-[600px] h-[500px] bg-amber-500/8 rounded-full blur-[160px] pointer-events-none -z-10" />
+      <div className="absolute bottom-20 left-1/4 w-[600px] h-[500px] bg-indigo-500/10 rounded-full blur-[160px] pointer-events-none -z-10" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Navigation Breadcrumb */}
+        <Link
+          href="/shop"
+          className="cursor-pointer inline-flex items-center gap-2 text-xs font-mono text-neutral-400 hover:text-amber-300 transition-colors mb-8 group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="font-mono text-sm">Back to Collection</span>
-        </button>
+          <span>Back to Atelier Collection</span>
+        </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-          {/* Left: Product Images */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="space-y-6"
-          >
-            <div className="glass-card aspect-square rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-transparent p-8 flex items-center justify-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10" />
-              <img 
-                src={activeImage || "/placeholder-frame.png"} 
-                alt={product.name} 
-                className="w-full h-auto object-contain drop-shadow-2xl z-20 hover:scale-105 transition-transform duration-500"
+        {/* Main Product Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+          {/* Left Column: Visual Showcase Card */}
+          <div className="space-y-6 lg:sticky lg:top-28">
+            <div className="relative rounded-3xl bg-gradient-to-b from-white/[0.05] to-white/[0.01] border border-white/10 p-10 flex flex-col items-center justify-center min-h-[380px] sm:min-h-[460px] shadow-2xl overflow-hidden group">
+              {/* Card Badges */}
+              <div className="absolute top-6 left-6 flex items-center gap-2 z-10">
+                <span className="text-[10px] font-mono text-amber-300 uppercase tracking-widest px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/30">
+                  {product.material.toUpperCase()} &bull; {product.weight}
+                </span>
+                {product.bestSeller && (
+                  <span className="text-[10px] font-mono text-emerald-300 uppercase tracking-widest px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30">
+                    Bestseller
+                  </span>
+                )}
+              </div>
+
+              {/* Dynamic Aura */}
+              <div
+                className="absolute inset-0 opacity-40 blur-3xl transition-colors duration-700 pointer-events-none"
+                style={{ backgroundColor: activeColorHex }}
               />
+
+              {/* Central Optical Motif */}
+              <div className="relative text-8xl sm:text-9xl filter drop-shadow-[0_0_35px_rgba(212,175,55,0.4)] my-8">
+                👓
+              </div>
+
+              <div className="relative text-center">
+                <span className="text-xs font-mono text-amber-300 uppercase tracking-widest">
+                  Selected Finish: {activeColor}
+                </span>
+                <p className="text-[11px] text-neutral-400 mt-1 font-mono">
+                  Optical Bench Tested &bull; Japanese Alloy Precision
+                </p>
+              </div>
             </div>
-            
-            {product.gallery && product.gallery.length > 0 && (
-              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                {[product.image, ...product.gallery].map((img, idx) => (
+
+            {/* Quality Certifications Row */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
+                <ShieldCheck className="w-4 h-4 text-amber-400 mx-auto mb-1.5" />
+                <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider block">Coating</span>
+                <span className="text-xs font-semibold text-white block">Sapphire 420nm</span>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
+                <Truck className="w-4 h-4 text-cyan-400 mx-auto mb-1.5" />
+                <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider block">Delivery</span>
+                <span className="text-xs font-semibold text-white block">Free Express</span>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
+                <Award className="w-4 h-4 text-emerald-400 mx-auto mb-1.5" />
+                <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider block">Doctor Check</span>
+                <span className="text-xs font-semibold text-white block">AMU Certified</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Customizer & Purchase */}
+          <div className="space-y-8">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 text-[11px] font-mono text-neutral-300 uppercase tracking-widest mb-3">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span className="capitalize">{product.category.replace("-", " ")}</span>
+                <span>&bull;</span>
+                <span className="capitalize">{product.frameShape}</span>
+              </div>
+
+              <h1 className="text-3xl sm:text-5xl font-bold text-white tracking-tight font-sans">
+                {product.name}
+              </h1>
+
+              <div className="flex items-baseline gap-4 mt-4">
+                <span className="text-3xl sm:text-4xl font-bold font-mono text-amber-300">
+                  ₹{product.price.toLocaleString()}
+                </span>
+                {product.originalPrice && (
+                  <>
+                    <span className="text-xl text-neutral-500 line-through font-mono">
+                      ₹{product.originalPrice.toLocaleString()}
+                    </span>
+                    <span className="text-xs font-mono font-bold text-emerald-400 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30">
+                      SAVE {discount}%
+                    </span>
+                  </>
+                )}
+              </div>
+
+              <p className="text-neutral-300 text-sm sm:text-base mt-4 font-light leading-relaxed">
+                {product.description}
+              </p>
+            </div>
+
+            {/* Frame Finish Selector */}
+            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono uppercase tracking-wider text-neutral-400">
+                  Select Frame Finish:
+                </span>
+                <span className="text-xs font-semibold text-white font-mono">{activeColor}</span>
+              </div>
+
+              <div className="flex flex-wrap gap-2.5">
+                {colors.map((color, idx) => {
+                  const isSelected = selectedColorIdx === idx;
+                  const cHex = COLOR_MAP[color.toLowerCase()] || "#374151";
+                  return (
+                    <button
+                      key={color}
+                      onClick={() => setSelectedColorIdx(idx)}
+                      className={`cursor-pointer flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs transition-all ${
+                        isSelected
+                          ? "bg-white/15 border border-amber-400 text-white shadow-[0_0_15px_rgba(212,175,55,0.3)]"
+                          : "bg-white/[0.04] text-neutral-400 hover:text-white border border-white/10"
+                      }`}
+                    >
+                      <span className="w-3.5 h-3.5 rounded-full border border-white/20" style={{ backgroundColor: cHex }} />
+                      <span>{color}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Lens Type Customizer */}
+            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3">
+              <span className="text-xs font-mono uppercase tracking-wider text-neutral-400 block">
+                Select Lens Prescription Option:
+              </span>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                {[
+                  { id: "zero-power", title: "Zero-Power Blue Cut", desc: "Digital screen shield" },
+                  { id: "single-vision", title: "Single Vision Power", desc: "Distance or Reading" },
+                  { id: "consult-doctor", title: "Free Doctor Power Check", desc: "Firozabad Clinic / Call" },
+                ].map((lt) => (
                   <button
-                    key={idx}
-                    onClick={() => setActiveImage(img)}
-                    className={`w-24 h-24 rounded-xl border flex-shrink-0 flex items-center justify-center bg-white/5 transition-all ${
-                      activeImage === img ? "border-cyan-400 bg-white/10" : "border-white/10 hover:border-white/30"
+                    key={lt.id}
+                    onClick={() => setLensType(lt.id)}
+                    className={`cursor-pointer p-3.5 rounded-xl text-left border transition-all ${
+                      lensType === lt.id
+                        ? "bg-amber-400/10 border-amber-400 text-white shadow-sm"
+                        : "bg-white/[0.03] border-white/10 text-neutral-400 hover:text-white"
                     }`}
                   >
-                    <img src={img || "/placeholder-frame.png"} alt="" className="w-3/4 h-auto object-contain" />
+                    <span className="text-xs font-semibold block text-white">{lt.title}</span>
+                    <span className="text-[11px] text-neutral-400 block mt-1">{lt.desc}</span>
                   </button>
                 ))}
               </div>
-            )}
-          </motion.div>
-
-          {/* Right: Product Info */}
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex flex-col"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <span className="px-3 py-1 rounded-full text-xs font-mono border border-white/20 bg-white/5 text-gray-300 uppercase tracking-wider">
-                {product.category}
-              </span>
-              <span className="px-3 py-1 rounded-full text-xs font-mono border border-white/20 bg-white/5 text-gray-300 uppercase tracking-wider">
-                {product.material}
-              </span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4 font-sans text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
-              {product.name}
-            </h1>
-            
-            <div className="flex items-baseline gap-4 mb-6">
-              <span className="text-3xl font-semibold text-white">₹{product.price}</span>
-              {product.originalPrice && (
-                <>
-                  <span className="text-xl text-gray-500 line-through">₹{product.originalPrice}</span>
-                  <span className="px-2 py-1 bg-cyan-500/20 text-cyan-400 text-sm font-medium rounded border border-cyan-500/30">
-                    {discount}% OFF
-                  </span>
-                </>
-              )}
-            </div>
-
-            <p className="text-gray-400 text-lg mb-8 leading-relaxed">
-              {product.description || "Premium handcrafted eyewear designed for everyday comfort and cinematic style. Firozabad's finest optics meet modern design."}
-            </p>
-
-            {/* Colors */}
-            {product.colors && product.colors.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-sm font-mono text-gray-400 mb-3">SELECT COLOR: {selectedColor}</h3>
-                <div className="flex gap-3">
-                  {product.colors.map((color) => (
-                    <button
-                      key={color.name}
-                      onClick={() => setSelectedColor(color.name)}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                        selectedColor === color.name ? "ring-2 ring-cyan-400 ring-offset-2 ring-offset-[#0a0a0a]" : "hover:scale-110"
-                      }`}
-                    >
-                      <span className="w-8 h-8 rounded-full shadow-inner border border-white/10" style={{ backgroundColor: color.hex }} />
-                    </button>
-                  ))}
+            {/* Quantity Counter & Primary Actions */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <span className="text-xs font-mono text-neutral-400 uppercase tracking-wider">Quantity:</span>
+                <div className="inline-flex items-center rounded-xl bg-white/[0.06] border border-white/15 p-1">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="cursor-pointer p-1.5 text-neutral-400 hover:text-white"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="px-4 text-sm font-mono font-bold text-white">{quantity}</span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="cursor-pointer p-1.5 text-neutral-400 hover:text-white"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-            )}
 
-            {/* Quantity */}
-            <div className="mb-10">
-              <h3 className="text-sm font-mono text-gray-400 mb-3">QUANTITY</h3>
-              <div className="flex items-center w-32 glass-pill border border-white/10 bg-white/5 rounded-full overflow-hidden">
-                <button 
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="flex-1 px-4 py-2 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
-                >-</button>
-                <span className="font-mono">{quantity}</span>
-                <button 
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="flex-1 px-4 py-2 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
-                >+</button>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              <button
-                onClick={handleAddToCart}
-                className="flex-1 glass-button bg-white text-black hover:bg-gray-200 py-4 px-8 rounded-full font-semibold flex items-center justify-center gap-2 transition-colors"
-              >
-                <ShoppingBag className="w-5 h-5" />
-                Add to Cart
-              </button>
-              <button
-                onClick={handleWhatsAppBuy}
-                className="flex-1 glass-button bg-[#25D366]/10 text-[#25D366] border border-[#25D366]/30 hover:bg-[#25D366]/20 py-4 px-8 rounded-full font-semibold flex items-center justify-center gap-2 transition-colors"
-              >
-                <MessageCircle className="w-5 h-5" />
-                Buy on WhatsApp
-              </button>
-            </div>
-
-            {/* Value Props */}
-            <div className="grid grid-cols-2 gap-4 mb-12 py-6 border-y border-white/10">
-              <div className="flex items-center gap-3 text-sm text-gray-300">
-                <Truck className="w-5 h-5 text-cyan-400" />
-                <span>Free Shipping</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm text-gray-300">
-                <ShieldCheck className="w-5 h-5 text-cyan-400" />
-                <span>1 Year Warranty</span>
-              </div>
-            </div>
-
-            {/* Features & Specs */}
-            <div className="space-y-8">
-              <div>
-                <h3 className="text-lg font-semibold mb-4 text-white">Premium Features</h3>
-                <ul className="space-y-3">
-                  {product.features?.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-3 text-gray-400">
-                      <CheckCircle2 className="w-5 h-5 text-cyan-500 shrink-0 mt-0.5" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                  {!product.features?.length && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <button
+                  onClick={handleAddToCart}
+                  className="cursor-pointer w-full py-4 rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-black font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(212,175,55,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+                >
+                  {isAdded ? (
                     <>
-                      <li className="flex items-start gap-3 text-gray-400"><CheckCircle2 className="w-5 h-5 text-cyan-500 shrink-0 mt-0.5" /><span>Anti-reflective coating</span></li>
-                      <li className="flex items-start gap-3 text-gray-400"><CheckCircle2 className="w-5 h-5 text-cyan-500 shrink-0 mt-0.5" /><span>Scratch-resistant lenses</span></li>
-                      <li className="flex items-start gap-3 text-gray-400"><CheckCircle2 className="w-5 h-5 text-cyan-500 shrink-0 mt-0.5" /><span>Lightweight comfort fit</span></li>
+                      <Check className="w-4 h-4 text-black" />
+                      <span>Added to Your Bag!</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingBag className="w-4 h-4 text-black" />
+                      <span>Add to Bag (₹{(product.price * quantity).toLocaleString()})</span>
                     </>
                   )}
-                </ul>
+                </button>
+
+                <button
+                  onClick={handleWhatsAppBuy}
+                  className="cursor-pointer w-full py-4 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 font-semibold text-sm flex items-center justify-center gap-2 transition-all"
+                >
+                  <MessageCircle className="w-4 h-4 text-emerald-400" />
+                  <span>Buy Directly on WhatsApp</span>
+                </button>
               </div>
 
-              <div>
-                <h3 className="text-lg font-semibold mb-4 text-white">Specifications</h3>
-                <div className="glass-panel border border-white/10 bg-white/5 rounded-xl overflow-hidden">
-                  <table className="w-full text-left text-sm">
-                    <tbody>
-                      <tr className="border-b border-white/5">
-                        <th className="py-3 px-4 font-mono text-gray-500 font-normal">Shape</th>
-                        <td className="py-3 px-4 text-gray-300">{product.frameShape}</td>
-                      </tr>
-                      <tr className="border-b border-white/5">
-                        <th className="py-3 px-4 font-mono text-gray-500 font-normal">Material</th>
-                        <td className="py-3 px-4 text-gray-300">{product.material}</td>
-                      </tr>
-                      <tr className="border-b border-white/5">
-                        <th className="py-3 px-4 font-mono text-gray-500 font-normal">Weight</th>
-                        <td className="py-3 px-4 text-gray-300">{product.weight}</td>
-                      </tr>
-                      <tr>
-                        <th className="py-3 px-4 font-mono text-gray-500 font-normal">Frame Width</th>
-                        <td className="py-3 px-4 text-gray-300">{product.width}</td>
-                      </tr>
-                    </tbody>
-                  </table>
+              <Link
+                href="/appointment"
+                className="cursor-pointer w-full py-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 text-neutral-300 hover:text-white text-xs flex items-center justify-center gap-2 transition-colors"
+              >
+                <Calendar className="w-3.5 h-3.5 text-amber-400" />
+                <span>Want Dr. Sheeraz Ahmad to check your power in Firozabad? Book Appointment</span>
+              </Link>
+            </div>
+
+            {/* Technical Specifications Table */}
+            <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10 space-y-4">
+              <h3 className="text-sm font-mono text-neutral-300 uppercase tracking-wider flex items-center gap-2">
+                <FileText className="w-4 h-4 text-amber-400" />
+                Optical Architecture &amp; Dimensions
+              </h3>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2 text-xs">
+                <div>
+                  <span className="text-neutral-500 block font-mono">Frame Material</span>
+                  <span className="font-semibold text-white capitalize mt-0.5 block">{product.material}</span>
+                </div>
+                <div>
+                  <span className="text-neutral-500 block font-mono">Total Weight</span>
+                  <span className="font-semibold text-white mt-0.5 block">{product.weight}</span>
+                </div>
+                <div>
+                  <span className="text-neutral-500 block font-mono">Contour Silhouette</span>
+                  <span className="font-semibold text-white capitalize mt-0.5 block">{product.frameShape}</span>
+                </div>
+                <div>
+                  <span className="text-neutral-500 block font-mono">Lens Coating</span>
+                  <span className="font-semibold text-white mt-0.5 block">Anti-Glare Sapphire</span>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
 
-          </motion.div>
+        {/* Related Handcrafted Frames */}
+        <div className="mt-28 border-t border-white/10 pt-16">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <span className="text-xs font-mono text-amber-300 uppercase tracking-widest block">Complete Your Style</span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mt-1">Similar Handcrafted Frames</h2>
+            </div>
+            <Link href="/shop" className="cursor-pointer text-xs font-mono text-amber-400 hover:underline">
+              View All 12 Frames &rarr;
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {relatedProducts.map((rel) => (
+              <Link
+                key={rel.slug}
+                href={`/shop/${rel.slug}`}
+                className="group p-5 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-amber-400/40 transition-all flex flex-col justify-between"
+              >
+                <div className="w-full h-36 rounded-2xl bg-gradient-to-br from-neutral-900 to-black border border-white/5 flex items-center justify-center text-4xl group-hover:scale-105 transition-transform duration-300">
+                  👓
+                </div>
+                <div className="mt-4">
+                  <h4 className="text-sm font-semibold text-white group-hover:text-amber-300 transition-colors">
+                    {rel.name}
+                  </h4>
+                  <div className="flex items-center justify-between mt-1 text-xs font-mono">
+                    <span className="text-neutral-400 capitalize">{rel.material}</span>
+                    <span className="font-bold text-amber-300">₹{rel.price}</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </main>

@@ -5,11 +5,33 @@ import { useFrame } from "@react-three/fiber";
 import { useGLTF, Float } from "@react-three/drei";
 import * as THREE from "three";
 
-export default function GlassesModel() {
+export interface MaterialOption {
+  id: string;
+  name: string;
+  color: string;
+  metalness: number;
+  roughness: number;
+  badge: string;
+}
+
+export const FRAME_MATERIALS: MaterialOption[] = [
+  { id: "gold", name: "24K Champagne Gold", color: "#D4AF37", metalness: 0.94, roughness: 0.16, badge: "Royal Titanium" },
+  { id: "onyx", name: "Matte Onyx Black", color: "#16171B", metalness: 0.45, roughness: 0.38, badge: "Italian Acetate" },
+  { id: "rose", name: "Rose Gold Mirage", color: "#B76E79", metalness: 0.88, roughness: 0.22, badge: "Aerospace Alloy" },
+  { id: "silver", name: "Arctic Chrome", color: "#E0E5EC", metalness: 0.96, roughness: 0.12, badge: "Pure Platinum" },
+  { id: "emerald", name: "Firozabad Emerald", color: "#0F4C3A", metalness: 0.65, roughness: 0.25, badge: "Heritage Glass" },
+];
+
+export default function GlassesModel({ materialId = "gold" }: { materialId?: string }) {
   const groupRef = useRef<THREE.Group>(null);
   const { scene } = useGLTF("/models/glasses.glb");
 
-  // Clone scene and apply premium material finishes
+  const selectedMat = useMemo(
+    () => FRAME_MATERIALS.find((m) => m.id === materialId) || FRAME_MATERIALS[0],
+    [materialId]
+  );
+
+  // Clone scene and dynamically apply chosen luxury material finishes
   const clonedScene = useMemo(() => {
     const clone = scene.clone(true);
 
@@ -22,21 +44,19 @@ export default function GlassesModel() {
         if (mesh.material) {
           const mat = (mesh.material as THREE.MeshStandardMaterial).clone();
 
-          // Check if mesh represents the lenses or frame
           const name = (mesh.name || "").toLowerCase();
           if (name.includes("lens") || name.includes("glass")) {
             mat.transparent = true;
-            mat.opacity = 0.82;
+            mat.opacity = 0.84;
             mat.roughness = 0.04;
             mat.metalness = 0.15;
-            mat.color = new THREE.Color("#0c1322");
-            mat.envMapIntensity = 2.0;
+            mat.color = new THREE.Color("#0a1220");
+            mat.envMapIntensity = 2.2;
           } else {
-            // Metallic titanium & hand-polished acetate frame finish
-            mat.metalness = 0.88;
-            mat.roughness = 0.22;
-            mat.color = new THREE.Color("#1a1c23");
-            mat.envMapIntensity = 1.6;
+            mat.metalness = selectedMat.metalness;
+            mat.roughness = selectedMat.roughness;
+            mat.color = new THREE.Color(selectedMat.color);
+            mat.envMapIntensity = 1.9;
           }
           mesh.material = mat;
         }
@@ -44,19 +64,17 @@ export default function GlassesModel() {
     });
 
     return clone;
-  }, [scene]);
+  }, [scene, selectedMat]);
 
   // Mouse Tracking with Linear Interpolation (lerp)
   useFrame((state) => {
     if (!groupRef.current) return;
 
-    // state.pointer has normalized coordinates between -1 and 1
-    const targetX = -state.pointer.y * 0.42; // Tilt up/down
-    const targetY = state.pointer.x * 0.72;  // Rotate left/right
-    const targetPosX = state.pointer.x * 0.25; // Subtle parallax shift
+    const targetX = -state.pointer.y * 0.42;
+    const targetY = state.pointer.x * 0.72;
+    const targetPosX = state.pointer.x * 0.25;
     const targetPosY = state.pointer.y * 0.18;
 
-    // Ultra-fluid linear interpolation
     groupRef.current.rotation.x = THREE.MathUtils.lerp(
       groupRef.current.rotation.x,
       targetX,
@@ -81,9 +99,9 @@ export default function GlassesModel() {
 
   return (
     <Float
-      speed={2.2}            // Continuous hovering animation speed
-      rotationIntensity={0.35} // Gentle wobble
-      floatIntensity={0.8}    // Vertical floating amplitude
+      speed={2.2}
+      rotationIntensity={0.35}
+      floatIntensity={0.8}
       floatingRange={[-0.08, 0.08]}
     >
       <group ref={groupRef} scale={44} position={[0, 0, 0]}>

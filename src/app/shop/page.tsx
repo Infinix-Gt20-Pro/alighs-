@@ -1,102 +1,157 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProductCard from "@/components/ProductCard";
-import { Filter, ChevronDown } from "lucide-react";
-
-type Product = {
-  _id: string;
-  name: string;
-  slug: string;
-  price: number;
-  originalPrice?: number;
-  category: string;
-  frameShape: string;
-  colors: string[];
-  image: string;
-  isNew?: boolean;
-};
+import { DEFAULT_PRODUCTS, ProductType } from "@/lib/products-data";
+import { Filter, Search, Sparkles, SlidersHorizontal, RefreshCw, X } from "lucide-react";
 
 const CATEGORIES = ["All", "Eyeglasses", "Sunglasses", "Computer Glasses"];
+const FRAME_SHAPES = ["All Shapes", "Aviator", "Hexagonal", "Clubmaster", "Cat-Eye", "Round", "Wayfarer", "Rectangle"];
 const SORT_OPTIONS = [
-  { label: "Popular", value: "popular" },
-  { label: "Price Low→High", value: "price_asc" },
-  { label: "Price High→Low", value: "price_desc" },
-  { label: "Newest", value: "newest" },
+  { label: "Featured & Bestsellers", value: "popular" },
+  { label: "Price: Low to High", value: "price_asc" },
+  { label: "Price: High to Low", value: "price_desc" },
+  { label: "Newest Arrivals", value: "newest" },
 ];
 
 export default function ShopPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All");
+  const [activeShape, setActiveShape] = useState("All Shapes");
+  const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState("popular");
-  const [isSortOpen, setIsSortOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        // Construct query params based on filters
-        const url = new URL("/api/products", window.location.origin);
-        if (activeCategory !== "All") {
-          url.searchParams.append("category", activeCategory);
-        }
-        url.searchParams.append("sort", sortOption);
-        
-        const res = await fetch(url.toString());
-        if (res.ok) {
-          const data = await res.json();
-          setProducts(data.products || data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch products", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts();
-  }, [activeCategory, sortOption]);
+  // Instant reactive client-side filtering over curated catalog
+  const filteredProducts = useMemo(() => {
+    let list = [...DEFAULT_PRODUCTS];
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 },
-    },
+    if (activeCategory !== "All") {
+      const catKey = activeCategory.toLowerCase().replace(/\s+/g, "-");
+      list = list.filter((p) => p.category.toLowerCase().replace(/\s+/g, "-") === catKey);
+    }
+
+    if (activeShape !== "All Shapes") {
+      list = list.filter((p) => p.frameShape.toLowerCase() === activeShape.toLowerCase());
+    }
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.material.toLowerCase().includes(q) ||
+          p.description.toLowerCase().includes(q) ||
+          p.features.some((f) => f.toLowerCase().includes(q))
+      );
+    }
+
+    if (sortOption === "price_asc") {
+      list.sort((a, b) => a.price - b.price);
+    } else if (sortOption === "price_desc") {
+      list.sort((a, b) => b.price - a.price);
+    } else if (sortOption === "popular") {
+      list.sort((a, b) => (b.bestSeller ? 1 : 0) - (a.bestSeller ? 1 : 0));
+    }
+
+    return list;
+  }, [activeCategory, activeShape, searchQuery, sortOption]);
+
+  const resetFilters = () => {
+    setActiveCategory("All");
+    setActiveShape("All Shapes");
+    setSearchQuery("");
+    setSortOption("popular");
   };
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white pt-24 pb-20 relative overflow-hidden">
-      {/* Ambient Orbs */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-cyan-900/20 rounded-full blur-[120px] -z-10" />
-      <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-indigo-900/20 rounded-full blur-[150px] -z-10" />
+    <main className="min-h-screen bg-[#070709] text-white pt-28 pb-24 relative overflow-hidden">
+      {/* Ambient Lighting Orbs */}
+      <div className="absolute top-12 left-1/3 w-[600px] h-[500px] bg-amber-500/8 rounded-full blur-[160px] pointer-events-none -z-10" />
+      <div className="absolute bottom-10 right-1/4 w-[600px] h-[500px] bg-indigo-500/10 rounded-full blur-[160px] pointer-events-none -z-10" />
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header Title Section */}
         <div className="flex flex-col items-center text-center mb-12">
-          <div className="glass-pill px-4 py-1.5 mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-            <span className="text-xs font-mono tracking-wider text-cyan-200">CURATED FRAMES</span>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-400/10 border border-amber-400/20 text-xs font-mono text-amber-300 uppercase tracking-widest mb-4 shadow-sm">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>ARCHITECTURAL EYEWEAR ATELIER</span>
           </div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-500 font-sans">
-            Premium Eyewear Collection
+
+          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-white font-sans">
+            Handcrafted Optical Collection
           </h1>
-          <p className="text-gray-400 max-w-2xl text-lg">
-            Discover our hand-picked selection of premium frames. Crafted for comfort, designed for style. Firozabad&apos;s finest optical quality.
+
+          <p className="text-neutral-400 max-w-2xl text-sm sm:text-base mt-3 font-light leading-relaxed">
+            Engineered from Japanese pure titanium and Italian hand-polished acetate. Tested and fitted under the clinical guidance of Dr. Sheeraz Ahmad.
           </p>
         </div>
 
-        {/* Filter Bar */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-10 pb-6 border-b border-white/10">
-          <div className="flex flex-wrap items-center gap-2 justify-center">
+        {/* Filter & Search Control Panel */}
+        <div className="p-6 rounded-3xl bg-white/[0.03] border border-white/10 backdrop-blur-xl mb-10 space-y-5">
+          {/* Top Row: Search Input & Sorting */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* Search Input */}
+            <div className="relative w-full sm:w-80">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search titanium, aviator, blue-cut..."
+                className="w-full pl-10 pr-9 py-2.5 rounded-full bg-white/[0.05] border border-white/10 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-amber-400/60 focus:bg-white/[0.08] transition-all"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Sorting Dropdown & Reset */}
+            <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+              <div className="flex items-center gap-2 text-xs font-mono text-neutral-400">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-amber-400" />
+                <span className="hidden sm:inline">Sort:</span>
+              </div>
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                className="cursor-pointer px-3.5 py-2 rounded-full bg-[#101116] border border-white/15 text-neutral-200 text-xs focus:outline-none focus:border-amber-400"
+              >
+                {SORT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+
+              {(activeCategory !== "All" || activeShape !== "All Shapes" || searchQuery) && (
+                <button
+                  onClick={resetFilters}
+                  className="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-xs font-mono text-amber-300 border border-white/10"
+                  title="Reset all filters"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  <span className="hidden sm:inline">Reset</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Category Tabs */}
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/10">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-500 mr-2">Category:</span>
             {CATEGORIES.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-5 py-2 rounded-full text-sm transition-all duration-300 font-medium ${
+                className={`cursor-pointer px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                   activeCategory === cat
-                    ? "bg-white text-black"
-                    : "glass-pill border border-white/10 bg-white/5 text-gray-300 hover:bg-white/10"
+                    ? "bg-amber-400 text-black font-semibold shadow-[0_0_15px_rgba(212,175,55,0.4)]"
+                    : "bg-white/[0.04] text-neutral-400 hover:text-white border border-white/10 hover:bg-white/[0.08]"
                 }`}
               >
                 {cat}
@@ -104,88 +159,77 @@ export default function ShopPage() {
             ))}
           </div>
 
-          <div className="relative">
-            <button
-              onClick={() => setIsSortOpen(!isSortOpen)}
-              className="glass-pill flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 text-sm text-gray-300 hover:bg-white/10 transition-colors"
-            >
-              <Filter className="w-4 h-4" />
-              <span>Sort: {SORT_OPTIONS.find(o => o.value === sortOption)?.label}</span>
-              <ChevronDown className="w-4 h-4" />
-            </button>
-            
-            <AnimatePresence>
-              {isSortOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="absolute right-0 mt-2 w-48 rounded-xl border border-white/10 bg-[#111]/90 backdrop-blur-xl z-50 overflow-hidden shadow-2xl"
-                >
-                  {SORT_OPTIONS.map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => {
-                        setSortOption(option.value);
-                        setIsSortOpen(false);
-                      }}
-                      className={`w-full text-left px-4 py-3 text-sm transition-colors hover:bg-white/10 ${
-                        sortOption === option.value ? "text-cyan-400 bg-white/5" : "text-gray-300"
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
+          {/* Frame Shape Pills */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-500 mr-2">Shape:</span>
+            {FRAME_SHAPES.map((shape) => (
+              <button
+                key={shape}
+                onClick={() => setActiveShape(shape)}
+                className={`cursor-pointer px-3 py-1 rounded-full text-[11px] font-mono transition-all duration-200 ${
+                  activeShape === shape
+                    ? "bg-white/20 text-white border border-white/40 font-semibold"
+                    : "bg-white/[0.03] text-neutral-400 hover:text-neutral-200 border border-white/5"
+                }`}
+              >
+                {shape}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Product Grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="glass-card rounded-2xl h-[400px] border border-white/5 bg-white/[0.02] animate-pulse">
-                <div className="h-2/3 bg-white/5 rounded-t-2xl" />
-                <div className="p-6 space-y-4">
-                  <div className="h-6 bg-white/10 rounded w-3/4" />
-                  <div className="h-4 bg-white/10 rounded w-1/2" />
-                  <div className="h-8 bg-white/10 rounded w-1/3" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : products.length > 0 ? (
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="show"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
-          >
-            {products.map((product) => (
-              <ProductCard key={product._id} product={product} />
-            ))}
-          </motion.div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-6">
-              <Filter className="w-8 h-8 text-gray-500" />
-            </div>
-            <h3 className="text-2xl font-semibold mb-2">No frames found</h3>
-            <p className="text-gray-400 max-w-md">
-              We couldn&apos;t find any eyewear matching your current filters. Try selecting a different category or clearing your filters.
+        {/* Results Metadata Bar */}
+        <div className="flex items-center justify-between mb-6 px-1">
+          <span className="text-xs font-mono text-neutral-400">
+            Showing <strong className="text-white">{filteredProducts.length}</strong> mastercraft frames
+          </span>
+          <span className="text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            100% In Stock &bull; Free Shipping Over ₹1999
+          </span>
+        </div>
+
+        {/* Product Cards Responsive Grid */}
+        {filteredProducts.length === 0 ? (
+          <div className="p-16 rounded-3xl bg-white/[0.02] border border-white/10 text-center space-y-4">
+            <div className="text-5xl">👓</div>
+            <h3 className="text-lg font-semibold text-white">No Matching Eyewear Found</h3>
+            <p className="text-xs text-neutral-400 max-w-sm mx-auto">
+              Try adjusting your filter selection or clear search terms to view our full collection.
             </p>
             <button
-              onClick={() => {
-                setActiveCategory("All");
-                setSortOption("popular");
-              }}
-              className="mt-8 px-6 py-2 rounded-full border border-white/10 hover:bg-white/5 transition-colors"
+              onClick={resetFilters}
+              className="px-6 py-2.5 rounded-full bg-amber-400 text-black font-semibold text-xs hover:brightness-110 transition-all"
             >
-              Clear Filters
+              Reset Filters
             </button>
           </div>
+        ) : (
+          <motion.div
+            layout
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {filteredProducts.map((product) => (
+              <ProductCard
+                key={product._id}
+                product={{
+                  _id: product._id,
+                  id: product._id,
+                  name: product.name,
+                  slug: product.slug,
+                  price: product.price,
+                  originalPrice: product.originalPrice,
+                  colors: product.colors,
+                  features: product.features,
+                  bestSeller: product.bestSeller,
+                  category: product.category,
+                  weight: product.weight,
+                  images: product.images,
+                  frameMaterial: product.material,
+                }}
+              />
+            ))}
+          </motion.div>
         )}
       </div>
     </main>

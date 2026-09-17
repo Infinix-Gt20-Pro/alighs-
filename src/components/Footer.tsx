@@ -121,6 +121,15 @@ export default function Footer() {
                     <ExternalLink className="w-3 h-3 opacity-70" />
                   </a>
                 </li>
+                <li>
+                  <Link
+                    href="/admin"
+                    className="text-amber-400/80 hover:text-amber-300 transition-colors text-xs font-mono flex items-center gap-1.5 pt-1"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Orders &amp; Admin Portal</span>
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>

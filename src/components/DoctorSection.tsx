@@ -29,7 +29,7 @@ export default function DoctorSection() {
   ];
 
   return (
-    <section id="doctor-section" className="w-full py-24 bg-[#0a0a0a] relative overflow-hidden">
+    <section id="doctor-section" className="w-full pt-10 pb-16 sm:pt-14 sm:pb-20 bg-[#070709] relative overflow-hidden">
       <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] -translate-y-1/2 pointer-events-none"></div>
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-[100px] pointer-events-none"></div>
 
@@ -39,7 +39,7 @@ export default function DoctorSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-10 sm:mb-12"
         >
           <h2 className="text-3xl md:text-5xl font-bold text-white font-sans mb-4">Meet The Expert</h2>
           <p className="text-gray-400 max-w-2xl mx-auto">

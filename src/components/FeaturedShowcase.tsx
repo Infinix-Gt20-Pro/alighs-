@@ -43,12 +43,12 @@ export default function FeaturedShowcase() {
   };
 
   return (
-    <section className="relative py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto overflow-hidden">
+    <section className="relative pt-6 pb-12 sm:pt-10 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto overflow-hidden">
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-amber-500/8 rounded-full blur-[140px] pointer-events-none -z-10" />
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6 border-b border-white/10 pb-8">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4 border-b border-white/10 pb-6">
         <div>
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-400/10 border border-amber-400/20 text-xs font-mono text-amber-300 uppercase tracking-widest mb-3">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
@@ -205,7 +205,7 @@ export default function FeaturedShowcase() {
       </div>
 
       {/* Bottom CTA to Shop */}
-      <div className="text-center mt-14">
+      <div className="text-center mt-10">
         <Link
           href="/shop"
           className="cursor-pointer inline-flex items-center gap-3 px-8 py-4 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/20 text-white font-medium text-sm hover:border-amber-400/50 hover:scale-105 transition-all duration-300 backdrop-blur-xl"

@@ -61,7 +61,7 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-[92vh] flex flex-col items-center justify-start overflow-hidden px-3 sm:px-6 pt-4 sm:pt-8 pb-14 bg-[#070709] w-full max-w-full">
+    <section className="relative flex flex-col items-center justify-start overflow-hidden px-3 sm:px-6 pt-4 sm:pt-8 pb-8 sm:pb-12 bg-[#070709] w-full max-w-full">
       {/* Editorial Motion Video Ambient Layer */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden opacity-25">
         <video

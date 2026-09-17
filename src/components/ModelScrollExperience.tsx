@@ -210,13 +210,13 @@ export default function ModelScrollExperience() {
   const modelOpacity = useTransform(scrollYProgress, [0, 0.1, 0.85, 1], [0.85, 1, 1, 0.75]);
   const overlayDarkness = useTransform(scrollYProgress, [0, 0.4, 0.85], [0.2, 0.35, 0.6]);
 
-  const phase1Opacity = useTransform(scrollYProgress, [0.05, 0.22, 0.35], [0, 1, 0]);
+  const phase1Opacity = useTransform(scrollYProgress, [0.04, 0.2, 0.35], [0, 1, 0]);
   const phase1Y = useTransform(scrollYProgress, [0.05, 0.22, 0.35], [20, 0, -15]);
 
-  const phase2Opacity = useTransform(scrollYProgress, [0.38, 0.55, 0.72], [0, 1, 0]);
+  const phase2Opacity = useTransform(scrollYProgress, [0.36, 0.52, 0.68], [0, 1, 0]);
   const phase2Y = useTransform(scrollYProgress, [0.38, 0.55, 0.72], [20, 0, -15]);
 
-  const phase3Opacity = useTransform(scrollYProgress, [0.75, 0.9, 1.0], [0, 1, 1]);
+  const phase3Opacity = useTransform(scrollYProgress, [0.72, 0.88, 1.0], [0, 1, 1]);
   const phase3Y = useTransform(scrollYProgress, [0.75, 0.9, 1.0], [20, 0, 0]);
 
   const activeModel = MODELS[activeModelIdx];
@@ -240,7 +240,7 @@ export default function ModelScrollExperience() {
   };
 
   return (
-    <section ref={containerRef} className="relative h-[300vh] sm:h-[340vh] bg-[#070709] gpu-layer w-full max-w-full overflow-hidden">
+    <section ref={containerRef} className="relative h-[200vh] sm:h-[220vh] bg-[#070709] gpu-layer w-full max-w-full overflow-hidden">
       {/* Sticky Fullscreen Container */}
       <div className="sticky top-0 h-[100dvh] w-full flex items-center justify-center overflow-hidden">
         

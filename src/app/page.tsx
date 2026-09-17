@@ -6,7 +6,6 @@ import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import FeaturedShowcase from "@/components/FeaturedShowcase";
 import ModelScrollExperience from "@/components/ModelScrollExperience";
-import LensRevealSection from "@/components/LensRevealSection";
 import DoctorSection from "@/components/DoctorSection";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
@@ -24,7 +23,7 @@ export default function Home() {
       />
 
       <main className="relative min-h-screen max-w-full overflow-x-hidden bg-[#070709] text-white selection:bg-amber-500/30 selection:text-white">
-        {/* Dynamic Ambient Color Orbs */}
+        {/* Dynamic Ambient Color Orbs with seamless vertical coverage */}
         <div className="pointer-events-none fixed inset-0 overflow-hidden z-0">
           <div className="animate-float-1 absolute -top-24 -left-20 w-[350px] sm:w-[550px] h-[350px] sm:h-[550px] rounded-full bg-gradient-to-br from-amber-600/15 via-indigo-600/15 to-transparent blur-[100px] sm:blur-[130px]" />
           <div className="animate-float-2 absolute top-1/3 -right-32 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] rounded-full bg-gradient-to-bl from-purple-600/15 via-amber-600/10 to-transparent blur-[100px] sm:blur-[140px]" />
@@ -44,13 +43,10 @@ export default function Home() {
         {/* 3. 3D EDITORIAL MODEL SCROLL EXPERIENCE: Real Fashion Icons & Motion Capture Reel */}
         <ModelScrollExperience />
 
-        {/* 4. MAGIC LENS: Interactive Optical Clarity Simulation */}
-        <LensRevealSection />
-
-        {/* 5. DOCTOR SECTION: Dr. Sheeraz Ahmad — AMU-Certified Optometrist */}
+        {/* 4. DOCTOR SECTION: Dr. Sheeraz Ahmad — AMU-Certified Optometrist */}
         <DoctorSection />
 
-        {/* 6. Luxury Atelier Footer */}
+        {/* 5. Luxury Atelier Footer */}
         <Footer />
       </main>
 

@@ -4,6 +4,7 @@
 import React, { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Float } from "@react-three/drei";
+import { MotionValue } from "framer-motion";
 import * as THREE from "three";
 
 export interface MaterialOption {
@@ -29,7 +30,7 @@ export default function GlassesModel({
   scrollYProgress
 }: {
   materialId?: string;
-  scrollYProgress?: number;
+  scrollYProgress?: MotionValue<number> | React.MutableRefObject<number> | number;
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const leftLensRef = useRef<THREE.Mesh>(null);
@@ -85,8 +86,16 @@ export default function GlassesModel({
     const mouseX = state.pointer.x * 0.45;
     const mouseY = state.pointer.y * 0.3;
 
-    // Scroll progress influence (rotates frame upwards and sideways as user scrolls)
-    const scroll = scrollYProgress || 0;
+    // Scroll progress read directly from motion value or ref without React re-render
+    let scroll = 0;
+    if (typeof scrollYProgress === "number") {
+      scroll = scrollYProgress;
+    } else if (scrollYProgress && "get" in scrollYProgress) {
+      scroll = (scrollYProgress as MotionValue<number>).get();
+    } else if (scrollYProgress && "current" in scrollYProgress) {
+      scroll = (scrollYProgress as React.MutableRefObject<number>).current;
+    }
+
     const scrollRotX = scroll * -0.6;
     const scrollRotY = scroll * 0.8;
     const scrollScale = 1.0 + scroll * 0.25;
@@ -106,62 +115,62 @@ export default function GlassesModel({
       <group ref={groupRef} position={[0, 0, 0]} scale={1.45}>
         {/* Left Rim (Rounded Architectural Wireframe) */}
         <mesh position={[-0.92, 0, 0]} material={frameMaterial} castShadow>
-          <torusGeometry args={[0.7, 0.042, 28, 72]} />
+          <torusGeometry args={[0.7, 0.042, 20, 54]} />
         </mesh>
         {/* Left Lens */}
         <mesh ref={leftLensRef} position={[-0.92, 0, 0]} material={lensMaterial}>
-          <cylinderGeometry args={[0.68, 0.68, 0.015, 54]} />
+          <cylinderGeometry args={[0.68, 0.68, 0.015, 36]} />
         </mesh>
 
         {/* Right Rim */}
         <mesh position={[0.92, 0, 0]} material={frameMaterial} castShadow>
-          <torusGeometry args={[0.7, 0.042, 28, 72]} />
+          <torusGeometry args={[0.7, 0.042, 20, 54]} />
         </mesh>
         {/* Right Lens */}
         <mesh ref={rightLensRef} position={[0.92, 0, 0]} material={lensMaterial}>
-          <cylinderGeometry args={[0.68, 0.68, 0.015, 54]} />
+          <cylinderGeometry args={[0.68, 0.68, 0.015, 36]} />
         </mesh>
 
         {/* Keyhole Nose Bridge (Upper Arch) */}
         <mesh position={[0, 0.28, 0.01]} rotation={[0, 0, Math.PI / 2]} material={frameMaterial}>
-          <cylinderGeometry args={[0.034, 0.034, 0.44, 24]} />
+          <cylinderGeometry args={[0.034, 0.034, 0.44, 18]} />
         </mesh>
 
         {/* Bridge Lower Accent Bar */}
         <mesh position={[0, 0.12, 0]} rotation={[0, 0, Math.PI / 2]} material={accentMaterial}>
-          <cylinderGeometry args={[0.02, 0.02, 0.38, 20]} />
+          <cylinderGeometry args={[0.02, 0.02, 0.38, 16]} />
         </mesh>
 
         {/* Left Endpiece & Temple */}
         <mesh position={[-1.65, 0.12, 0]} material={accentMaterial}>
-          <sphereGeometry args={[0.065, 20, 20]} />
+          <sphereGeometry args={[0.065, 16, 16]} />
         </mesh>
         <mesh position={[-1.68, 0.12, -0.95]} rotation={[0, 0.16, 0]} material={frameMaterial} castShadow>
           <boxGeometry args={[0.038, 0.038, 1.9]} />
         </mesh>
         {/* Left Curved Ear Tip */}
         <mesh position={[-1.84, -0.06, -1.95]} rotation={[0.4, 0, 0]} material={frameMaterial}>
-          <cylinderGeometry args={[0.035, 0.025, 0.45, 16]} />
+          <cylinderGeometry args={[0.035, 0.025, 0.45, 14]} />
         </mesh>
 
         {/* Right Endpiece & Temple */}
         <mesh position={[1.65, 0.12, 0]} material={accentMaterial}>
-          <sphereGeometry args={[0.065, 20, 20]} />
+          <sphereGeometry args={[0.065, 16, 16]} />
         </mesh>
         <mesh position={[1.68, 0.12, -0.95]} rotation={[0, -0.16, 0]} material={frameMaterial} castShadow>
           <boxGeometry args={[0.038, 0.038, 1.9]} />
         </mesh>
         {/* Right Curved Ear Tip */}
         <mesh position={[1.84, -0.06, -1.95]} rotation={[0.4, 0, 0]} material={frameMaterial}>
-          <cylinderGeometry args={[0.035, 0.025, 0.45, 16]} />
+          <cylinderGeometry args={[0.035, 0.025, 0.45, 14]} />
         </mesh>
 
         {/* Nose Pads */}
         <mesh position={[-0.26, -0.08, -0.12]} rotation={[0, 0.3, 0]} material={lensMaterial}>
-          <capsuleGeometry args={[0.045, 0.12, 12, 16]} />
+          <capsuleGeometry args={[0.045, 0.12, 10, 14]} />
         </mesh>
         <mesh position={[0.26, -0.08, -0.12]} rotation={[0, -0.3, 0]} material={lensMaterial}>
-          <capsuleGeometry args={[0.045, 0.12, 12, 16]} />
+          <capsuleGeometry args={[0.045, 0.12, 10, 14]} />
         </mesh>
       </group>
     </Float>

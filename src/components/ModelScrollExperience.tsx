@@ -1,7 +1,7 @@
 // src/components/ModelScrollExperience.tsx
 "use client";
 
-import React, { useRef, useState, useEffect, useSyncExternalStore } from "react";
+import React, { useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Canvas, useFrame } from "@react-three/fiber";
@@ -10,19 +10,15 @@ import { motion, useScroll, useTransform, useMotionValueEvent, AnimatePresence }
 import * as THREE from "three";
 import {
   Sparkles,
-  ShieldCheck,
   Eye,
   ShoppingBag,
-  ArrowRight,
   CheckCircle2,
-  Sliders,
-  Maximize2,
   RotateCw,
   Zap,
-  Play,
   Film
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useInViewFast } from "@/hooks/useInViewFast";
 
 const emptySubscribe = () => () => {};
 
@@ -86,21 +82,21 @@ function InteractiveScrollGlasses({
     <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.25}>
       <group ref={groupRef} position={[0, 0.2, 0]}>
         <mesh position={[-0.95, 0, 0]} material={frameMaterial}>
-          <torusGeometry args={[0.72, 0.045, 24, 64]} />
+          <torusGeometry args={[0.72, 0.045, 18, 44]} />
         </mesh>
         <mesh ref={leftLensRef} position={[-0.95, 0, 0]} material={lensMaterial}>
-          <cylinderGeometry args={[0.7, 0.7, 0.02, 48]} />
+          <cylinderGeometry args={[0.7, 0.7, 0.02, 32]} />
         </mesh>
 
         <mesh position={[0.95, 0, 0]} material={frameMaterial}>
-          <torusGeometry args={[0.72, 0.045, 24, 64]} />
+          <torusGeometry args={[0.72, 0.045, 18, 44]} />
         </mesh>
         <mesh ref={rightLensRef} position={[0.95, 0, 0]} material={lensMaterial}>
-          <cylinderGeometry args={[0.7, 0.7, 0.02, 48]} />
+          <cylinderGeometry args={[0.7, 0.7, 0.02, 32]} />
         </mesh>
 
         <mesh position={[0, 0.25, 0.02]} rotation={[0, 0, Math.PI / 2]} material={frameMaterial}>
-          <cylinderGeometry args={[0.038, 0.038, 0.48, 20]} />
+          <cylinderGeometry args={[0.038, 0.038, 0.48, 16]} />
         </mesh>
 
         <mesh position={[-1.7, 0.12, -1.0]} rotation={[0, 0.18, 0]} material={frameMaterial}>
@@ -111,10 +107,10 @@ function InteractiveScrollGlasses({
         </mesh>
 
         <mesh position={[-1.68, 0.12, 0]} material={frameMaterial}>
-          <sphereGeometry args={[0.065, 16, 16]} />
+          <sphereGeometry args={[0.065, 14, 14]} />
         </mesh>
         <mesh position={[1.68, 0.12, 0]} material={frameMaterial}>
-          <sphereGeometry args={[0.065, 16, 16]} />
+          <sphereGeometry args={[0.065, 14, 14]} />
         </mesh>
       </group>
     </Float>
@@ -172,9 +168,10 @@ export default function ModelScrollExperience() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressRef = useRef(0);
   const [activeModelIdx, setActiveModelIdx] = useState(0);
-  const [addedNotice, setAddedNotice] = useState(false);
   const [blueCutActive, setBlueCutActive] = useState(true);
   const { addToCart, openCart } = useCart();
+
+  const isInView = useInViewFast(containerRef, "300px");
 
   const mounted = useSyncExternalStore(
     emptySubscribe,
@@ -187,16 +184,26 @@ export default function ModelScrollExperience() {
     offset: ["start start", "end end"]
   });
 
+  // RAF-throttled smooth seek without blocking UI/compositor thread
+  const targetTimeRef = useRef(0);
+  const rafSeekRef = useRef<number | null>(null);
+
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     progressRef.current = latest;
 
-    // Scroll-scrub video playback if active model has video
-    if (videoRef.current && MODELS[activeModelIdx].video && videoRef.current.duration) {
-      const duration = videoRef.current.duration;
-      // Map scroll progress to video duration with gentle easing
-      const targetTime = latest * duration;
-      if (!isNaN(targetTime)) {
-        videoRef.current.currentTime = targetTime;
+    const v = videoRef.current;
+    if (v && MODELS[activeModelIdx].video && v.duration) {
+      targetTimeRef.current = latest * v.duration;
+
+      if (!rafSeekRef.current) {
+        rafSeekRef.current = requestAnimationFrame(() => {
+          rafSeekRef.current = null;
+          const vid = videoRef.current;
+          if (!vid || vid.seeking || isNaN(targetTimeRef.current)) return;
+          if (Math.abs(vid.currentTime - targetTimeRef.current) > 0.07) {
+            vid.currentTime = targetTimeRef.current;
+          }
+        });
       }
     }
   });
@@ -231,13 +238,11 @@ export default function ModelScrollExperience() {
       },
       1
     );
-    setAddedNotice(true);
-    setTimeout(() => setAddedNotice(false), 2000);
     openCart();
   };
 
   return (
-    <section ref={containerRef} className="relative h-[340vh] bg-[#070709]">
+    <section ref={containerRef} className="relative h-[340vh] bg-[#070709] gpu-layer">
       {/* Sticky Fullscreen Container */}
       <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
         
@@ -278,21 +283,19 @@ export default function ModelScrollExperience() {
           </div>
         </div>
 
-        {/* ====================================================================
-            REAL EDITORIAL MODEL PHOTO OR MOTION VIDEO WITH DYNAMIC SCROLL PARALLAX
-            ==================================================================== */}
+        {/* REAL EDITORIAL MODEL PHOTO OR MOTION VIDEO */}
         <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
           <motion.div
             style={{ scale: modelScale, opacity: modelOpacity }}
-            className="relative w-full h-full max-w-5xl mx-auto flex items-center justify-center"
+            className="relative w-full h-full max-w-5xl mx-auto flex items-center justify-center gpu-layer"
           >
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeModel.id}
-                initial={{ opacity: 0, filter: "blur(10px)" }}
-                animate={{ opacity: 1, filter: "blur(0px)" }}
-                exit={{ opacity: 0, filter: "blur(10px)" }}
-                transition={{ duration: 0.6 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.35 }}
                 className="relative w-full h-full max-h-[85vh] sm:max-h-[90vh] rounded-3xl overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.9)]"
               >
                 {activeModel.video ? (
@@ -301,7 +304,7 @@ export default function ModelScrollExperience() {
                     muted
                     playsInline
                     preload="auto"
-                    className="w-full h-full object-cover object-center brightness-90 contrast-105"
+                    className="w-full h-full object-cover object-center brightness-90 contrast-105 will-change-transform"
                   >
                     <source src={activeModel.video} type="video/mp4" />
                   </video>
@@ -337,16 +340,21 @@ export default function ModelScrollExperience() {
           </motion.div>
         </div>
 
-        {/* ====================================================================
-            3D REAL-TIME GLASSES CANVAS (Layered over the model)
-            ==================================================================== */}
+        {/* 3D REAL-TIME GLASSES CANVAS (Layered over the model with Viewport-Paused frameloop) */}
         <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
           <div className="w-full h-full max-w-4xl mx-auto">
             {mounted && (
               <Canvas
                 camera={{ position: [0, 0, 4.8], fov: 38 }}
-                gl={{ antialias: true, alpha: true }}
-                dpr={[1, 2]}
+                frameloop={isInView ? "always" : "never"}
+                gl={{
+                  antialias: true,
+                  alpha: true,
+                  powerPreference: "high-performance",
+                  stencil: false,
+                  depth: true
+                }}
+                dpr={typeof window !== "undefined" ? Math.min(window.devicePixelRatio, 1.5) : 1}
               >
                 <ambientLight intensity={1.6} />
                 <directionalLight position={[5, 6, 6]} intensity={3.0} />
@@ -366,14 +374,10 @@ export default function ModelScrollExperience() {
           </div>
         </div>
 
-        {/* ====================================================================
-            SCROLL-TRIGGERED EDITORIAL STORYTELLING CARDS
-            ==================================================================== */}
-
-        {/* Stage 1: The Icon & Editorial Reveal (0.05 - 0.35) */}
+        {/* Stage 1: The Icon & Editorial Reveal */}
         <motion.div
           style={{ opacity: phase1Opacity, y: phase1Y }}
-          className="absolute left-6 sm:left-12 bottom-16 sm:bottom-24 z-30 max-w-md pointer-events-none"
+          className="absolute left-6 sm:left-12 bottom-16 sm:bottom-24 z-30 max-w-md pointer-events-none gpu-layer"
         >
           <div className="glass-card p-6 rounded-3xl border border-white/10 bg-[#0c0d12]/85 backdrop-blur-2xl shadow-2xl">
             <div className="flex items-center gap-2 text-xs font-mono text-amber-400 mb-2">
@@ -393,10 +397,10 @@ export default function ModelScrollExperience() {
           </div>
         </motion.div>
 
-        {/* Stage 2: 3D Glasses Sync & Micro-Engineering (0.38 - 0.72) */}
+        {/* Stage 2: 3D Glasses Sync & Micro-Engineering */}
         <motion.div
           style={{ opacity: phase2Opacity, y: phase2Y }}
-          className="absolute right-6 sm:right-12 top-24 sm:top-32 z-30 max-w-md pointer-events-none"
+          className="absolute right-6 sm:right-12 top-24 sm:top-32 z-30 max-w-md pointer-events-none gpu-layer"
         >
           <div className="glass-card p-6 rounded-3xl border border-cyan-500/30 bg-[#0c0d12]/90 backdrop-blur-2xl shadow-[0_0_40px_rgba(6,182,212,0.15)]">
             <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 mb-2">
@@ -425,10 +429,10 @@ export default function ModelScrollExperience() {
           </div>
         </motion.div>
 
-        {/* Stage 3: Wear The Runway Look CTA (0.75 - 1.0) */}
+        {/* Stage 3: Wear The Runway Look CTA */}
         <motion.div
           style={{ opacity: phase3Opacity, y: phase3Y }}
-          className="absolute bottom-8 sm:bottom-12 z-40 w-full px-4 max-w-2xl mx-auto flex flex-col items-center"
+          className="absolute bottom-8 sm:bottom-12 z-40 w-full px-4 max-w-2xl mx-auto flex flex-col items-center gpu-layer"
         >
           <div className="w-full glass-card p-6 sm:p-8 rounded-3xl border border-amber-400/40 bg-[#0c0d12]/95 backdrop-blur-2xl shadow-[0_0_50px_rgba(212,175,55,0.25)] flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="text-center sm:text-left">
@@ -457,7 +461,7 @@ export default function ModelScrollExperience() {
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
                 onClick={handleQuickAdd}
-                className="w-full sm:w-auto bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-black font-bold px-6 py-3.5 rounded-xl shadow-[0_0_20px_rgba(212,175,55,0.4)] flex items-center justify-center gap-2 text-sm uppercase tracking-wider"
+                className="w-full sm:w-auto bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-black font-bold px-6 py-3.5 rounded-xl shadow-[0_0_20px_rgba(212,175,55,0.4)] flex items-center justify-center gap-2 text-sm uppercase tracking-wider cursor-pointer"
               >
                 <ShoppingBag className="w-4 h-4" /> Add to Bag
               </motion.button>
@@ -472,11 +476,11 @@ export default function ModelScrollExperience() {
           </div>
         </motion.div>
 
-        {/* Interactive Optical Filter Toggle Switch (Bottom-Right) */}
+        {/* Interactive Optical Filter Toggle Switch */}
         <div className="absolute right-4 sm:right-8 bottom-6 sm:bottom-8 z-40 hidden md:block">
           <button
             onClick={() => setBlueCutActive(!blueCutActive)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-black/70 border border-white/10 text-xs font-mono text-zinc-300 hover:text-white backdrop-blur-xl transition-all shadow-lg hover:border-cyan-400"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-black/70 border border-white/10 text-xs font-mono text-zinc-300 hover:text-white backdrop-blur-xl transition-all shadow-lg hover:border-cyan-400 cursor-pointer"
           >
             <Zap className={`w-3.5 h-3.5 ${blueCutActive ? "text-cyan-400" : "text-zinc-500"}`} />
             <span>420nm Filter: {blueCutActive ? "ACTIVE" : "OFF"}</span>

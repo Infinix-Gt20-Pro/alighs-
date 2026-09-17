@@ -152,3 +152,35 @@ body {
 .gold-glow {
   text-shadow: 0 0 40px rgba(212, 175, 55, 0.45), 0 0 80px rgba(212, 175, 55, 0.2);
 }
+
+
+/* ==========================================================================
+   Lenis 144Hz Ultra-Fluid Smooth Scroll & Hardware Acceleration
+   ========================================================================== */
+html.lenis, html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* GPU Hardware Layering for 144Hz Compositing */
+.gpu-layer {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform;
+}
+
+.will-change-transform {
+  will-change: transform;
+}

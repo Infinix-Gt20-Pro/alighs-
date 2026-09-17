@@ -4,7 +4,7 @@
 import React, { useState, useRef } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
   Sparkles,
   Eye,
@@ -12,7 +12,6 @@ import {
   ShieldCheck,
   Feather,
   Award,
-  ChevronDown,
   Calendar
 } from "lucide-react";
 import { FRAME_MATERIALS } from "./GlassesModel";
@@ -34,18 +33,14 @@ const GlassesHeroCanvas = dynamic(() => import("./GlassesHeroCanvas"), {
 export default function HeroSection() {
   const [selectedMaterial, setSelectedMaterial] = useState("gold");
   const sectionRef = useRef<HTMLElement>(null);
-  const [scrollVal, setScrollVal] = useState(0);
 
+  // High-Performance Zero-Rerender Scroll Physics
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
   });
 
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    setScrollVal(latest);
-  });
-
-  // Motion Scroll Transforms for Next-Level Parallax
+  // Motion Scroll Transforms for Next-Level Parallax (Hardware GPU-Accelerated)
   const titleY = useTransform(scrollYProgress, [0, 1], [0, 160]);
   const titleScale = useTransform(scrollYProgress, [0, 1], [1, 0.88]);
   const titleOpacity = useTransform(scrollYProgress, [0, 0.75, 1], [1, 0.45, 0]);
@@ -59,32 +54,33 @@ export default function HeroSection() {
   const bgOrbY1 = useTransform(scrollYProgress, [0, 1], [0, -120]);
   const bgOrbY2 = useTransform(scrollYProgress, [0, 1], [0, 140]);
 
-  // Cinematic Video Scroll Parallax & Zoom
+  // Cinematic Video Scroll Parallax & Zoom with GPU Layering
   const videoY = useTransform(scrollYProgress, [0, 1], [0, 140]);
-  const videoScale = useTransform(scrollYProgress, [0, 1], [1.02, 1.24]);
+  const videoScale = useTransform(scrollYProgress, [0, 1], [1.02, 1.22]);
   const videoOpacity = useTransform(scrollYProgress, [0, 0.7, 1], [0.55, 0.35, 0.05]);
 
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-[96vh] flex flex-col items-center justify-start overflow-hidden px-4 sm:px-6 pt-10 sm:pt-14 pb-20"
+      className="relative min-h-[96vh] flex flex-col items-center justify-start overflow-hidden px-4 sm:px-6 pt-10 sm:pt-14 pb-20 gpu-layer"
     >
       {/* Cinematic Editorial Video Background with Scroll Parallax */}
       <motion.div
         style={{ y: videoY, scale: videoScale, opacity: videoOpacity }}
-        className="absolute inset-0 pointer-events-none z-0 overflow-hidden"
+        className="absolute inset-0 pointer-events-none z-0 overflow-hidden gpu-layer"
       >
         <video
           autoPlay
           loop
           muted
           playsInline
-          className="w-full h-full object-cover object-center brightness-55 contrast-110"
+          preload="metadata"
+          className="w-full h-full object-cover object-center brightness-55 contrast-110 will-change-transform"
         >
           <source src="/videos/man-putting-on-glasses.mp4" type="video/mp4" />
         </video>
 
-        {/* Deep Luxury Obsidian Gradients for seamless integration */}
+        {/* Deep Luxury Obsidian Gradients */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#070709] via-transparent to-[#070709]/80 pointer-events-none" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#070709] via-transparent to-[#070709] pointer-events-none" />
         <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] pointer-events-none" />
@@ -94,11 +90,11 @@ export default function HeroSection() {
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
         <motion.div
           style={{ y: bgOrbY1 }}
-          className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[550px] bg-gradient-to-r from-amber-600/15 via-indigo-600/15 to-cyan-500/15 rounded-full blur-[160px]"
+          className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[550px] bg-gradient-to-r from-amber-600/15 via-indigo-600/15 to-cyan-500/15 rounded-full blur-[160px] will-change-transform"
         />
         <motion.div
           style={{ y: bgOrbY2 }}
-          className="absolute top-[52%] left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-cyan-500/12 rounded-full blur-[130px]"
+          className="absolute top-[52%] left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-cyan-500/12 rounded-full blur-[130px] will-change-transform"
         />
         <div className="absolute inset-0 bg-[radial-gradient(#ffffff08_1px,transparent_1px)] [background-size:32px_32px] opacity-40 pointer-events-none" />
       </div>
@@ -120,7 +116,7 @@ export default function HeroSection() {
         {/* Giant Next-Level Cinzel Typography Heading BEHIND the Canvas */}
         <motion.div
           style={{ y: titleY, scale: titleScale, opacity: titleOpacity }}
-          className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none z-0"
+          className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none z-0 gpu-layer"
         >
           <h1 className="font-cinzel text-5xl sm:text-7xl md:text-8xl lg:text-[9.8rem] font-bold tracking-[0.14em] sm:tracking-[0.18em] uppercase text-center leading-[0.95] text-gold-gradient gold-glow drop-shadow-[0_0_90px_rgba(212,175,55,0.45)]">
             ALIGH&apos;S
@@ -135,12 +131,12 @@ export default function HeroSection() {
           </div>
         </motion.div>
 
-        {/* 3D Eyeglasses Canvas with Scroll Elevation */}
+        {/* 3D Eyeglasses Canvas with Direct MotionValue Scroll Elevation */}
         <motion.div
           style={{ y: canvasY, scale: canvasScale }}
-          className="relative z-10 w-full flex items-center justify-center pointer-events-auto"
+          className="relative z-10 w-full flex items-center justify-center pointer-events-auto gpu-layer"
         >
-          <GlassesHeroCanvas materialId={selectedMaterial} scrollYProgress={scrollVal} />
+          <GlassesHeroCanvas materialId={selectedMaterial} scrollYProgress={scrollYProgress} />
         </motion.div>
 
         {/* Interactive Real-Time 3D Material Switcher */}
@@ -182,7 +178,7 @@ export default function HeroSection() {
       {/* Foreground Copy & CTAs with Motion Parallax */}
       <motion.div
         style={{ y: subtitleY, opacity: subtitleOpacity }}
-        className="relative z-20 max-w-4xl w-full mx-auto flex flex-col items-center text-center mt-6"
+        className="relative z-20 max-w-4xl w-full mx-auto flex flex-col items-center text-center mt-6 gpu-layer"
       >
         <p className="font-cormorant text-2xl sm:text-3xl md:text-4xl italic font-light text-neutral-200 mb-8 max-w-2xl leading-relaxed">
           Firozabad ki bharosemand offline optical legacy,{" "}

@@ -1,36 +1,36 @@
 // src/components/GlassesHeroCanvas.tsx
 "use client";
 
-import React, { Suspense } from "react";
+import React, { Suspense, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment } from "@react-three/drei";
+import { MotionValue } from "framer-motion";
 import GlassesModel from "./GlassesModel";
-
-function CanvasLoader() {
-  return (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="w-12 h-12 rounded-full border border-amber-400/20 border-t-amber-400 animate-spin" />
-    </div>
-  );
-}
+import { useInViewFast } from "@/hooks/useInViewFast";
 
 export default function GlassesHeroCanvas({
   materialId = "gold",
-  scrollYProgress = 0
+  scrollYProgress
 }: {
   materialId?: string;
-  scrollYProgress?: number;
+  scrollYProgress?: MotionValue<number> | React.MutableRefObject<number> | number;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isInView = useInViewFast(containerRef, "200px");
+
   return (
-    <div className="relative w-full h-[380px] sm:h-[440px] md:h-[500px] flex items-center justify-center">
+    <div ref={containerRef} className="relative w-full h-[380px] sm:h-[440px] md:h-[500px] flex items-center justify-center">
       <Canvas
         camera={{ position: [0, 0, 4.4], fov: 36 }}
+        frameloop={isInView ? "always" : "never"}
         gl={{
           antialias: true,
           alpha: true,
           powerPreference: "high-performance",
+          stencil: false,
+          depth: true
         }}
-        dpr={[1, 2]}
+        dpr={typeof window !== "undefined" ? Math.min(window.devicePixelRatio, 1.5) : 1}
       >
         {/* Three-Point Studio Lighting */}
         <ambientLight intensity={1.8} />

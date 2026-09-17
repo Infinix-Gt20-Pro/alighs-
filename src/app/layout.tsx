@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist_Mono, Cinzel, Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
+import SmoothScroll from "@/components/SmoothScroll";
 
 const cinzel = Cinzel({
   variable: "--font-cinzel",
@@ -60,6 +61,7 @@ export default function RootLayout({
       className={`${cinzel.variable} ${cormorant.variable} ${plusJakarta.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans bg-[#070709] text-white">
+        <SmoothScroll />
         <CartProvider>{children}</CartProvider>
       </body>
     </html>

@@ -6,13 +6,18 @@ import { ContactShadows, Environment } from "@react-three/drei";
 import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
 import ExplodedGlasses3D from "./ExplodedGlasses3D";
 import { ShieldCheck, Layers, Sparkles, Feather, Eye } from "lucide-react";
+import { useInViewFast } from "@/hooks/useInViewFast";
 
 const emptySubscribe = () => () => {};
 
 export default function ExplodedSection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef(0);
-  const [displayProgress, setDisplayProgress] = useState(0);
+  const pctSpanRef = useRef<HTMLSpanElement>(null);
+  const [mobileTier, setMobileTier] = useState(0);
+
+  const isInView = useInViewFast(containerRef, "250px");
+
   const mounted = useSyncExternalStore(
     emptySubscribe,
     () => true,
@@ -25,43 +30,47 @@ export default function ExplodedSection() {
     offset: ["start start", "end end"],
   });
 
-  // Keep progressRef updated for the 60fps R3F useFrame loop without re-rendering the whole page
+  // Zero-rerender progress updating
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     progressRef.current = latest;
-    setDisplayProgress(Math.round(latest * 100));
+    const pct = Math.round(latest * 100);
+    if (pctSpanRef.current) {
+      pctSpanRef.current.textContent = `${pct}%`;
+    }
+
+    // Only update mobile state when tier boundary changes (0 -> 1 -> 2)
+    const tier = latest < 0.3 ? 0 : latest < 0.6 ? 1 : 2;
+    if (tier !== mobileTier) {
+      setMobileTier(tier);
+    }
   });
 
-  // Desktop tooltips transforms
-  // 1. Blue-Cut Technology (fades in 0.15 -> 0.32, remains until 0.90)
+  // Desktop tooltips transforms (Pure CSS transforms, zero React re-renders)
   const blueCutOpacity = useTransform(scrollYProgress, [0.15, 0.32, 0.88, 0.98], [0, 1, 1, 0]);
   const blueCutY = useTransform(scrollYProgress, [0.15, 0.32], [24, 0]);
   const blueCutScale = useTransform(scrollYProgress, [0.15, 0.32], [0.92, 1]);
 
-  // 2. Anti-Glare Coating (fades in 0.28 -> 0.45, remains until 0.90)
   const antiGlareOpacity = useTransform(scrollYProgress, [0.28, 0.45, 0.88, 0.98], [0, 1, 1, 0]);
   const antiGlareY = useTransform(scrollYProgress, [0.28, 0.45], [24, 0]);
   const antiGlareScale = useTransform(scrollYProgress, [0.28, 0.45], [0.92, 1]);
 
-  // 3. Ultra-Lightweight Frames (fades in 0.42 -> 0.58)
   const lightweightOpacity = useTransform(scrollYProgress, [0.42, 0.58, 0.88, 0.98], [0, 1, 1, 0]);
   const lightweightY = useTransform(scrollYProgress, [0.42, 0.58], [24, 0]);
   const lightweightScale = useTransform(scrollYProgress, [0.42, 0.58], [0.92, 1]);
 
-  // 4. Ergonomic Fit (fades in 0.55 -> 0.72)
   const bridgeOpacity = useTransform(scrollYProgress, [0.55, 0.72, 0.88, 0.98], [0, 1, 1, 0]);
   const bridgeY = useTransform(scrollYProgress, [0.55, 0.72], [24, 0]);
   const bridgeScale = useTransform(scrollYProgress, [0.55, 0.72], [0.92, 1]);
 
-  // Global Header and Status Opacity
   const headerOpacity = useTransform(scrollYProgress, [0.02, 0.12], [0.4, 1]);
   const progressWidth = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   return (
-    <div id="explode-section" ref={containerRef} className="relative h-[320vh] bg-[#0a0a0a]">
+    <div id="explode-section" ref={containerRef} className="relative h-[320vh] bg-[#0a0a0a] gpu-layer">
       {/* Sticky Screen Viewport pinned for 320vh of scroll travel */}
       <div className="sticky top-0 h-screen w-full flex flex-col items-center justify-center overflow-hidden">
         
-        {/* Ambient Lighting Orbs for Optical Refraction */}
+        {/* Ambient Lighting Orbs */}
         <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
           <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-indigo-600/15 blur-[120px]" />
           <div className="absolute bottom-1/4 right-1/4 w-[550px] h-[550px] rounded-full bg-cyan-600/15 blur-[130px]" />
@@ -71,7 +80,7 @@ export default function ExplodedSection() {
         {/* Section Top Header */}
         <motion.div
           style={{ opacity: headerOpacity }}
-          className="absolute top-6 sm:top-8 z-30 flex flex-col items-center text-center px-4"
+          className="absolute top-6 sm:top-8 z-30 flex flex-col items-center text-center px-4 gpu-layer"
         >
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full glass-pill text-xs font-mono text-cyan-300 mb-2">
             <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
@@ -85,15 +94,20 @@ export default function ExplodedSection() {
           </p>
         </motion.div>
 
-        {/* ====================================================================
-            CENTER 3D CANVAS (Exploded Eyeglasses)
-            ==================================================================== */}
+        {/* CENTER 3D CANVAS (Exploded Eyeglasses with Viewport Pause) */}
         <div className="relative z-10 w-full h-full max-w-6xl mx-auto flex items-center justify-center">
           {mounted ? (
             <Canvas
               camera={{ position: [0, 0, 5.5], fov: 42 }}
-              gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-              dpr={[1, 2]}
+              frameloop={isInView ? "always" : "never"}
+              gl={{
+                antialias: true,
+                alpha: true,
+                powerPreference: "high-performance",
+                stencil: false,
+                depth: true
+              }}
+              dpr={typeof window !== "undefined" ? Math.min(window.devicePixelRatio, 1.5) : 1}
             >
               <ambientLight intensity={1.4} />
               <directionalLight position={[6, 8, 7]} intensity={2.6} castShadow />
@@ -119,14 +133,10 @@ export default function ExplodedSection() {
           )}
         </div>
 
-        {/* ====================================================================
-            DESKTOP FLOATING GLASSMORPHIC TOOLTIPS (Corners)
-            ==================================================================== */}
-
-        {/* Tooltip 1: Blue-Cut Technology (Screens ke liye) */}
+        {/* DESKTOP FLOATING GLASSMORPHIC TOOLTIPS */}
         <motion.div
           style={{ opacity: blueCutOpacity, y: blueCutY, scale: blueCutScale }}
-          className="hidden md:block absolute top-[20%] left-6 lg:left-14 z-20 max-w-xs sm:max-w-sm pointer-events-auto"
+          className="hidden md:block absolute top-[20%] left-6 lg:left-14 z-20 max-w-xs sm:max-w-sm pointer-events-auto gpu-layer"
         >
           <div className="glass-card p-5 border-l-4 border-l-blue-400 shadow-2xl">
             <div className="flex items-center gap-2 mb-1.5">
@@ -149,10 +159,9 @@ export default function ExplodedSection() {
           </div>
         </motion.div>
 
-        {/* Tooltip 2: Anti-Glare Coating */}
         <motion.div
           style={{ opacity: antiGlareOpacity, y: antiGlareY, scale: antiGlareScale }}
-          className="hidden md:block absolute top-[20%] right-6 lg:right-14 z-20 max-w-xs sm:max-w-sm pointer-events-auto"
+          className="hidden md:block absolute top-[20%] right-6 lg:right-14 z-20 max-w-xs sm:max-w-sm pointer-events-auto gpu-layer"
         >
           <div className="glass-card p-5 border-r-4 border-r-cyan-400 shadow-2xl text-right sm:text-left">
             <div className="flex items-center justify-end sm:justify-start gap-2 mb-1.5">
@@ -175,10 +184,9 @@ export default function ExplodedSection() {
           </div>
         </motion.div>
 
-        {/* Tooltip 3: Ultra-Lightweight Frames */}
         <motion.div
           style={{ opacity: lightweightOpacity, y: lightweightY, scale: lightweightScale }}
-          className="hidden md:block absolute bottom-[20%] left-6 lg:left-14 z-20 max-w-xs sm:max-w-sm pointer-events-auto"
+          className="hidden md:block absolute bottom-[20%] left-6 lg:left-14 z-20 max-w-xs sm:max-w-sm pointer-events-auto gpu-layer"
         >
           <div className="glass-card p-5 border-l-4 border-l-emerald-400 shadow-2xl">
             <div className="flex items-center gap-2 mb-1.5">
@@ -201,10 +209,9 @@ export default function ExplodedSection() {
           </div>
         </motion.div>
 
-        {/* Tooltip 4: Ergonomic Fit & Nose Pads */}
         <motion.div
           style={{ opacity: bridgeOpacity, y: bridgeY, scale: bridgeScale }}
-          className="hidden md:block absolute bottom-[20%] right-6 lg:right-14 z-20 max-w-xs sm:max-w-sm pointer-events-auto"
+          className="hidden md:block absolute bottom-[20%] right-6 lg:right-14 z-20 max-w-xs sm:max-w-sm pointer-events-auto gpu-layer"
         >
           <div className="glass-card p-5 border-r-4 border-r-amber-400 shadow-2xl text-right sm:text-left">
             <div className="flex items-center justify-end sm:justify-start gap-2 mb-1.5">
@@ -227,12 +234,10 @@ export default function ExplodedSection() {
           </div>
         </motion.div>
 
-        {/* ====================================================================
-            MOBILE RESPONSIVE SINGLE DYNAMIC DOCK (Avoids card collision on phones)
-            ==================================================================== */}
+        {/* MOBILE RESPONSIVE SINGLE DYNAMIC DOCK */}
         <div className="block md:hidden absolute top-28 inset-x-4 z-20 pointer-events-auto">
           <div className="glass-card p-4 border border-white/15 shadow-2xl transition-all duration-300">
-            {displayProgress < 30 ? (
+            {mobileTier === 0 ? (
               <div>
                 <div className="flex items-center gap-2 text-xs text-blue-400 font-mono mb-1">
                   <ShieldCheck className="w-3.5 h-3.5" />
@@ -241,7 +246,7 @@ export default function ExplodedSection() {
                 <h4 className="text-sm font-semibold text-white">Blue-Cut Technology (Screens ke liye)</h4>
                 <p className="text-xs text-neutral-300 mt-0.5">Mobiles &amp; laptops ki 420nm harmful blue-light ko block karta hai.</p>
               </div>
-            ) : displayProgress < 60 ? (
+            ) : mobileTier === 1 ? (
               <div>
                 <div className="flex items-center gap-2 text-xs text-cyan-400 font-mono mb-1">
                   <Eye className="w-3.5 h-3.5" />
@@ -263,16 +268,13 @@ export default function ExplodedSection() {
           </div>
         </div>
 
-        {/* ====================================================================
-            BOTTOM STICKY SCRUB PROGRESS BAR & STATUS
-            ==================================================================== */}
+        {/* BOTTOM STICKY SCRUB PROGRESS BAR */}
         <div className="absolute bottom-6 z-30 w-full max-w-md px-4 pointer-events-none">
           <div className="glass-panel px-5 py-3 rounded-2xl border border-white/15 shadow-2xl flex flex-col gap-2">
             <div className="flex items-center justify-between text-xs font-mono">
               <span className="text-neutral-400">EXPLODED ASSEMBLY SCRUB</span>
-              <span className="text-cyan-300 font-bold">{displayProgress}%</span>
+              <span ref={pctSpanRef} className="text-cyan-300 font-bold">0%</span>
             </div>
-            {/* Progress Track */}
             <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
               <motion.div
                 style={{ width: progressWidth }}

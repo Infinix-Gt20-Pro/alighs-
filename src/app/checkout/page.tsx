@@ -601,8 +601,20 @@ export default function CheckoutPage() {
                           <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-800 dark:text-red-300 flex items-start gap-3 text-xs leading-relaxed animate-in fade-in duration-200">
                             <AlertCircle className="w-5 h-5 shrink-0 text-red-600 dark:text-red-400 mt-0.5" />
                             <div className="flex-1">
-                              <p className="font-bold text-sm mb-0.5 text-red-900 dark:text-red-200">Payment Notice</p>
-                              <p>{paymentError}</p>
+                              <p className="font-bold text-sm mb-0.5 text-red-900 dark:text-red-200">Payment Gateway Notice</p>
+                              <p className="mb-3">{paymentError}</p>
+                              <div className="flex items-center gap-3">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setPaymentMethod("COD");
+                                    setPaymentError(null);
+                                  }}
+                                  className="px-3.5 py-1.5 rounded-lg bg-[#B88A32] text-white font-medium text-xs hover:bg-[#9a7329] transition-all shadow-sm"
+                                >
+                                  Switch to Cash on Delivery (COD)
+                                </button>
+                              </div>
                             </div>
                             <button
                               onClick={() => setPaymentError(null)}

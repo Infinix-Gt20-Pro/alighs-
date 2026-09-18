@@ -201,7 +201,7 @@ export default function CheckoutPage() {
 
       // Step 2: Configure and open Razorpay modal
       const options = {
-        key: orderData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_TdNVPovd4cJJTn",
+        key: orderData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_live_TdNncN01Vi6Vvg",
         amount: orderData.amount,
         currency: orderData.currency || "INR",
         name: "ALIG'S WARE",

@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 
-const FALLBACK_KEY_ID = 'rzp_test_TdNVPovd4cJJTn';
-const FALLBACK_KEY_SECRET = 'jQhbeYJhgZ7xWB7Fz4EDI1cE';
+const FALLBACK_KEY_ID = 'rzp_live_TdNncN01Vi6Vvg';
+const FALLBACK_KEY_SECRET = 'GbLZfY1sCE3P1jj9yT6juJ2E';
 
 /**
  * GET /api/create-order

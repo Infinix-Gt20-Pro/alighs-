@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { dbUpdateOrderStatus } from '@/lib/githubDb';
 
-const FALLBACK_KEY_SECRET = 'jQhbeYJhgZ7xWB7Fz4EDI1cE';
+const FALLBACK_KEY_SECRET = 'GbLZfY1sCE3P1jj9yT6juJ2E';
 
 export async function POST(request: Request) {
   try {

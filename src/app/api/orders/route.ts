@@ -1,123 +1,191 @@
-import { NextResponse } from 'next/server';
-import { dbGetOrders, dbSaveOrder, dbUpdateOrderStatus } from '@/lib/githubDb';
+﻿import { NextResponse } from 'next/server';
+import {
+  createOrderTransaction,
+  getDatabase,
+  getOrderWithDetails,
+  updateOrderStatus,
+  updatePaymentStatus,
+} from '@/lib/database/db';
+import { OrderStatus, PaymentStatus } from '@/lib/database/schema';
 
-interface StoredOrder {
-  orderId: string;
-  customer: {
-    name: string;
-    phone: string;
-    email?: string;
-    city: string;
-    address: string;
-    pincode: string;
-  };
-  items: {
-    productId?: string;
-    name: string;
-    color?: string;
-    quantity: number;
-    price: number;
-  }[];
-  totalAmount: number;
-  paymentMethod: string;
-  orderStatus: 'placed' | 'confirmed' | 'shipped' | 'delivered';
-  paymentStatus: 'pending' | 'paid' | 'failed';
-  razorpayPaymentId?: string;
-  razorpayOrderId?: string;
-  createdAt: string;
-}
-
-function generateOrderId() {
-  const date = new Date();
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  const dd = String(date.getDate()).padStart(2, '0');
-  const suffix = Math.floor(1000 + Math.random() * 9000);
-  return `AW-${yyyy}${mm}${dd}-${suffix}`;
-}
-
+/**
+ * POST /api/orders
+ * Creates an order via atomic transaction:
+ * - Validates customer and stock
+ * - Decrements inventory safely
+ * - Creates customer record
+ * - Creates order with sequential order_number (ALG-YYYY-XXXXXX)
+ * - Creates order_items with immutable historical snapshot prices
+ * - Logs initial order_status_history
+ */
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
 
-    if (!body.customer?.name || !body.customer?.phone || !body.customer?.city ||
-        !body.customer?.address || !body.customer?.pincode ||
-        !body.items || body.items.length === 0 || !body.paymentMethod) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!body.customer || !body.items || body.items.length === 0) {
+      return NextResponse.json(
+        { error: 'Customer details and order items are required.' },
+        { status: 400 }
+      );
     }
 
-    const orderId = body.orderId || generateOrderId();
-    const totalAmount = body.totalAmount || body.items.reduce(
-      (sum: number, item: { price: number; quantity: number }) => sum + (item.price * item.quantity), 0
-    );
-    const pm = body.paymentMethod.toLowerCase();
-    const paymentMethod = pm === 'online' ? 'online' : pm === 'upi' ? 'upi' : 'cod';
-    const isPaid = body.paymentStatus === 'paid';
-
-    const orderRecord: StoredOrder = {
-      orderId,
+    const { order, items, customer } = await createOrderTransaction({
       customer: {
-        name: body.customer.name,
+        fullName: body.customer.fullName || body.customer.name,
         phone: body.customer.phone,
-        email: body.customer.email || '',
-        city: body.customer.city,
+        email: body.customer.email,
         address: body.customer.address,
-        pincode: body.customer.pincode
+        city: body.customer.city,
+        state: body.customer.state || 'Uttar Pradesh',
+        pincode: body.customer.pincode,
       },
-      items: body.items.map((it: { productId?: string; name: string; color?: string; quantity: number; price: number }) => ({
-        productId: it.productId || 'frame',
-        name: it.name,
-        color: it.color || 'Standard Black',
+      items: body.items.map((it: any) => ({
+        productId: String(it.productId || it.id),
         quantity: Number(it.quantity) || 1,
-        price: Number(it.price) || 0
+        color: it.color,
       })),
-      totalAmount,
-      paymentMethod,
-      orderStatus: isPaid ? 'confirmed' : 'placed',
-      paymentStatus: isPaid ? 'paid' : (body.paymentStatus === 'failed' ? 'failed' : 'pending'),
-      ...(body.razorpayPaymentId ? { razorpayPaymentId: body.razorpayPaymentId } : {}),
-      ...(body.razorpayOrderId ? { razorpayOrderId: body.razorpayOrderId } : {}),
-      createdAt: new Date().toISOString()
-    };
+      paymentMethod: body.paymentMethod || 'COD',
+      paymentStatus: body.paymentStatus,
+      customerNotes: body.customerNotes || body.notes,
+      razorpayOrderId: body.razorpayOrderId || body.razorpay_order_id,
+      razorpayPaymentId: body.razorpayPaymentId || body.razorpay_payment_id,
+    });
 
-    // Save to GitHub persistent DB (fire-and-forget style — don't block response)
-    dbSaveOrder(orderRecord as unknown as Record<string, unknown>).catch((e) =>
-      console.warn('GitHub DB save failed:', e)
+    return NextResponse.json(
+      {
+        success: true,
+        order: {
+          id: order.id,
+          order_number: order.order_number,
+          orderId: order.order_number, // backward-compatibility
+          total_amount: order.total_amount,
+          subtotal: order.subtotal,
+          shipping_charge: order.shipping_charge,
+          payment_method: order.payment_method,
+          payment_status: order.payment_status,
+          order_status: order.order_status,
+          customer_notes: order.customer_notes,
+          created_at: order.created_at,
+        },
+        items,
+        customer,
+      },
+      { status: 201 }
     );
-
-    return NextResponse.json(orderRecord, { status: 201 });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Internal server error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error('Order creation error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to create order.';
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }
 
-export async function GET() {
+/**
+ * GET /api/orders
+ * Retrieves orders list with optional search, filtering, and sorting
+ */
+export async function GET(request: Request) {
   try {
-    const orders = await dbGetOrders();
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get('search')?.toLowerCase() || '';
+    const status = searchParams.get('status');
+    const paymentStatus = searchParams.get('paymentStatus');
+    const sort = searchParams.get('sort') || 'newest'; // 'newest' | 'oldest'
+
+    const db = await getDatabase();
+
+    let list = db.orders.map((o) => {
+      const customer = db.customers.find((c) => c.id === o.customer_id);
+      const items = db.order_items.filter((it) => it.order_id === o.id);
+      return {
+        ...o,
+        orderId: o.order_number, // backward compatibility for legacy admin views
+        customer: customer || {
+          full_name: 'Unknown Client',
+          phone: 'N/A',
+          email: '',
+          address: '',
+          city: '',
+          pincode: '',
+        },
+        items: items.map((it) => ({
+          productId: it.product_id,
+          name: it.product_name_snapshot,
+          quantity: it.quantity,
+          price: it.unit_price,
+          totalPrice: it.total_price,
+        })),
+      };
+    });
+
+    // Filtering
+    if (status && status !== 'all') {
+      list = list.filter((o) => o.order_status.toLowerCase() === status.toLowerCase());
+    }
+
+    if (paymentStatus && paymentStatus !== 'all') {
+      list = list.filter((o) => o.payment_status.toLowerCase() === paymentStatus.toLowerCase());
+    }
+
+    if (search) {
+      list = list.filter(
+        (o) =>
+          o.order_number.toLowerCase().includes(search) ||
+          o.customer.full_name.toLowerCase().includes(search) ||
+          o.customer.phone.includes(search)
+      );
+    }
+
+    // Sorting
+    list.sort((a, b) => {
+      const timeA = new Date(a.created_at).getTime();
+      const timeB = new Date(b.created_at).getTime();
+      return sort === 'oldest' ? timeA - timeB : timeB - timeA;
+    });
+
     return NextResponse.json({
-      orders,
-      totalCount: orders.length
+      orders: list,
+      totalCount: list.length,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Internal server error';
+    console.error('Error fetching orders:', error);
+    const message = error instanceof Error ? error.message : 'Internal server error.';
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
+/**
+ * PATCH /api/orders
+ * Updates order status or payment status
+ */
 export async function PATCH(request: Request) {
   try {
-    const body = await request.json();
-    const { orderId, orderStatus } = body;
+    const body = await request.json().catch(() => ({}));
+    const orderNumber = body.orderNumber || body.orderId;
+    const { orderStatus, paymentStatus, note } = body;
 
-    if (!orderId || !orderStatus) {
-      return NextResponse.json({ error: 'Missing orderId or orderStatus' }, { status: 400 });
+    if (!orderNumber) {
+      return NextResponse.json({ error: 'orderNumber is required.' }, { status: 400 });
     }
 
-    await dbUpdateOrderStatus(orderId, orderStatus);
-    return NextResponse.json({ success: true, orderId, orderStatus });
+    if (orderStatus) {
+      const ok = await updateOrderStatus(orderNumber, orderStatus as OrderStatus, note);
+      if (!ok) {
+        return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
+      }
+    }
+
+    if (paymentStatus) {
+      const ok = await updatePaymentStatus(orderNumber, paymentStatus as PaymentStatus);
+      if (!ok) {
+        return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
+      }
+    }
+
+    const updated = await getOrderWithDetails(orderNumber);
+    return NextResponse.json({ success: true, order: updated });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Internal server error';
+    console.error('Error updating order:', error);
+    const message = error instanceof Error ? error.message : 'Internal server error.';
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -61,6 +61,11 @@ export async function POST(request: Request) {
 
     // Signatures match - update order if storeOrderId passed
     if (storeOrderId) {
+      import('@/lib/database/db').then(({ updateOrderStatus, updatePaymentStatus }) => {
+        updatePaymentStatus(storeOrderId, 'Paid').catch(() => {});
+        updateOrderStatus(storeOrderId, 'Confirmed', 'Payment verified via Razorpay Standard Checkout').catch(() => {});
+      }).catch(() => {});
+
       dbUpdateOrderStatus(storeOrderId, 'confirmed', 'paid').catch((err) =>
         console.warn('DB payment status update notice:', err)
       );

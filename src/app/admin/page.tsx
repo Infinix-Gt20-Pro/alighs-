@@ -3,15 +3,15 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ShieldCheck, Package, Calendar, Phone, MessageCircle, Clock,
   RefreshCw, Search, CheckCircle2, Truck, ExternalLink, Lock,
   LogOut, MapPin, TrendingUp, Archive, Plus, Trash2, Pencil,
   AlertTriangle, X, Settings2, Sparkles, Database, ArrowRight,
-  SlidersHorizontal, Check, Globe
+  SlidersHorizontal, Check, Globe, Download, Users, BarChart3,
+  Eye, ShoppingBag, Layers, Key, DollarSign, ChevronRight, Filter
 } from "lucide-react";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface OrderItem {
   productId?: string;
@@ -19,18 +19,37 @@ interface OrderItem {
   color?: string;
   quantity: number;
   price: number;
+  totalPrice?: number;
 }
 
 interface OrderRecord {
-  orderId: string;
-  customer: { name: string; phone: string; email?: string; city: string; address: string; pincode: string; };
+  id?: string;
+  order_number: string;
+  orderId?: string;
+  customer: {
+    full_name?: string;
+    name?: string;
+    phone: string;
+    email?: string;
+    city: string;
+    state?: string;
+    address: string;
+    pincode: string;
+  };
   items: OrderItem[];
-  totalAmount: number;
-  paymentMethod: string;
-  orderStatus: "placed" | "confirmed" | "shipped" | "delivered";
-  paymentStatus: "pending" | "paid" | "failed";
-  createdAt: string;
-  isOfflineMode?: boolean;
+  subtotal?: number;
+  shipping_charge?: number;
+  total_amount: number;
+  totalAmount?: number;
+  payment_method: string;
+  paymentMethod?: string;
+  order_status: string;
+  orderStatus?: string;
+  payment_status: string;
+  paymentStatus?: string;
+  customer_notes?: string;
+  created_at: string;
+  createdAt?: string;
 }
 
 interface AppointmentRecord {
@@ -44,123 +63,158 @@ interface AppointmentRecord {
   createdAt: string;
 }
 
-interface InventoryItem {
+interface ProductRecord {
   id: string;
   name: string;
+  description?: string;
   category: string;
-  frameShape?: string;
-  brand?: string;
-  sku?: string;
   price: number;
-  stock: number;
-  lowStockThreshold: number;
-  colors?: string[];
-  notes?: string;
-  updatedAt: string;
+  original_price: number;
+  discount: number;
+  sku: string;
+  stock_quantity: number;
+  image_url: string;
+  status: "active" | "out_of_stock" | "inactive";
+  created_at: string;
+  updated_at: string;
 }
 
-interface AirtableStatusInfo {
-  configured: boolean;
-  connected: boolean;
-  recordCount: number;
-  error?: string;
-  config: {
-    baseId?: string;
-    tableName?: string;
-    maskedKey?: string;
-    syncEnabled?: boolean;
-    lastSync?: string | null;
-  };
+interface CustomerRecord {
+  id: string;
+  fullName: string;
+  phone: string;
+  email?: string;
+  city: string;
+  state: string;
+  address: string;
+  pincode: string;
+  orderCount: number;
+  totalSpent: number;
+  lastOrderDate: string;
 }
 
-interface WordPressStatusInfo {
-  configured: boolean;
-  connected: boolean;
-  siteName: string;
-  hasWooCommerce: boolean;
-  productCount: number;
-  error?: string;
-  config: {
-    siteUrl: string;
-    hasKeys: boolean;
-    syncEnabled?: boolean;
-    lastSync?: string | null;
-  };
+interface AnalyticsData {
+  totalOrders: number;
+  todayOrders: number;
+  pendingOrders: number;
+  processingOrders: number;
+  shippedOrders: number;
+  deliveredOrders: number;
+  cancelledOrders: number;
+  totalRevenue: number;
+  todayRevenue: number;
+  monthRevenue: number;
+  totalUnitsSold: number;
+  aov: number;
+  lowStockCount: number;
+  ordersPerDay: Array<{ date: string; orders: number; revenue: number }>;
+  bestSellers: Array<{ name: string; units: number; revenue: number }>;
 }
 
-const CATEGORIES = ["Eyeglasses", "Sunglasses", "Computer Glasses", "Kids Glasses", "Sports Glasses", "Lens Only", "Accessories"];
-const FRAME_SHAPES = ["Rectangle", "Round", "Oval", "Square", "Cat-Eye", "Aviator", "Clubmaster", "Hexagonal", "Wayfarer", "Rimless"];
+const CATEGORIES = [
+  "All", "Eyeglasses", "Sunglasses", "Computer Glasses",
+  "Kids Glasses", "Sports Glasses", "Rimless", "Luxury Gold"
+];
 
-// ─── Blank Inventory Form ─────────────────────────────────────────────────────
-const blankForm = (): Partial<InventoryItem> => ({
-  name: "", category: "Eyeglasses", frameShape: "Rectangle", brand: "ALIG'S WARE",
-  sku: "", price: 0, stock: 0, lowStockThreshold: 5, colors: [], notes: "",
-});
+const ORDER_STATUSES = [
+  "Pending", "Confirmed", "Processing", "Packed",
+  "Shipped", "Out for Delivery", "Delivered", "Cancelled", "Returned"
+];
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+const PAYMENT_STATUSES = ["Pending", "Paid", "Failed", "Refunded", "COD"];
+
 export default function AdminDashboardPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [usernameInput, setUsernameInput] = useState("");
+  const [passwordInput, setPasswordInput] = useState("");
   const [pinInput, setPinInput] = useState("");
+  const [authMode, setAuthMode] = useState<"pin" | "password">("pin");
   const [authError, setAuthError] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<"orders" | "appointments" | "inventory">("orders");
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "orders" | "customers" | "inventory" | "appointments"
+  >("overview");
+
   const [orders, setOrders] = useState<OrderRecord[]>([]);
+  const [customers, setCustomers] = useState<CustomerRecord[]>([]);
+  const [products, setProducts] = useState<ProductRecord[]>([]);
   const [appointments, setAppointments] = useState<AppointmentRecord[]>([]);
-  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  // Inventory state
+  const [orderSearch, setOrderSearch] = useState("");
+  const [orderStatusFilter, setOrderStatusFilter] = useState("all");
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState("all");
+  const [orderSort, setOrderSort] = useState<"newest" | "oldest">("newest");
+  const [orderPage, setOrderPage] = useState(1);
+  const ordersPerPage = 10;
+
+  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+  const [orderDrawerOpen, setOrderDrawerOpen] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [newOrderStatus, setNewOrderStatus] = useState("");
+  const [newPaymentStatus, setNewPaymentStatus] = useState("");
+  const [internalNote, setInternalNote] = useState("");
+
+  const [selectedCustomer, setSelectedCustomer] = useState<any | null>(null);
+  const [customerDrawerOpen, setCustomerDrawerOpen] = useState(false);
+  const [customerSearch, setCustomerSearch] = useState("");
+
   const [invSearch, setInvSearch] = useState("");
-  const [invCategory, setInvCategory] = useState("all");
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
-  const [formData, setFormData] = useState<Partial<InventoryItem>>(blankForm());
-  const [colorInput, setColorInput] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [stockEditId, setStockEditId] = useState<string | null>(null);
-  const [stockEditVal, setStockEditVal] = useState<number>(0);
+  const [invCategory, setInvCategory] = useState("All");
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newProdForm, setNewProdForm] = useState({
+    name: "", category: "Eyeglasses", price: 1999, original_price: 2999,
+    sku: "", stock_quantity: 20, image_url: "/logo.png",
+    description: "Atelier Handcrafted Luxury Titanium Frame."
+  });
+  const [savingProduct, setSavingProduct] = useState(false);
 
-  // ─── Plugins State ───────────────────────────────────────────────────────────
-  const [activePluginTab, setActivePluginTab] = useState<"wordpress" | "airtable">("wordpress");
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [currentPw, setCurrentPw] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
+  const [pwMsg, setPwMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  // Airtable Plugin
-  const [airtableStatus, setAirtableStatus] = useState<AirtableStatusInfo | null>(null);
-  const [showAirtableModal, setShowAirtableModal] = useState(false);
-  const [syncingAirtable, setSyncingAirtable] = useState(false);
-  const [airtableApiKey, setAirtableApiKey] = useState("");
-  const [airtableBaseId, setAirtableBaseId] = useState("");
-  const [airtableTableName, setAirtableTableName] = useState("Inventory");
-  const [airtableSaving, setAirtableSaving] = useState(false);
-  const [airtableFeedback, setAirtableFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
-
-  // WordPress Plugin
-  const [wpStatus, setWpStatus] = useState<WordPressStatusInfo | null>(null);
-  const [showWpModal, setShowWpModal] = useState(false);
-  const [syncingWp, setSyncingWp] = useState(false);
-  const [wpSiteUrl, setWpSiteUrl] = useState("");
-  const [wpConsumerKey, setWpConsumerKey] = useState("");
-  const [wpConsumerSecret, setWpConsumerSecret] = useState("");
-  const [wpSaving, setWpSaving] = useState(false);
-  const [wpFeedback, setWpFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
-
-  // Check persisted auth
   useEffect(() => {
     const saved = localStorage.getItem("aligs_admin_authenticated");
     if (saved === "true") setIsAuthenticated(true);
   }, []);
 
-  const handleLogin = (e?: React.FormEvent) => {
+  const handlePinLogin = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    const cleanPin = pinInput.trim();
-    if (["786", "6396", "7217", "1499", "admin"].includes(cleanPin)) {
+    const clean = pinInput.trim();
+    if (["786", "6396", "7217", "1499", "admin"].includes(clean)) {
       setIsAuthenticated(true);
       localStorage.setItem("aligs_admin_authenticated", "true");
       setAuthError("");
     } else {
-      setAuthError("Incorrect Passcode. Enter 786 or 6396");
+      setAuthError("Invalid Passcode. Enter 786 or 6396.");
+    }
+  };
+
+  const handlePasswordLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthLoading(true);
+    setAuthError("");
+    try {
+      const res = await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "login", username: usernameInput.trim(), password: passwordInput })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setIsAuthenticated(true);
+        localStorage.setItem("aligs_admin_authenticated", "true");
+      } else {
+        setAuthError(data.error || "Invalid username or password.");
+      }
+    } catch {
+      setAuthError("Failed to reach authentication service.");
+    } finally {
+      setAuthLoading(false);
     }
   };
 
@@ -168,1226 +222,1711 @@ export default function AdminDashboardPage() {
     setIsAuthenticated(false);
     localStorage.removeItem("aligs_admin_authenticated");
     setPinInput("");
+    setUsernameInput("");
+    setPasswordInput("");
   };
 
-  // ─── Fetch Data ─────────────────────────────────────────────────────────────
-  const fetchAirtableStatus = useCallback(async () => {
-    try {
-      const res = await fetch("/api/inventory/airtable");
-      if (res.ok) {
-        const data: AirtableStatusInfo = await res.json();
-        setAirtableStatus(data);
-        if (data.config.baseId) setAirtableBaseId(data.config.baseId);
-        if (data.config.tableName) setAirtableTableName(data.config.tableName);
-      }
-    } catch (err) {
-      console.error("Error checking Airtable status:", err);
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwMsg(null);
+    if (newPw !== confirmPw) {
+      setPwMsg({ type: "error", text: "New passwords do not match." });
+      return;
     }
-  }, []);
-
-  const fetchWpStatus = useCallback(async () => {
     try {
-      const res = await fetch("/api/wordpress");
-      if (res.ok) {
-        const data: WordPressStatusInfo = await res.json();
-        setWpStatus(data);
-        if (data.config.siteUrl) setWpSiteUrl(data.config.siteUrl);
+      const res = await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "change_password", username: "admin", currentPassword: currentPw, newPassword: newPw })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setPwMsg({ type: "success", text: "Master password successfully updated." });
+        setTimeout(() => {
+          setShowPasswordModal(false);
+          setCurrentPw("");
+          setNewPw("");
+          setConfirmPw("");
+          setPwMsg(null);
+        }, 1500);
+      } else {
+        setPwMsg({ type: "error", text: data.error || "Failed to update password." });
       }
-    } catch (err) {
-      console.error("Error checking WordPress status:", err);
+    } catch {
+      setPwMsg({ type: "error", text: "Network error updating password." });
     }
-  }, []);
+  };
 
-  const fetchData = useCallback(async () => {
+  const fetchAllData = useCallback(async () => {
     setLoading(true);
     try {
-      const [resOrders, resApts, resInv] = await Promise.all([
-        fetch("/api/orders"),
-        fetch("/api/appointments"),
-        fetch("/api/inventory"),
+      const [resOrders, resAnalytics, resCust, resInv, resApts] = await Promise.all([
+        fetch("/api/orders?sort=newest"),
+        fetch("/api/admin/analytics"),
+        fetch("/api/admin/customers"),
+        fetch("/api/admin/inventory"),
+        fetch("/api/appointments")
       ]);
+
       if (resOrders.ok) { const d = await resOrders.json(); setOrders(d.orders || []); }
-      if (resApts.ok)   { const d = await resApts.json();   setAppointments(d.appointments || []); }
-      if (resInv.ok)    { const d = await resInv.json();    setInventory(d.items || []); }
-      await Promise.all([fetchAirtableStatus(), fetchWpStatus()]);
-    } catch (err) { console.error("Error fetching admin data:", err); }
-    finally { setLoading(false); }
-  }, [fetchAirtableStatus, fetchWpStatus]);
+      if (resAnalytics.ok) { const d = await resAnalytics.json(); setAnalytics(d.analytics || null); }
+      if (resCust.ok) { const d = await resCust.json(); setCustomers(d.customers || []); }
+      if (resInv.ok) { const d = await resInv.json(); setProducts(d.products || []); }
+      if (resApts.ok) { const d = await resApts.json(); setAppointments(d.appointments || []); }
+    } catch (err) {
+      console.error("Admin data fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  useEffect(() => { if (isAuthenticated) fetchData(); }, [isAuthenticated, fetchData]);
+  useEffect(() => {
+    if (isAuthenticated) fetchAllData();
+  }, [isAuthenticated, fetchAllData]);
 
-  // ─── Order Actions ───────────────────────────────────────────────────────────
-  const handleUpdateOrderStatus = async (orderId: string, newStatus: string) => {
-    setUpdatingId(orderId);
+  const handleOpenOrder = async (orderNum: string) => {
+    setOrderDrawerOpen(true);
+    setSelectedOrder(null);
+    try {
+      const res = await fetch(`/api/orders/${orderNum}`);
+      if (res.ok) {
+        const data = await res.json();
+        setSelectedOrder(data.order);
+        setNewOrderStatus(data.order.order_status);
+        setNewPaymentStatus(data.order.payment_status);
+      }
+    } catch (e) {
+      console.error("Order detail error:", e);
+    }
+  };
+
+  const handleUpdateOrderStatus = async () => {
+    if (!selectedOrder) return;
+    setUpdatingStatus(true);
     try {
       const res = await fetch("/api/orders", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId, orderStatus: newStatus }),
+        body: JSON.stringify({
+          orderNumber: selectedOrder.order_number,
+          orderStatus: newOrderStatus,
+          paymentStatus: newPaymentStatus,
+          note: internalNote.trim() || `Status updated to ${newOrderStatus} via Executive Admin Panel`
+        })
       });
-      if (res.ok) setOrders((prev) => prev.map((o) => o.orderId === orderId ? { ...o, orderStatus: newStatus as OrderRecord["orderStatus"] } : o));
-    } catch (err) { console.error(err); }
-    finally { setUpdatingId(null); }
+      if (res.ok) {
+        const data = await res.json();
+        setSelectedOrder(data.order);
+        setInternalNote("");
+        fetchAllData();
+      }
+    } catch (e) {
+      console.error("Status update error:", e);
+    } finally {
+      setUpdatingStatus(false);
+    }
   };
 
-  // ─── Appointment Actions ─────────────────────────────────────────────────────
-  const handleUpdateAptStatus = async (appointmentId: string, newStatus: string) => {
+  const handleOpenCustomer = async (custId: string) => {
+    setCustomerDrawerOpen(true);
+    setSelectedCustomer(null);
+    try {
+      const res = await fetch(`/api/admin/customers?id=${custId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setSelectedCustomer(data.customer);
+      }
+    } catch (e) {
+      console.error("Customer fetch error:", e);
+    }
+  };
+
+  const handleStockUpdate = async (productId: string, newStock: number) => {
+    try {
+      const res = await fetch("/api/admin/inventory", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: productId, stock_quantity: Math.max(0, newStock) })
+      });
+      if (res.ok) {
+        setProducts((prev) =>
+          prev.map((p) =>
+            p.id === productId
+              ? { ...p, stock_quantity: Math.max(0, newStock), status: newStock > 0 ? "active" : "out_of_stock" }
+              : p
+          )
+        );
+      }
+    } catch (e) {
+      console.error("Stock update error:", e);
+    }
+  };
+
+  const handlePriceUpdate = async (productId: string, newPrice: number) => {
+    try {
+      const res = await fetch("/api/admin/inventory", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: productId, price: newPrice })
+      });
+      if (res.ok) {
+        setProducts((prev) => prev.map((p) => (p.id === productId ? { ...p, price: newPrice } : p)));
+      }
+    } catch (e) {
+      console.error("Price update error:", e);
+    }
+  };
+
+  const handleToggleProductStatus = async (product: ProductRecord) => {
+    const nextStatus = product.status === "active" ? "inactive" : "active";
+    try {
+      const res = await fetch("/api/admin/inventory", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: product.id, status: nextStatus })
+      });
+      if (res.ok) {
+        setProducts((prev) => prev.map((p) => (p.id === product.id ? { ...p, status: nextStatus as any } : p)));
+      }
+    } catch (e) {
+      console.error("Status toggle error:", e);
+    }
+  };
+
+  const handleCreateProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingProduct(true);
+    try {
+      const res = await fetch("/api/admin/inventory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newProdForm)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setProducts((prev) => [data.product, ...prev]);
+        setShowAddModal(false);
+        setNewProdForm({
+          name: "", category: "Eyeglasses", price: 1999, original_price: 2999,
+          sku: "", stock_quantity: 20, image_url: "/logo.png",
+          description: "Atelier Handcrafted Luxury Titanium Frame."
+        });
+      }
+    } catch (e) {
+      console.error("Add product error:", e);
+    } finally {
+      setSavingProduct(false);
+    }
+  };
+
+  const handleUpdateAptStatus = async (appointmentId: string, status: string) => {
     try {
       const res = await fetch("/api/appointments", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ appointmentId, status: newStatus }),
-      });
-      if (res.ok) setAppointments((prev) => prev.map((a) => a.appointmentId === appointmentId ? { ...a, status: newStatus as AppointmentRecord["status"] } : a));
-    } catch (err) { console.error(err); }
-  };
-
-  // ─── Inventory Actions ───────────────────────────────────────────────────────
-  const handleSaveInventory = async () => {
-    if (!formData.name || !formData.category) return;
-    setSaving(true);
-    try {
-      const method = editingItem ? "PATCH" : "POST";
-      const payload = editingItem ? { ...formData, id: editingItem.id } : formData;
-      const res = await fetch("/api/inventory", {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ appointmentId, status })
       });
       if (res.ok) {
-        const saved = await res.json();
-        if (editingItem) {
-          setInventory((prev) => prev.map((i) => i.id === editingItem.id ? (saved.item || saved) : i));
-        } else {
-          setInventory((prev) => [saved, ...prev]);
-        }
-        setShowAddForm(false);
-        setEditingItem(null);
-        setFormData(blankForm());
-        setColorInput("");
+        setAppointments((prev) =>
+          prev.map((a) => (a.appointmentId === appointmentId ? { ...a, status: status as any } : a))
+        );
       }
-    } catch (err) { console.error(err); }
-    finally { setSaving(false); }
+    } catch (e) {
+      console.error("Apt update error:", e);
+    }
   };
 
-  const handleDeleteInventory = async (id: string) => {
-    if (!confirm("Yeh product inventory se delete kar dein?")) return;
-    const res = await fetch(`/api/inventory?id=${id}`, { method: "DELETE" });
-    if (res.ok) setInventory((prev) => prev.filter((i) => i.id !== id));
+  const handleExportCSV = () => {
+    if (orders.length === 0) return;
+    const headers = [
+      "Order Number", "Customer Name", "Phone", "City", "State",
+      "Items Count", "Subtotal", "Total Amount", "Payment Method",
+      "Payment Status", "Order Status", "Date Placed"
+    ];
+    const rows = filteredOrders.map((o) => [
+      `"${o.order_number || o.orderId}"`,
+      `"${o.customer?.full_name || o.customer?.name || ""}"`,
+      `"${o.customer?.phone || ""}"`,
+      `"${o.customer?.city || ""}"`,
+      `"${o.customer?.state || ""}"`,
+      o.items?.length || 0,
+      o.subtotal || o.total_amount,
+      o.total_amount || o.totalAmount,
+      `"${o.payment_method || o.paymentMethod}"`,
+      `"${o.payment_status || o.paymentStatus}"`,
+      `"${o.order_status || o.orderStatus}"`,
+      `"${new Date(o.created_at || o.createdAt || Date.now()).toLocaleString("en-IN")}"`
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `ALIGSWARE_Orders_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
-  const handleQuickStockSave = async (id: string) => {
-    const res = await fetch("/api/inventory", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, stock: stockEditVal, stockOnly: true }),
+  const filteredOrders = useMemo(() => {
+    return orders
+      .filter((o) => {
+        const num = (o.order_number || o.orderId || "").toLowerCase();
+        const name = (o.customer?.full_name || o.customer?.name || "").toLowerCase();
+        const phone = (o.customer?.phone || "");
+        const query = orderSearch.toLowerCase().trim();
+        const matchesSearch = !query || num.includes(query) || name.includes(query) || phone.includes(query);
+
+        const curStatus = (o.order_status || o.orderStatus || "").toLowerCase();
+        const matchesStatus = orderStatusFilter === "all" || curStatus === orderStatusFilter.toLowerCase();
+
+        const curPay = (o.payment_status || o.paymentStatus || "").toLowerCase();
+        const matchesPay = paymentStatusFilter === "all" || curPay === paymentStatusFilter.toLowerCase();
+
+        return matchesSearch && matchesStatus && matchesPay;
+      })
+      .sort((a, b) => {
+        const tA = new Date(a.created_at || a.createdAt || Date.now()).getTime();
+        const tB = new Date(b.created_at || b.createdAt || Date.now()).getTime();
+        return orderSort === "oldest" ? tA - tB : tB - tA;
+      });
+  }, [orders, orderSearch, orderStatusFilter, paymentStatusFilter, orderSort]);
+
+  const paginatedOrders = useMemo(() => {
+    const start = (orderPage - 1) * ordersPerPage;
+    return filteredOrders.slice(start, start + ordersPerPage);
+  }, [filteredOrders, orderPage]);
+
+  const totalOrderPages = Math.ceil(filteredOrders.length / ordersPerPage) || 1;
+
+  const filteredProducts = useMemo(() => {
+    return products.filter((p) => {
+      const matchesCat = invCategory === "All" || p.category === invCategory;
+      const query = invSearch.toLowerCase().trim();
+      const matchesSearch = !query || p.name.toLowerCase().includes(query) || p.sku.toLowerCase().includes(query);
+      return matchesCat && matchesSearch;
     });
-    if (res.ok) {
-      setInventory((prev) => prev.map((i) => i.id === id ? { ...i, stock: stockEditVal } : i));
-      setStockEditId(null);
-      // Sync to Airtable if ID starts with 'rec'
-      if (id.startsWith("rec")) {
-        fetch("/api/inventory/airtable", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ recordId: id, stock: stockEditVal }),
-        }).catch((e) => console.warn("Airtable sync note:", e));
-      }
-      // Sync to WooCommerce if ID starts with 'wc-'
-      if (id.startsWith("wc-")) {
-        fetch("/api/wordpress", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ productId: id, stock: stockEditVal }),
-        }).catch((e) => console.warn("WooCommerce sync note:", e));
-      }
-    }
-  };
+  }, [products, invCategory, invSearch]);
 
-  const openEdit = (item: InventoryItem) => {
-    setEditingItem(item);
-    setFormData({ ...item });
-    setColorInput("");
-    setShowAddForm(true);
-  };
+  const filteredCustomers = useMemo(() => {
+    const q = customerSearch.toLowerCase().trim();
+    if (!q) return customers;
+    return customers.filter(
+      (c) =>
+        c.fullName.toLowerCase().includes(q) ||
+        c.phone.includes(q) ||
+        (c.city && c.city.toLowerCase().includes(q))
+    );
+  }, [customers, customerSearch]);
 
-  const addColor = () => {
-    const c = colorInput.trim();
-    if (c && !(formData.colors || []).includes(c)) {
-      setFormData((p) => ({ ...p, colors: [...(p.colors || []), c] }));
-    }
-    setColorInput("");
-  };
-
-  const removeColor = (c: string) => setFormData((p) => ({ ...p, colors: (p.colors || []).filter((x) => x !== c) }));
-
-  // ─── Airtable Plugin Handlers ───────────────────────────────────────────────
-  const handleTriggerAirtableSync = async () => {
-    setSyncingAirtable(true);
-    setAirtableFeedback(null);
-    try {
-      const res = await fetch("/api/inventory/airtable", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "sync" }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setAirtableFeedback({ type: "success", message: data.message || "Airtable se live sync safal raha!" });
-        if (data.items) setInventory(data.items);
-        await fetchAirtableStatus();
-      } else {
-        setAirtableFeedback({ type: "error", message: data.error || "Sync fail hua." });
-      }
-    } catch {
-      setAirtableFeedback({ type: "error", message: "Network error during Airtable sync." });
-    } finally {
-      setSyncingAirtable(false);
-    }
-  };
-
-  const handleSaveAirtableSettings = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAirtableSaving(true);
-    setAirtableFeedback(null);
-    try {
-      const res = await fetch("/api/inventory/airtable", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "save_config",
-          apiKey: airtableApiKey,
-          baseId: airtableBaseId,
-          tableName: airtableTableName || "Inventory",
-        }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setAirtableFeedback({ type: "success", message: "Airtable successfully connect ho gaya!" });
-        setAirtableApiKey("");
-        setShowAirtableModal(false);
-        await fetchAirtableStatus();
-        handleTriggerAirtableSync();
-      } else {
-        setAirtableFeedback({ type: "error", message: data.error || "Airtable settings save nahi ho saki." });
-      }
-    } catch {
-      setAirtableFeedback({ type: "error", message: "Network error while saving settings." });
-    } finally {
-      setAirtableSaving(false);
-    }
-  };
-
-  // ─── WordPress Plugin Handlers ─────────────────────────────────────────────
-  const handleTriggerWpSync = async () => {
-    setSyncingWp(true);
-    setWpFeedback(null);
-    try {
-      const res = await fetch("/api/wordpress", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "sync" }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setWpFeedback({ type: "success", message: data.message || "WordPress / WooCommerce se products sync ho gaye!" });
-        if (data.items) setInventory(data.items);
-        await fetchWpStatus();
-      } else {
-        setWpFeedback({ type: "error", message: data.error || "Sync fail hua. WooCommerce API keys check karein." });
-      }
-    } catch {
-      setWpFeedback({ type: "error", message: "Network error during WordPress sync." });
-    } finally {
-      setSyncingWp(false);
-    }
-  };
-
-  const handleSaveWpSettings = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setWpSaving(true);
-    setWpFeedback(null);
-    try {
-      const res = await fetch("/api/wordpress", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "save_config",
-          siteUrl: wpSiteUrl,
-          consumerKey: wpConsumerKey,
-          consumerSecret: wpConsumerSecret,
-        }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setWpFeedback({ type: "success", message: "WordPress connection settings save ho gayi hain!" });
-        setShowWpModal(false);
-        await fetchWpStatus();
-        if (data.testResult?.hasWooCommerce) {
-          handleTriggerWpSync();
-        }
-      } else {
-        setWpFeedback({ type: "error", message: data.error || "WordPress connect nahi ho saka." });
-      }
-    } catch {
-      setWpFeedback({ type: "error", message: "Network error saving WordPress settings." });
-    } finally {
-      setWpSaving(false);
-    }
-  };
-
-  // ─── Computed Values ─────────────────────────────────────────────────────────
-  const totalRevenue = useMemo(() => orders.reduce((s, o) => s + (Number(o.totalAmount) || 0), 0), [orders]);
-  const pendingOrdersCount = useMemo(() => orders.filter((o) => o.orderStatus === "placed" || o.orderStatus === "confirmed").length, [orders]);
-  const lowStockCount = useMemo(() => inventory.filter((i) => i.stock <= i.lowStockThreshold).length, [inventory]);
-
-  const filteredOrders = useMemo(() => orders.filter((o) => {
-    const mf = statusFilter === "all" || o.orderStatus === statusFilter;
-    const q = searchQuery.toLowerCase().trim();
-    const ms = !q || o.orderId.toLowerCase().includes(q) || o.customer.name.toLowerCase().includes(q) || o.customer.phone.includes(q) || o.customer.city.toLowerCase().includes(q);
-    return mf && ms;
-  }), [orders, statusFilter, searchQuery]);
-
-  const filteredInventory = useMemo(() => inventory.filter((i) => {
-    const mc = invCategory === "all" || i.category === invCategory;
-    const q = invSearch.toLowerCase().trim();
-    const ms = !q || i.name.toLowerCase().includes(q) || (i.brand || "").toLowerCase().includes(q) || (i.sku || "").toLowerCase().includes(q);
-    return mc && ms;
-  }), [inventory, invCategory, invSearch]);
-
-  // ─── Login Screen ─────────────────────────────────────────────────────────────
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-[#070709] text-white flex items-center justify-center p-4 selection:bg-amber-500/30">
-        <div className="w-full max-w-md p-8 rounded-3xl bg-[#0c0d12]/90 border border-amber-400/30 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-300 text-black flex items-center justify-center mx-auto mb-5 shadow-[0_0_25px_rgba(212,175,55,0.4)]">
-            <Lock className="w-8 h-8" />
-          </div>
-          <h1 className="font-cinzel text-2xl font-bold tracking-wider text-white">ALIG&apos;S WARE</h1>
-          <p className="text-xs font-mono text-amber-300 uppercase tracking-widest mt-1 mb-6">Atelier Management &bull; Orders Portal</p>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="text-left">
-              <label className="block text-[11px] font-mono uppercase text-neutral-400 mb-1.5">Enter Passcode / PIN</label>
-              <input
-                type="password" value={pinInput} onChange={(e) => setPinInput(e.target.value)} placeholder="••••"
-                className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/15 text-white placeholder-neutral-600 focus:outline-none focus:border-amber-400 font-mono text-center text-lg tracking-widest" autoFocus
-              />
-              {authError && <p className="text-xs text-rose-400 mt-1.5 font-mono text-center">{authError}</p>}
+      <div className="min-h-screen bg-[#070709] text-[#F5EFE6] flex items-center justify-center p-4 relative overflow-hidden selection:bg-[#B88A32]/30 selection:text-white">
+        <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-[#B88A32]/10 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/3 w-[400px] h-[400px] bg-[#D4AF62]/5 rounded-full blur-[120px] pointer-events-none" />
+
+        <div className="w-full max-w-md bg-[#121218]/90 backdrop-blur-xl border border-[#B88A32]/30 rounded-3xl p-8 shadow-2xl relative z-10">
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#B88A32] to-[#7A5A1A] p-0.5 mx-auto mb-4 shadow-lg shadow-[#B88A32]/25 flex items-center justify-center">
+              <div className="w-full h-full bg-[#121218] rounded-[14px] flex items-center justify-center">
+                <ShieldCheck className="w-8 h-8 text-[#B88A32]" />
+              </div>
             </div>
-            <button type="submit" className="cursor-pointer w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-black font-bold text-xs uppercase tracking-wider shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:brightness-110 active:scale-98 transition-all">
-              Unlock Dashboard
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#B88A32]/30 bg-[#B88A32]/10 text-[10px] font-mono tracking-widest text-[#B88A32] uppercase mb-2">
+              Executive Access
+            </div>
+            <h1 className="text-2xl font-serif font-bold text-white tracking-wide">
+              ALIG'S WARE Atelier
+            </h1>
+            <p className="text-xs text-neutral-400 mt-1">
+              E-Commerce Management & Order Registry
+            </p>
+          </div>
+
+          <div className="flex border-b border-white/10 mb-6 text-xs font-mono">
+            <button
+              onClick={() => { setAuthMode("pin"); setAuthError(""); }}
+              className={`flex-1 pb-2.5 font-semibold transition-all ${
+                authMode === "pin" ? "text-[#B88A32] border-b-2 border-[#B88A32]" : "text-neutral-500 hover:text-neutral-300"
+              }`}
+            >
+              Quick Passcode (786)
             </button>
-          </form>
-          <div className="mt-6 pt-5 border-t border-white/10 flex flex-col gap-2.5">
-            <button onClick={() => { setIsAuthenticated(true); localStorage.setItem("aligs_admin_authenticated", "true"); }}
-              className="cursor-pointer text-xs font-mono text-amber-300/80 hover:text-amber-300 underline underline-offset-4">
-              ✦ Quick Access for Dr. Sheeraz Ahmad
+            <button
+              onClick={() => { setAuthMode("password"); setAuthError(""); }}
+              className={`flex-1 pb-2.5 font-semibold transition-all ${
+                authMode === "password" ? "text-[#B88A32] border-b-2 border-[#B88A32]" : "text-neutral-500 hover:text-neutral-300"
+              }`}
+            >
+              Master Credentials
             </button>
-            <Link href="/" className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors font-mono">&larr; Return to Storefront</Link>
+          </div>
+
+          {authMode === "pin" ? (
+            <form onSubmit={handlePinLogin} className="space-y-4">
+              <div>
+                <label className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 block mb-1.5">
+                  Security Passcode
+                </label>
+                <input
+                  type="password"
+                  autoFocus
+                  placeholder="Enter 786 or 6396"
+                  value={pinInput}
+                  onChange={(e) => setPinInput(e.target.value)}
+                  className="w-full bg-white/[0.04] border border-[#B88A32]/30 rounded-xl px-4 py-3 text-center text-lg tracking-widest text-white placeholder-neutral-600 focus:outline-none focus:border-[#B88A32] transition-all font-mono"
+                />
+              </div>
+
+              {authError && <p className="text-xs text-red-400 text-center font-mono">{authError}</p>}
+
+              <button
+                type="submit"
+                className="w-full bg-[#B88A32] hover:bg-[#A07828] text-white font-semibold py-3.5 rounded-xl transition-all shadow-lg shadow-[#B88A32]/25 text-sm flex items-center justify-center gap-2"
+              >
+                <Lock className="w-4 h-4" /> Enter Command Center
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handlePasswordLogin} className="space-y-4">
+              <div>
+                <label className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 block mb-1.5">
+                  Admin Username
+                </label>
+                <input
+                  type="text"
+                  placeholder="admin"
+                  value={usernameInput}
+                  onChange={(e) => setUsernameInput(e.target.value)}
+                  className="w-full bg-white/[0.04] border border-[#B88A32]/30 rounded-xl px-4 py-2.5 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-[#B88A32] transition-all font-mono"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 block mb-1.5">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  placeholder="••••••••••••"
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  className="w-full bg-white/[0.04] border border-[#B88A32]/30 rounded-xl px-4 py-2.5 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-[#B88A32] transition-all font-mono"
+                />
+              </div>
+
+              {authError && <p className="text-xs text-red-400 text-center font-mono">{authError}</p>}
+
+              <button
+                type="submit"
+                disabled={authLoading}
+                className="w-full bg-[#B88A32] hover:bg-[#A07828] text-white font-semibold py-3.5 rounded-xl transition-all shadow-lg shadow-[#B88A32]/25 text-sm flex items-center justify-center gap-2 disabled:opacity-60"
+              >
+                {authLoading ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <Lock className="w-4 h-4" /> Authenticate Session
+                  </>
+                )}
+              </button>
+            </form>
+          )}
+
+          <div className="mt-6 pt-4 border-t border-white/10 text-center">
+            <Link
+              href="/"
+              className="text-xs text-neutral-400 hover:text-[#B88A32] transition-colors inline-flex items-center gap-1.5 font-mono"
+            >
+              &larr; Return to Public Boutique
+            </Link>
           </div>
         </div>
       </div>
     );
   }
 
-  // ─── Dashboard ────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#070709] text-white selection:bg-amber-500/30 selection:text-white pb-20">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-[#0c0d12]/90 backdrop-blur-xl border-b border-white/10 px-4 sm:px-8 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-9 h-9 rounded-xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-300 group-hover:scale-105 transition-transform">
-              <ShieldCheck className="w-5 h-5" />
+    <div className="min-h-screen bg-[#0A0A0E] text-[#F5EFE6] selection:bg-[#B88A32]/30 selection:text-white pb-20">
+      {/* Top Header Bar */}
+      <header className="sticky top-0 z-30 bg-[#0E0E14]/90 backdrop-blur-md border-b border-[#B88A32]/20 px-4 sm:px-8 py-3.5">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#B88A32] to-[#7A5A1A] p-0.5 flex items-center justify-center shadow-md shadow-[#B88A32]/20">
+              <div className="w-full h-full bg-[#0E0E14] rounded-[10px] flex items-center justify-center">
+                <ShieldCheck className="w-5 h-5 text-[#B88A32]" />
+              </div>
             </div>
             <div>
-              <span className="font-cinzel text-lg font-bold tracking-wider text-white group-hover:text-amber-300 transition-colors">ALIG&apos;S WARE</span>
-              <span className="text-[10px] font-mono text-amber-400 uppercase tracking-widest block">Backoffice Dashboard</span>
+              <div className="flex items-center gap-2">
+                <span className="font-serif font-bold text-white text-base tracking-wide">
+                  ALIG'S WARE
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#B88A32]/20 border border-[#B88A32]/30 text-[#B88A32] font-semibold">
+                  E-Commerce OS
+                </span>
+              </div>
+              <p className="text-[11px] text-neutral-400 font-mono flex items-center gap-1.5">
+                <Database className="w-3 h-3 text-emerald-400" />
+                Persistent Ledger Active &bull; Dr. Sheeraz Ahmad
+              </p>
             </div>
-          </Link>
-          <div className="flex items-center gap-3">
-            <button onClick={fetchData} disabled={loading}
-              className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs font-mono text-neutral-300 hover:text-white transition-all">
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-amber-400" : ""}`} />
-              <span className="hidden sm:inline">Refresh</span>
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+            <button
+              onClick={() => fetchAllData()}
+              disabled={loading}
+              className="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs font-mono text-neutral-300 flex items-center gap-1.5 transition-all"
+              title="Refresh all data"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#B88A32]" : ""}`} />
+              <span>Refresh</span>
             </button>
-            <Link href="/" target="_blank" className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs font-mono text-neutral-300 hover:text-white transition-all">
-              <span>View Store</span><ExternalLink className="w-3 h-3 text-neutral-400" />
+
+            <button
+              onClick={() => setShowPasswordModal(true)}
+              className="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs font-mono text-neutral-300 flex items-center gap-1.5 transition-all"
+              title="Change master admin password"
+            >
+              <Key className="w-3.5 h-3.5 text-[#B88A32]" />
+              <span>Security</span>
+            </button>
+
+            <Link
+              href="/track-order"
+              target="_blank"
+              className="px-3 py-1.5 rounded-xl bg-[#B88A32]/10 hover:bg-[#B88A32]/20 border border-[#B88A32]/30 text-xs font-mono text-[#B88A32] flex items-center gap-1.5 transition-all"
+            >
+              <Truck className="w-3.5 h-3.5" />
+              <span>Track Portal</span>
+              <ExternalLink className="w-3 h-3" />
             </Link>
-            <button onClick={handleLogout} className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-xs font-mono text-rose-300 transition-all">
-              <LogOut className="w-3.5 h-3.5" /><span className="hidden sm:inline">Lock</span>
+
+            <button
+              onClick={handleLogout}
+              className="px-3 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-xs font-mono text-red-400 flex items-center gap-1.5 transition-all"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Sign Out</span>
             </button>
           </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto flex items-center gap-2 mt-4 pt-2 border-t border-white/10 overflow-x-auto text-xs font-mono">
+          <button
+            onClick={() => setActiveTab("overview")}
+            className={`px-4 py-2 rounded-xl flex items-center gap-2 transition-all shrink-0 ${
+              activeTab === "overview"
+                ? "bg-[#B88A32] text-white font-semibold shadow-md shadow-[#B88A32]/20"
+                : "text-neutral-400 hover:text-white hover:bg-white/[0.05]"
+            }`}
+          >
+            <BarChart3 className="w-4 h-4" /> Overview & KPIs
+          </button>
+
+          <button
+            onClick={() => setActiveTab("orders")}
+            className={`px-4 py-2 rounded-xl flex items-center gap-2 transition-all shrink-0 ${
+              activeTab === "orders"
+                ? "bg-[#B88A32] text-white font-semibold shadow-md shadow-[#B88A32]/20"
+                : "text-neutral-400 hover:text-white hover:bg-white/[0.05]"
+            }`}
+          >
+            <Package className="w-4 h-4" /> Orders ({orders.length})
+          </button>
+
+          <button
+            onClick={() => setActiveTab("customers")}
+            className={`px-4 py-2 rounded-xl flex items-center gap-2 transition-all shrink-0 ${
+              activeTab === "customers"
+                ? "bg-[#B88A32] text-white font-semibold shadow-md shadow-[#B88A32]/20"
+                : "text-neutral-400 hover:text-white hover:bg-white/[0.05]"
+            }`}
+          >
+            <Users className="w-4 h-4" /> Customers ({customers.length})
+          </button>
+
+          <button
+            onClick={() => setActiveTab("inventory")}
+            className={`px-4 py-2 rounded-xl flex items-center gap-2 transition-all shrink-0 ${
+              activeTab === "inventory"
+                ? "bg-[#B88A32] text-white font-semibold shadow-md shadow-[#B88A32]/20"
+                : "text-neutral-400 hover:text-white hover:bg-white/[0.05]"
+            }`}
+          >
+            <Layers className="w-4 h-4" /> Inventory ({products.length})
+          </button>
+
+          <button
+            onClick={() => setActiveTab("appointments")}
+            className={`px-4 py-2 rounded-xl flex items-center gap-2 transition-all shrink-0 ${
+              activeTab === "appointments"
+                ? "bg-[#B88A32] text-white font-semibold shadow-md shadow-[#B88A32]/20"
+                : "text-neutral-400 hover:text-white hover:bg-white/[0.05]"
+            }`}
+          >
+            <Calendar className="w-4 h-4" /> Appointments ({appointments.length})
+          </button>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-8 pt-6 sm:pt-8">
-        {/* KPI Row */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-8">
-          {[
-            { label: "Total Orders", value: orders.length, sub: "Lifetime store orders", icon: <Package className="w-4 h-4 text-amber-400" />, color: "text-white" },
-            { label: "Total Revenue", value: `₹${totalRevenue.toLocaleString()}`, sub: "From customer bookings", icon: <TrendingUp className="w-4 h-4 text-emerald-400" />, color: "text-amber-300" },
-            { label: "Pending Dispatch", value: pendingOrdersCount, sub: "Requires packing", icon: <Truck className="w-4 h-4 text-amber-400" />, color: "text-amber-400" },
-            { label: "Appointments", value: appointments.length, sub: "Dr. Sheeraz patients", icon: <Calendar className="w-4 h-4 text-cyan-400" />, color: "text-cyan-300" },
-            { label: "Low Stock", value: lowStockCount, sub: `of ${inventory.length} products`, icon: <AlertTriangle className="w-4 h-4 text-rose-400" />, color: lowStockCount > 0 ? "text-rose-400" : "text-emerald-400" },
-          ].map((kpi) => (
-            <div key={kpi.label} className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl">
-              <div className="flex items-center justify-between text-neutral-400 mb-2">
-                <span className="text-[10px] font-mono uppercase tracking-wider">{kpi.label}</span>
-                {kpi.icon}
+      <main className="max-w-7xl mx-auto px-4 sm:px-8 py-8">
+        {activeTab === "overview" && (
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              <div className="bg-[#121218] border border-[#B88A32]/20 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-[#B88A32]/5 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform" />
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider">
+                    Total Gross Revenue
+                  </span>
+                  <div className="w-8 h-8 rounded-lg bg-[#B88A32]/15 text-[#B88A32] flex items-center justify-center">
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="text-2xl sm:text-3xl font-bold font-mono text-white mb-1">
+                  ₹{(analytics?.totalRevenue || 0).toLocaleString("en-IN")}
+                </div>
+                <div className="text-xs text-neutral-400 font-mono flex items-center gap-1.5">
+                  <span className="text-emerald-400 font-semibold">
+                    ₹{(analytics?.todayRevenue || 0).toLocaleString("en-IN")}
+                  </span>{" "}
+                  today &bull; ₹{(analytics?.monthRevenue || 0).toLocaleString("en-IN")} this mo.
+                </div>
               </div>
-              <div className={`text-2xl font-bold font-mono ${kpi.color}`}>{kpi.value}</div>
-              <span className="text-[10px] font-mono text-neutral-500 mt-1 block">{kpi.sub}</span>
-            </div>
-          ))}
-        </div>
 
-        {/* Tabs Bar */}
-        <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-4 mb-6 flex-wrap">
-          <div className="flex items-center gap-2 flex-wrap">
-            {[
-              { key: "orders", label: `Customer Orders (${orders.length})`, icon: <Package className="w-3.5 h-3.5" />, active: "from-amber-400 to-amber-500 text-black shadow-[0_0_15px_rgba(212,175,55,0.4)]" },
-              { key: "appointments", label: `Appointments (${appointments.length})`, icon: <Calendar className="w-3.5 h-3.5" />, active: "from-cyan-400 to-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]" },
-              { key: "inventory", label: `Inventory & Plugins (${inventory.length})${lowStockCount > 0 ? ` ⚠ ${lowStockCount}` : ""}`, icon: <Archive className="w-3.5 h-3.5" />, active: "from-violet-400 to-violet-500 text-black shadow-[0_0_15px_rgba(139,92,246,0.4)]" },
-            ].map((tab) => (
-              <button key={tab.key} onClick={() => setActiveTab(tab.key as typeof activeTab)}
-                className={`cursor-pointer px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 ${
-                  activeTab === tab.key ? `bg-gradient-to-r ${tab.active} font-bold` : "bg-white/[0.04] text-neutral-400 hover:text-white border border-white/10"
-                }`}>
-                {tab.icon}<span>{tab.label}</span>
-              </button>
-            ))}
-          </div>
+              <div className="bg-[#121218] border border-[#B88A32]/20 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform" />
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider">
+                    Order Volume
+                  </span>
+                  <div className="w-8 h-8 rounded-lg bg-blue-500/15 text-blue-400 flex items-center justify-center">
+                    <Package className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="text-2xl sm:text-3xl font-bold font-mono text-white mb-1">
+                  {analytics?.totalOrders || orders.length}
+                </div>
+                <div className="text-xs text-neutral-400 font-mono flex items-center gap-1.5">
+                  <span className="text-emerald-400 font-semibold">
+                    +{analytics?.todayOrders || 0}
+                  </span>{" "}
+                  new today &bull; {analytics?.deliveredOrders || 0} delivered
+                </div>
+              </div>
 
-          {/* Tab-specific toolbar */}
-          {activeTab === "orders" && (
-            <div className="flex items-center gap-2.5 w-full sm:w-auto">
-              <div className="relative flex-1 sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500" />
-                <input type="text" placeholder="Search name, phone, order ID..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 font-mono" />
+              <div className="bg-[#121218] border border-[#B88A32]/20 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform" />
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider">
+                    Average Order Value (AOV)
+                  </span>
+                  <div className="w-8 h-8 rounded-lg bg-purple-500/15 text-purple-400 flex items-center justify-center">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="text-2xl sm:text-3xl font-bold font-mono text-white mb-1">
+                  ₹{(analytics?.aov || 0).toLocaleString("en-IN")}
+                </div>
+                <div className="text-xs text-neutral-400 font-mono">
+                  {analytics?.totalUnitsSold || 0} total eyewear frames dispatched
+                </div>
               </div>
-              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-black/80 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-amber-400 cursor-pointer">
-                <option value="all">All Statuses</option>
-                <option value="placed">Placed</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="shipped">Shipped</option>
-                <option value="delivered">Delivered</option>
-              </select>
-            </div>
-          )}
 
-          {activeTab === "inventory" && (
-            <div className="flex items-center gap-2.5 w-full sm:w-auto flex-wrap">
-              <div className="relative flex-1 sm:w-48">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500" />
-                <input type="text" placeholder="Search products..." value={invSearch} onChange={(e) => setInvSearch(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-violet-400 font-mono" />
+              <div className="bg-[#121218] border border-[#B88A32]/20 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform" />
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider">
+                    Low Stock Alert
+                  </span>
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center">
+                    <AlertTriangle className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="text-2xl sm:text-3xl font-bold font-mono text-white mb-1">
+                  {analytics?.lowStockCount || 0}
+                </div>
+                <div className="text-xs text-neutral-400 font-mono">
+                  {products.filter((p) => p.stock_quantity <= 5).length} items require replenishment
+                </div>
               </div>
-              <select value={invCategory} onChange={(e) => setInvCategory(e.target.value)}
-                className="bg-black/80 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs font-mono text-white focus:outline-none cursor-pointer">
-                <option value="all">All Categories</option>
-                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-              <button onClick={() => { setShowAddForm(true); setEditingItem(null); setFormData(blankForm()); setColorInput(""); }}
-                className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/50 text-violet-300 text-xs font-mono transition-all whitespace-nowrap">
-                <Plus className="w-3.5 h-3.5" /><span>Add Product</span>
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* ══════════════════════════════════════════════════════════ TAB: ORDERS */}
-        {activeTab === "orders" && (
-          <div>
-            {filteredOrders.length === 0 ? (
-              <div className="p-12 text-center rounded-3xl bg-white/[0.02] border border-white/10">
-                <Package className="w-12 h-12 text-neutral-600 mx-auto mb-3" />
-                <h3 className="text-lg font-cinzel text-white">No Orders Found</h3>
-                <p className="text-xs text-neutral-400 font-mono mt-1">
-                  {searchQuery || statusFilter !== "all" ? "Try clearing your search query or status filter." : "Jab koi customer naya order place karega, uski details automatically yahan aa jayengi."}
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredOrders.map((order) => {
-                  const dateStr = order.createdAt ? new Date(order.createdAt).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Recent";
-                  const isDelivered = order.orderStatus === "delivered";
-                  const isShipped = order.orderStatus === "shipped";
-                  const isConfirmed = order.orderStatus === "confirmed";
-                  const whatsappMsg = encodeURIComponent(`Hello ${order.customer.name}! Greetings from ALIG'S WARE.\nRegarding your eyewear order *${order.orderId}* of ₹${order.totalAmount}:\nWe are preparing your package under Dr. Sheeraz Ahmad's care. Please let us know if you need any assistance.`);
-                  return (
-                    <div key={order.orderId} className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10 hover:border-amber-400/30 transition-all shadow-xl">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 sm:pb-4 border-b border-white/10 gap-2">
-                        <div className="flex items-center gap-2.5 flex-wrap">
-                          <span className="font-mono font-bold text-amber-400 text-sm sm:text-base tracking-wider">{order.orderId}</span>
-                          <span className="text-[11px] font-mono text-neutral-400 flex items-center gap-1"><Clock className="w-3 h-3 text-neutral-500" />{dateStr}</span>
-                          {order.isOfflineMode && <span className="text-[9px] font-mono text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/20">Cached</span>}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-mono text-neutral-400 uppercase">Status:</span>
-                          <select value={order.orderStatus || "placed"} disabled={updatingId === order.orderId}
-                            onChange={(e) => handleUpdateOrderStatus(order.orderId, e.target.value)}
-                            className={`px-3 py-1 rounded-xl text-xs font-mono font-semibold border cursor-pointer focus:outline-none transition-all ${isDelivered ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40" : isShipped ? "bg-indigo-500/20 text-indigo-300 border-indigo-500/40" : isConfirmed ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40" : "bg-amber-500/20 text-amber-300 border-amber-500/40"}`}>
-                            <option value="placed" className="bg-neutral-900 text-amber-300">Placed (Pending)</option>
-                            <option value="confirmed" className="bg-neutral-900 text-cyan-300">Confirmed</option>
-                            <option value="shipped" className="bg-neutral-900 text-indigo-300">Shipped (In Transit)</option>
-                            <option value="delivered" className="bg-neutral-900 text-emerald-300">Delivered</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 my-4">
-                        <div className="md:col-span-5 space-y-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-base font-semibold text-white">{order.customer.name}</span>
-                            <span className="text-[10px] font-mono text-neutral-400 px-2 py-0.5 rounded-full bg-white/[0.04]">{order.customer.city}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-xs font-mono text-neutral-300">
-                            <Phone className="w-3.5 h-3.5 text-amber-400 shrink-0" /><span>+91 {order.customer.phone}</span>
-                          </div>
-                          {order.customer.email && <div className="text-xs text-neutral-400 font-mono">{order.customer.email}</div>}
-                          <div className="flex items-start gap-1.5 text-xs text-neutral-400 pt-1">
-                            <MapPin className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
-                            <span>{order.customer.address}, {order.customer.city} - {order.customer.pincode}</span>
-                          </div>
-                          <div className="flex items-center gap-2 pt-2">
-                            <a href={`https://wa.me/91${order.customer.phone}?text=${whatsappMsg}`} target="_blank" rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/40 text-[#25D366] text-xs font-mono transition-all">
-                              <MessageCircle className="w-3.5 h-3.5" /><span>WhatsApp Customer</span>
-                            </a>
-                            <a href={`tel:+91${order.customer.phone}`} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs font-mono text-neutral-300 transition-all">
-                              <Phone className="w-3.5 h-3.5" /><span>Call</span>
-                            </a>
-                          </div>
-                        </div>
-                        <div className="md:col-span-7 bg-white/[0.02] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between">
-                          <div>
-                            <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider block mb-2">Ordered Items ({order.items.length}):</span>
-                            <div className="space-y-2">
-                              {order.items.map((item, idx) => (
-                                <div key={idx} className="flex items-center justify-between text-xs py-1 border-b border-white/5 last:border-none">
-                                  <div>
-                                    <span className="text-white font-medium">{item.name}</span>
-                                    <span className="text-[11px] font-mono text-amber-300/80 ml-2">({item.color})</span>
-                                  </div>
-                                  <div className="font-mono text-right">
-                                    <span className="text-neutral-400 mr-2">x{item.quantity}</span>
-                                    <span className="text-white font-semibold">₹{item.price * item.quantity}</span>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                          <div className="pt-3 mt-2 border-t border-white/10 flex items-center justify-between text-xs font-mono">
-                            <div><span className="text-neutral-500 uppercase">Payment: </span><span className="text-amber-300 font-bold uppercase">{order.paymentMethod}</span></div>
-                            <div><span className="text-neutral-400 mr-2">Grand Total:</span><span className="text-base font-bold text-amber-400">₹{order.totalAmount}</span></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ══════════════════════════════════════════════════ TAB: APPOINTMENTS */}
-        {activeTab === "appointments" && (
-          <div>
-            {appointments.length === 0 ? (
-              <div className="p-12 text-center rounded-3xl bg-white/[0.02] border border-white/10">
-                <Calendar className="w-12 h-12 text-neutral-600 mx-auto mb-3" />
-                <h3 className="text-lg font-cinzel text-white">No Clinic Appointments Yet</h3>
-                <p className="text-xs text-neutral-400 font-mono mt-1">Patients booking eye checks or frame fittings with Dr. Sheeraz will show up here.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {appointments.map((apt) => {
-                  const dateStr = apt.preferredDate ? new Date(apt.preferredDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "Flexible";
-                  return (
-                    <div key={apt.appointmentId} className="p-4 sm:p-5 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-bold text-white text-sm sm:text-base">{apt.name}</span>
-                          <span className="text-[10px] font-mono text-cyan-300 bg-cyan-400/10 border border-cyan-400/20 px-2 py-0.5 rounded-full">{apt.concern}</span>
-                        </div>
-                        <div className="flex items-center gap-3 text-xs font-mono text-neutral-300">
-                          <span className="flex items-center gap-1 text-amber-300"><Calendar className="w-3 h-3" />{dateStr}</span>
-                          <span className="flex items-center gap-1 text-neutral-400"><Clock className="w-3 h-3" />{apt.preferredTime}</span>
-                          <span className="text-neutral-400">&bull; +91 {apt.phone}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
-                        <a href={`https://wa.me/91${apt.phone}?text=Hello%20${encodeURIComponent(apt.name)},%20confirming%20your%20appointment%20with%20Dr.%20Sheeraz%20Ahmad%20at%20ALIGSWARE%20Clinic.`}
-                          target="_blank" rel="noopener noreferrer"
-                          className="px-3 py-1.5 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/40 text-[#25D366] text-xs font-mono flex items-center gap-1.5">
-                          <MessageCircle className="w-3.5 h-3.5" /><span>WhatsApp</span>
-                        </a>
-                        <select value={apt.status || "confirmed"} onChange={(e) => handleUpdateAptStatus(apt.appointmentId, e.target.value)}
-                          className="bg-neutral-900 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs font-mono text-white focus:outline-none cursor-pointer">
-                          <option value="confirmed">Confirmed</option>
-                          <option value="completed">Completed</option>
-                          <option value="cancelled">Cancelled</option>
-                        </select>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ══════════════════════════════════════════════════════ TAB: INVENTORY & PLUGINS */}
-        {activeTab === "inventory" && (
-          <div>
-            {/* ─── PLUGIN SELECTOR TABS ─── */}
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest mr-1">Active Plugin:</span>
-              <button
-                onClick={() => setActivePluginTab("wordpress")}
-                className={`cursor-pointer px-3 py-1.5 rounded-xl text-xs font-mono transition-all flex items-center gap-1.5 ${
-                  activePluginTab === "wordpress"
-                    ? "bg-[#21759B]/20 text-[#21759B] border border-[#21759B]/50 font-bold shadow-[0_0_12px_rgba(33,117,155,0.3)]"
-                    : "bg-white/[0.04] text-neutral-400 hover:text-white border border-white/10"
-                }`}
-              >
-                <Globe className="w-3.5 h-3.5" />
-                <span>WordPress / WooCommerce Plugin</span>
-              </button>
-              <button
-                onClick={() => setActivePluginTab("airtable")}
-                className={`cursor-pointer px-3 py-1.5 rounded-xl text-xs font-mono transition-all flex items-center gap-1.5 ${
-                  activePluginTab === "airtable"
-                    ? "bg-teal-500/20 text-teal-300 border border-teal-500/50 font-bold shadow-[0_0_12px_rgba(20,184,166,0.3)]"
-                    : "bg-white/[0.04] text-neutral-400 hover:text-white border border-white/10"
-                }`}
-              >
-                <Database className="w-3.5 h-3.5 text-[#FCB400]" />
-                <span>Airtable Plugin</span>
-              </button>
             </div>
 
-            {/* ─── WORDPRESS & WOOCOMMERCE PLUGIN BANNER ─── */}
-            {activePluginTab === "wordpress" && (
-              <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#0d1e2d] via-[#091522] to-[#161226] border border-[#21759B]/40 shadow-lg relative overflow-hidden">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-11 h-11 rounded-2xl bg-[#21759B]/20 border border-[#21759B]/40 flex items-center justify-center shrink-0">
-                      <Globe className="w-6 h-6 text-[#21759B]" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-bold text-white text-sm sm:text-base font-cinzel">WordPress &amp; WooCommerce Plugin</h3>
-                        {wpStatus?.connected ? (
-                          <span className="text-[10px] font-mono text-emerald-300 bg-emerald-500/20 border border-emerald-500/40 px-2 py-0.5 rounded-full flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                            Connected to {wpStatus.siteName || "WordPress"} ({wpStatus.productCount} WooCommerce items)
-                          </span>
-                        ) : wpStatus?.configured ? (
-                          <span className="text-[10px] font-mono text-amber-300 bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 rounded-full">
-                            Checking WordPress Site...
-                          </span>
-                        ) : (
-                          <span className="text-[10px] font-mono text-neutral-400 bg-white/[0.05] border border-white/10 px-2 py-0.5 rounded-full">
-                            Not Connected (100% Free Setup)
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-neutral-400 font-mono mt-0.5">
-                        {wpStatus?.config?.lastSync
-                          ? `Last synced: ${new Date(wpStatus.config.lastSync).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}`
-                          : "Manage products and inventory from your WordPress / WooCommerce mobile app, synced automatically with this website."}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 flex-wrap w-full md:w-auto justify-start md:justify-end">
-                    {wpStatus?.config?.siteUrl && (
-                      <a
-                        href={`${wpStatus.config.siteUrl}/wp-admin`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs font-mono text-neutral-300 hover:text-white transition-all"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5 text-[#21759B]" />
-                        <span>WP Admin</span>
-                      </a>
-                    )}
-
-                    <button
-                      onClick={handleTriggerWpSync}
-                      disabled={syncingWp || !wpStatus?.config?.hasKeys}
-                      className="cursor-pointer flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#21759B] to-cyan-500 text-white font-bold text-xs font-mono uppercase tracking-wider hover:brightness-110 disabled:opacity-40 transition-all shadow-[0_0_15px_rgba(33,117,155,0.4)]"
-                    >
-                      <RefreshCw className={`w-3.5 h-3.5 ${syncingWp ? "animate-spin" : ""}`} />
-                      <span>{syncingWp ? "Syncing..." : "Sync Products"}</span>
-                    </button>
-
-                    <button
-                      onClick={() => { setShowWpModal(true); setWpFeedback(null); }}
-                      className="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs font-mono text-neutral-300 hover:text-white transition-all"
-                    >
-                      <Settings2 className="w-3.5 h-3.5 text-neutral-400" />
-                      <span>Settings</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Feedback toast */}
-                {wpFeedback && (
-                  <div className={`mt-3 p-2.5 rounded-xl text-xs font-mono flex items-center justify-between ${
-                    wpFeedback.type === "success"
-                      ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-300"
-                      : "bg-rose-500/15 border border-rose-500/30 text-rose-300"
-                  }`}>
-                    <span>{wpFeedback.message}</span>
-                    <button onClick={() => setWpFeedback(null)} className="cursor-pointer ml-2 hover:opacity-75">
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* ─── AIRTABLE LIVE SYNC PLUGIN BANNER ─── */}
-            {activePluginTab === "airtable" && (
-              <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-teal-950/40 via-[#0e1626] to-violet-950/40 border border-teal-500/30 shadow-lg relative overflow-hidden">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-11 h-11 rounded-2xl bg-[#FCB400]/10 border border-[#FCB400]/30 flex items-center justify-center shrink-0">
-                      <Database className="w-6 h-6 text-[#FCB400]" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-bold text-white text-sm sm:text-base font-cinzel">Airtable Live Sync Plugin</h3>
-                        {airtableStatus?.connected ? (
-                          <span className="text-[10px] font-mono text-emerald-300 bg-emerald-500/20 border border-emerald-500/40 px-2 py-0.5 rounded-full flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                            Live Connected ({airtableStatus.recordCount} records)
-                          </span>
-                        ) : airtableStatus?.configured ? (
-                          <span className="text-[10px] font-mono text-amber-300 bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 rounded-full">
-                            Checking Connection...
-                          </span>
-                        ) : (
-                          <span className="text-[10px] font-mono text-neutral-400 bg-white/[0.05] border border-white/10 px-2 py-0.5 rounded-full">
-                            Not Connected (Free Setup Available)
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-neutral-400 font-mono mt-0.5">
-                        {airtableStatus?.config?.lastSync
-                          ? `Last synced: ${new Date(airtableStatus.config.lastSync).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}`
-                          : "Airtable app par stock update karo, website par live update ho jayega."}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 flex-wrap w-full md:w-auto justify-start md:justify-end">
-                    {airtableStatus?.connected && airtableStatus.config.baseId && (
-                      <a
-                        href={`https://airtable.com/${airtableStatus.config.baseId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs font-mono text-neutral-300 hover:text-white transition-all"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5 text-[#FCB400]" />
-                        <span>Open in Airtable</span>
-                      </a>
-                    )}
-
-                    <button
-                      onClick={handleTriggerAirtableSync}
-                      disabled={syncingAirtable || !airtableStatus?.configured}
-                      className="cursor-pointer flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-black font-bold text-xs font-mono uppercase tracking-wider hover:brightness-110 disabled:opacity-40 transition-all shadow-[0_0_15px_rgba(20,184,166,0.3)]"
-                    >
-                      <RefreshCw className={`w-3.5 h-3.5 ${syncingAirtable ? "animate-spin" : ""}`} />
-                      <span>{syncingAirtable ? "Syncing..." : "Sync Now"}</span>
-                    </button>
-
-                    <button
-                      onClick={() => { setShowAirtableModal(true); setAirtableFeedback(null); }}
-                      className="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs font-mono text-neutral-300 hover:text-white transition-all"
-                    >
-                      <Settings2 className="w-3.5 h-3.5 text-neutral-400" />
-                      <span>Config</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Feedback toast */}
-                {airtableFeedback && (
-                  <div className={`mt-3 p-2.5 rounded-xl text-xs font-mono flex items-center justify-between ${
-                    airtableFeedback.type === "success"
-                      ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-300"
-                      : "bg-rose-500/15 border border-rose-500/30 text-rose-300"
-                  }`}>
-                    <span>{airtableFeedback.message}</span>
-                    <button onClick={() => setAirtableFeedback(null)} className="cursor-pointer ml-2 hover:opacity-75">
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* ─── WORDPRESS CONFIG MODAL ─── */}
-            {showWpModal && (
-              <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-                <div className="w-full max-w-lg p-6 rounded-3xl bg-[#0c0d12] border border-[#21759B]/40 shadow-2xl relative">
-                  <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
-                    <div className="flex items-center gap-2">
-                      <Globe className="w-5 h-5 text-[#21759B]" />
-                      <h3 className="font-cinzel text-lg font-bold text-white">WordPress &amp; WooCommerce Settings</h3>
-                    </div>
-                    <button onClick={() => setShowWpModal(false)} className="cursor-pointer p-1 rounded-lg hover:bg-white/[0.1] text-neutral-400 hover:text-white">
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  {/* 3 Step Guide */}
-                  <div className="mb-5 p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2 text-xs font-mono text-neutral-300">
-                    <div className="font-bold text-cyan-300 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5" /> Free WordPress Setup Guide:
-                    </div>
-                    <div className="pl-2 space-y-1 text-neutral-400">
-                      <div>1. Go to your WordPress Admin and install the free <span className="text-white">WooCommerce</span> plugin.</div>
-                      <div>2. Navigate to <span className="text-white">WooCommerce &rarr; Settings &rarr; Advanced &rarr; REST API</span> and click &quot;Add Key&quot;.</div>
-                      <div>3. Under Permissions, select <code className="text-amber-300 bg-white/[0.05] px-1 py-0.5 rounded">Read/Write</code>, then copy and paste the Consumer Key and Secret below.</div>
-                    </div>
-                  </div>
-
-                  <form onSubmit={handleSaveWpSettings} className="space-y-3.5">
-                    <div>
-                      <label className="text-[11px] font-mono uppercase text-neutral-400 block mb-1">
-                        WordPress Site URL *
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. https://aligsware.ct.ws or https://myaligs.wordpress.com"
-                        value={wpSiteUrl}
-                        onChange={(e) => setWpSiteUrl(e.target.value)}
-                        required
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#21759B] font-mono"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] font-mono uppercase text-neutral-400 block mb-1">
-                        WooCommerce Consumer Key (ck_...)
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="ck_XXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-                        value={wpConsumerKey}
-                        onChange={(e) => setWpConsumerKey(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#21759B] font-mono"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] font-mono uppercase text-neutral-400 block mb-1">
-                        WooCommerce Consumer Secret (cs_...)
-                      </label>
-                      <input
-                        type="password"
-                        placeholder="cs_XXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-                        value={wpConsumerSecret}
-                        onChange={(e) => setWpConsumerSecret(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#21759B] font-mono"
-                      />
-                    </div>
-
-                    <div className="pt-3 border-t border-white/10 flex items-center justify-end gap-2.5">
-                      <button
-                        type="button"
-                        onClick={() => setShowWpModal(false)}
-                        className="cursor-pointer px-4 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-mono text-neutral-400 hover:text-white"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={wpSaving || !wpSiteUrl}
-                        className="cursor-pointer flex items-center gap-1.5 px-5 py-2 rounded-xl bg-gradient-to-r from-[#21759B] to-cyan-500 text-white font-bold text-xs font-mono uppercase tracking-wider hover:brightness-110 disabled:opacity-40 shadow-[0_0_15px_rgba(33,117,155,0.4)]"
-                      >
-                        <Check className="w-3.5 h-3.5" />
-                        <span>{wpSaving ? "Testing & Saving..." : "Connect & Save"}</span>
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            )}
-
-            {/* ─── AIRTABLE CONFIG MODAL ─── */}
-            {showAirtableModal && (
-              <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-                <div className="w-full max-w-lg p-6 rounded-3xl bg-[#0c0d12] border border-teal-500/40 shadow-2xl relative">
-                  <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
-                    <div className="flex items-center gap-2">
-                      <Database className="w-5 h-5 text-[#FCB400]" />
-                      <h3 className="font-cinzel text-lg font-bold text-white">Airtable Plugin Settings</h3>
-                    </div>
-                    <button onClick={() => setShowAirtableModal(false)} className="cursor-pointer p-1 rounded-lg hover:bg-white/[0.1] text-neutral-400 hover:text-white">
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  {/* 3 Step Guide */}
-                  <div className="mb-5 p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2 text-xs font-mono text-neutral-300">
-                    <div className="font-bold text-teal-300 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5" /> 3 Step Free Setup Guide:
-                    </div>
-                    <div className="pl-2 space-y-1 text-neutral-400">
-                      <div>1. Create a free account on <a href="https://airtable.com" target="_blank" rel="noopener noreferrer" className="text-teal-400 underline">airtable.com</a> and create a new Base.</div>
-                      <div>2. Name the table <code className="text-amber-300 bg-white/[0.05] px-1 py-0.5 rounded">Inventory</code> with columns: <span className="text-white">Name, Category, Price, Stock, SKU</span>.</div>
-                      <div>3. Generate a Personal Access Token at <a href="https://airtable.com/create/tokens" target="_blank" rel="noopener noreferrer" className="text-teal-400 underline">airtable.com/create/tokens</a> and paste it below.</div>
-                    </div>
-                  </div>
-
-                  <form onSubmit={handleSaveAirtableSettings} className="space-y-3.5">
-                    <div>
-                      <label className="text-[11px] font-mono uppercase text-neutral-400 block mb-1">
-                        Personal Access Token *
-                      </label>
-                      <input
-                        type="password"
-                        placeholder={airtableStatus?.config?.maskedKey || "pat... (Airtable Token)"}
-                        value={airtableApiKey}
-                        onChange={(e) => setAirtableApiKey(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-teal-400 font-mono"
-                      />
-                      <span className="text-[10px] text-neutral-500 font-mono mt-0.5 block">
-                        Scopes chahiye: <code className="text-teal-300">data.records:read</code>, <code className="text-teal-300">data.records:write</code>
-                      </span>
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] font-mono uppercase text-neutral-400 block mb-1">
-                        Base ID (starts with &apos;app&apos;) *
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. appXXXXXXXXXXXXXX"
-                        value={airtableBaseId}
-                        onChange={(e) => setAirtableBaseId(e.target.value)}
-                        required
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-teal-400 font-mono"
-                      />
-                      <span className="text-[10px] text-neutral-500 font-mono mt-0.5 block">
-                        Apne Airtable base URL mein dekhein: <code className="text-neutral-400">airtable.com/appXXXXXXXX/...</code>
-                      </span>
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] font-mono uppercase text-neutral-400 block mb-1">
-                        Table Name
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Inventory"
-                        value={airtableTableName}
-                        onChange={(e) => setAirtableTableName(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-teal-400 font-mono"
-                      />
-                    </div>
-
-                    <div className="pt-3 border-t border-white/10 flex items-center justify-end gap-2.5">
-                      <button
-                        type="button"
-                        onClick={() => setShowAirtableModal(false)}
-                        className="cursor-pointer px-4 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-mono text-neutral-400 hover:text-white"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={airtableSaving || !airtableBaseId}
-                        className="cursor-pointer flex items-center gap-1.5 px-5 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-black font-bold text-xs font-mono uppercase tracking-wider hover:brightness-110 disabled:opacity-40 shadow-[0_0_15px_rgba(20,184,166,0.3)]"
-                      >
-                        <Check className="w-3.5 h-3.5" />
-                        <span>{airtableSaving ? "Testing & Saving..." : "Connect & Save"}</span>
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            )}
-
-            {/* ADD / EDIT FORM */}
-            {showAddForm && (
-              <div className="mb-6 p-5 rounded-2xl bg-violet-500/5 border border-violet-500/30">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-mono font-bold text-violet-300 uppercase tracking-wider">
-                    {editingItem ? "✦ Edit Product" : "✦ Add New Product"}
-                  </h3>
-                  <button onClick={() => { setShowAddForm(false); setEditingItem(null); setFormData(blankForm()); }}
-                    className="cursor-pointer p-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-all">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {/* Name */}
-                  <div className="lg:col-span-2">
-                    <label className="text-[10px] font-mono text-neutral-400 uppercase block mb-1">Product Name *</label>
-                    <input type="text" placeholder="e.g. Titanium Aviator Gold Frame"
-                      value={formData.name || ""} onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
-                      className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-violet-400 font-mono" />
-                  </div>
-
-                  {/* SKU */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 bg-[#121218] border border-[#B88A32]/20 rounded-2xl p-6 shadow-xl">
+                <div className="flex justify-between items-center mb-6">
                   <div>
-                    <label className="text-[10px] font-mono text-neutral-400 uppercase block mb-1">SKU / Code</label>
-                    <input type="text" placeholder="e.g. AW-EG-001"
-                      value={formData.sku || ""} onChange={(e) => setFormData((p) => ({ ...p, sku: e.target.value }))}
-                      className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-violet-400 font-mono" />
+                    <h3 className="font-serif font-bold text-lg text-white">
+                      7-Day Revenue & Orders Velocity
+                    </h3>
+                    <p className="text-xs text-neutral-400 font-mono">
+                      Daily order confirmations recorded in persistent ledger
+                    </p>
                   </div>
-
-                  {/* Category */}
-                  <div>
-                    <label className="text-[10px] font-mono text-neutral-400 uppercase block mb-1">Category *</label>
-                    <select value={formData.category || "Eyeglasses"} onChange={(e) => setFormData((p) => ({ ...p, category: e.target.value }))}
-                      className="w-full px-3 py-2 rounded-xl bg-black/80 border border-white/10 text-sm text-white focus:outline-none focus:border-violet-400 font-mono cursor-pointer">
-                      {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </div>
-
-                  {/* Frame Shape */}
-                  <div>
-                    <label className="text-[10px] font-mono text-neutral-400 uppercase block mb-1">Frame Shape</label>
-                    <select value={formData.frameShape || "Rectangle"} onChange={(e) => setFormData((p) => ({ ...p, frameShape: e.target.value }))}
-                      className="w-full px-3 py-2 rounded-xl bg-black/80 border border-white/10 text-sm text-white focus:outline-none focus:border-violet-400 font-mono cursor-pointer">
-                      {FRAME_SHAPES.map((s) => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                  </div>
-
-                  {/* Brand */}
-                  <div>
-                    <label className="text-[10px] font-mono text-neutral-400 uppercase block mb-1">Brand</label>
-                    <input type="text" placeholder="ALIG'S WARE"
-                      value={formData.brand || ""} onChange={(e) => setFormData((p) => ({ ...p, brand: e.target.value }))}
-                      className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-violet-400 font-mono" />
-                  </div>
-
-                  {/* Price */}
-                  <div>
-                    <label className="text-[10px] font-mono text-neutral-400 uppercase block mb-1">Price (₹) *</label>
-                    <input type="number" placeholder="1999" min={0}
-                      value={formData.price || ""} onChange={(e) => setFormData((p) => ({ ...p, price: Number(e.target.value) }))}
-                      className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-violet-400 font-mono" />
-                  </div>
-
-                  {/* Stock */}
-                  <div>
-                    <label className="text-[10px] font-mono text-neutral-400 uppercase block mb-1">Stock Quantity *</label>
-                    <input type="number" placeholder="10" min={0}
-                      value={formData.stock ?? ""} onChange={(e) => setFormData((p) => ({ ...p, stock: Number(e.target.value) }))}
-                      className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-violet-400 font-mono" />
-                  </div>
-
-                  {/* Low Stock Threshold */}
-                  <div>
-                    <label className="text-[10px] font-mono text-neutral-400 uppercase block mb-1">Low Stock Alert When &lt;</label>
-                    <input type="number" placeholder="5" min={1}
-                      value={formData.lowStockThreshold || ""} onChange={(e) => setFormData((p) => ({ ...p, lowStockThreshold: Number(e.target.value) }))}
-                      className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-violet-400 font-mono" />
-                  </div>
-
-                  {/* Colors */}
-                  <div className="lg:col-span-2">
-                    <label className="text-[10px] font-mono text-neutral-400 uppercase block mb-1">Colors Available</label>
-                    <div className="flex gap-2">
-                      <input type="text" placeholder="e.g. Matte Black" value={colorInput}
-                        onChange={(e) => setColorInput(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addColor(); } }}
-                        className="flex-1 px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-violet-400 font-mono" />
-                      <button onClick={addColor} type="button"
-                        className="cursor-pointer px-3 py-2 rounded-xl bg-violet-500/20 border border-violet-500/30 text-violet-300 text-xs font-mono hover:bg-violet-500/30 transition-all">
-                        Add
-                      </button>
-                    </div>
-                    {(formData.colors || []).length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {(formData.colors || []).map((c) => (
-                          <span key={c} className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/10 text-[11px] font-mono text-neutral-300">
-                            {c}<button onClick={() => removeColor(c)} className="cursor-pointer text-neutral-500 hover:text-rose-400 ml-0.5"><X className="w-2.5 h-2.5" /></button>
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Notes */}
-                  <div className="lg:col-span-3">
-                    <label className="text-[10px] font-mono text-neutral-400 uppercase block mb-1">Notes / Description</label>
-                    <input type="text" placeholder="e.g. Blue-Cut 420nm, Anti-Glare Sapphire coating"
-                      value={formData.notes || ""} onChange={(e) => setFormData((p) => ({ ...p, notes: e.target.value }))}
-                      className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-violet-400 font-mono" />
-                  </div>
+                  <span className="text-xs font-mono text-[#B88A32] bg-[#B88A32]/10 border border-[#B88A32]/30 px-3 py-1 rounded-full">
+                    Live Velocity
+                  </span>
                 </div>
 
-                <div className="flex items-center gap-3 mt-4 pt-4 border-t border-white/10">
-                  <button onClick={handleSaveInventory} disabled={saving || !formData.name}
-                    className="cursor-pointer flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-violet-600 text-white text-xs font-mono font-bold uppercase tracking-wider hover:brightness-110 transition-all disabled:opacity-50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    {saving ? "Saving..." : editingItem ? "Update Product" : "Add to Inventory"}
-                  </button>
-                  <button onClick={() => { setShowAddForm(false); setEditingItem(null); setFormData(blankForm()); }}
-                    className="cursor-pointer px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-mono text-neutral-400 hover:text-white transition-all">
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
+                <div className="grid grid-cols-7 gap-3 h-48 items-end pt-4 pb-2 border-b border-white/10">
+                  {(analytics?.ordersPerDay || []).map((day, idx) => {
+                    const maxRevenue = Math.max(1, ...(analytics?.ordersPerDay.map((d) => d.revenue) || [1]));
+                    const heightPercent = Math.min(100, Math.max(12, (day.revenue / maxRevenue) * 100));
 
-            {/* Inventory Table */}
-            {filteredInventory.length === 0 ? (
-              <div className="p-12 text-center rounded-3xl bg-white/[0.02] border border-white/10">
-                <Archive className="w-12 h-12 text-neutral-600 mx-auto mb-3" />
-                <h3 className="text-lg font-cinzel text-white">Inventory Khali Hai</h3>
-                <p className="text-xs text-neutral-400 font-mono mt-1 mb-4">
-                  WordPress / WooCommerce ya Airtable connect karke products sync karein, ya manual add karein.
-                </p>
-                <div className="flex items-center justify-center gap-3 flex-wrap">
-                  <button onClick={() => setShowWpModal(true)}
-                    className="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#21759B]/20 hover:bg-[#21759B]/30 border border-[#21759B]/40 text-cyan-300 text-xs font-mono transition-all">
-                    <Globe className="w-4 h-4 text-[#21759B]" />WordPress Connect Karein
-                  </button>
-                  <button onClick={() => setShowAirtableModal(true)}
-                    className="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 border border-teal-500/40 text-teal-300 text-xs font-mono transition-all">
-                    <Database className="w-4 h-4 text-[#FCB400]" />Airtable Connect Karein
-                  </button>
-                  <button onClick={() => { setShowAddForm(true); setEditingItem(null); setFormData(blankForm()); }}
-                    className="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/40 text-violet-300 text-xs font-mono transition-all">
-                    <Plus className="w-4 h-4" />Manual Product Add Karein
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-white/10 overflow-hidden">
-                {/* Table Header */}
-                <div className="grid grid-cols-12 gap-2 px-4 py-2.5 bg-white/[0.04] border-b border-white/10 text-[10px] font-mono text-neutral-400 uppercase tracking-wider">
-                  <div className="col-span-4">Product</div>
-                  <div className="col-span-2">Category</div>
-                  <div className="col-span-1 text-right">Price</div>
-                  <div className="col-span-2 text-center">Stock (Editable)</div>
-                  <div className="col-span-1 text-center">Status</div>
-                  <div className="col-span-2 text-right">Actions</div>
-                </div>
-
-                {/* Table Rows */}
-                <div className="divide-y divide-white/[0.05]">
-                  {filteredInventory.map((item) => {
-                    const isLow = item.stock <= item.lowStockThreshold;
-                    const isOut = item.stock === 0;
-                    const isAirtableItem = item.id.startsWith("rec");
-                    const isWcItem = item.id.startsWith("wc-");
                     return (
-                      <div key={item.id} className="grid grid-cols-12 gap-2 px-4 py-3 hover:bg-white/[0.02] transition-colors items-center">
-                        {/* Product name + sku */}
-                        <div className="col-span-4">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-sm font-medium text-white leading-tight">{item.name}</span>
-                            {isAirtableItem && (
-                              <span className="text-[9px] font-mono text-[#FCB400] bg-[#FCB400]/10 border border-[#FCB400]/30 px-1.5 py-0.2 rounded shrink-0">
-                                Airtable
-                              </span>
-                            )}
-                            {isWcItem && (
-                              <span className="text-[9px] font-mono text-cyan-300 bg-[#21759B]/20 border border-[#21759B]/40 px-1.5 py-0.2 rounded shrink-0">
-                                WooCommerce
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            {item.sku && <span className="text-[10px] font-mono text-neutral-500">{item.sku}</span>}
-                            {item.frameShape && <span className="text-[10px] font-mono text-violet-400/80">{item.frameShape}</span>}
-                            {(item.colors || []).length > 0 && (
-                              <span className="text-[10px] text-neutral-500 font-mono">• {item.colors!.slice(0, 2).join(", ")}{item.colors!.length > 2 ? ` +${item.colors!.length - 2}` : ""}</span>
-                            )}
+                      <div key={idx} className="flex flex-col items-center gap-2 h-full justify-end group">
+                        <div className="text-[10px] font-mono text-[#B88A32] opacity-0 group-hover:opacity-100 transition-opacity">
+                          ₹{day.revenue}
+                        </div>
+                        <div
+                          style={{ height: `${heightPercent}%` }}
+                          className="w-full max-w-[36px] bg-gradient-to-t from-[#B88A32]/40 to-[#B88A32] rounded-t-lg transition-all group-hover:brightness-125 relative"
+                        >
+                          <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-black border border-white/20 text-white text-[9px] font-mono px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-20">
+                            {day.orders} ord
                           </div>
                         </div>
-
-                        {/* Category */}
-                        <div className="col-span-2">
-                          <span className="text-[11px] font-mono text-neutral-300 bg-white/[0.05] px-2 py-0.5 rounded-full">{item.category}</span>
-                        </div>
-
-                        {/* Price */}
-                        <div className="col-span-1 text-right font-mono text-sm font-semibold text-amber-300">₹{item.price.toLocaleString()}</div>
-
-                        {/* Stock — inline edit */}
-                        <div className="col-span-2 flex items-center justify-center">
-                          {stockEditId === item.id ? (
-                            <div className="flex items-center gap-1">
-                              <input type="number" min={0} value={stockEditVal} onChange={(e) => setStockEditVal(Number(e.target.value))}
-                                className="w-14 px-2 py-1 rounded-lg bg-white/[0.06] border border-violet-400/50 text-xs text-white font-mono text-center focus:outline-none" autoFocus />
-                              <button onClick={() => handleQuickStockSave(item.id)}
-                                className="cursor-pointer p-1 rounded-lg bg-violet-500/30 border border-violet-500/40 text-violet-300 hover:bg-violet-500/50 transition-all">
-                                <CheckCircle2 className="w-3.5 h-3.5" />
-                              </button>
-                              <button onClick={() => setStockEditId(null)}
-                                className="cursor-pointer p-1 rounded-lg bg-white/[0.04] border border-white/10 text-neutral-400 hover:text-white transition-all">
-                                <X className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          ) : (
-                            <button onClick={() => { setStockEditId(item.id); setStockEditVal(item.stock); }}
-                              className="cursor-pointer flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 transition-all group">
-                              <span className={`text-sm font-bold font-mono ${isOut ? "text-rose-400" : isLow ? "text-amber-400" : "text-emerald-400"}`}>{item.stock}</span>
-                              <Pencil className="w-2.5 h-2.5 text-neutral-500 group-hover:text-violet-400 transition-colors" />
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Status Badge */}
-                        <div className="col-span-1 flex justify-center">
-                          {isOut ? (
-                            <span className="text-[10px] font-mono font-bold text-rose-400 bg-rose-500/10 border border-rose-500/30 px-2 py-0.5 rounded-full">Out</span>
-                          ) : isLow ? (
-                            <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                              <AlertTriangle className="w-2.5 h-2.5" />Low
-                            </span>
-                          ) : (
-                            <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full">OK</span>
-                          )}
-                        </div>
-
-                        {/* Actions */}
-                        <div className="col-span-2 flex items-center justify-end gap-1.5">
-                          <button onClick={() => openEdit(item)}
-                            className="cursor-pointer p-1.5 rounded-lg bg-white/[0.04] hover:bg-violet-500/20 border border-white/10 hover:border-violet-500/30 text-neutral-400 hover:text-violet-300 transition-all">
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                          <button onClick={() => handleDeleteInventory(item.id)}
-                            className="cursor-pointer p-1.5 rounded-lg bg-white/[0.04] hover:bg-rose-500/20 border border-white/10 hover:border-rose-500/30 text-neutral-400 hover:text-rose-300 transition-all">
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
+                        <span className="text-[11px] font-mono text-neutral-400">
+                          {day.date}
+                        </span>
                       </div>
                     );
                   })}
                 </div>
+              </div>
 
-                {/* Table Footer */}
-                <div className="px-4 py-3 bg-white/[0.02] border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-neutral-500 flex-wrap gap-2">
-                  <span>{filteredInventory.length} products showing</span>
-                  <div className="flex items-center gap-4">
-                    <span className="text-emerald-400">{inventory.filter((i) => i.stock > i.lowStockThreshold).length} in stock</span>
-                    <span className="text-amber-400">{inventory.filter((i) => i.stock > 0 && i.stock <= i.lowStockThreshold).length} low stock</span>
-                    <span className="text-rose-400">{inventory.filter((i) => i.stock === 0).length} out of stock</span>
+              <div className="bg-[#121218] border border-[#B88A32]/20 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+                <div>
+                  <h3 className="font-serif font-bold text-lg text-white mb-1">
+                    Pipeline Distribution
+                  </h3>
+                  <p className="text-xs text-neutral-400 font-mono mb-4">
+                    Current distribution across order lifecycle
+                  </p>
+
+                  <div className="space-y-3 font-mono text-xs">
+                    <div className="flex justify-between items-center p-2.5 rounded-xl bg-white/[0.03]">
+                      <span className="text-amber-300 flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-amber-400" /> Pending / Confirmed
+                      </span>
+                      <span className="font-bold text-white">
+                        {(analytics?.pendingOrders || 0) + (orders.filter((o) => (o.order_status || o.orderStatus) === "Confirmed").length)}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-2.5 rounded-xl bg-white/[0.03]">
+                      <span className="text-blue-400 flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-blue-400" /> Processing in Atelier
+                      </span>
+                      <span className="font-bold text-white">
+                        {analytics?.processingOrders || 0}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-2.5 rounded-xl bg-white/[0.03]">
+                      <span className="text-indigo-400 flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-indigo-400" /> Shipped / Out for Delivery
+                      </span>
+                      <span className="font-bold text-white">
+                        {analytics?.shippedOrders || 0}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-2.5 rounded-xl bg-white/[0.03]">
+                      <span className="text-emerald-400 flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-emerald-400" /> Delivered Safely
+                      </span>
+                      <span className="font-bold text-white">
+                        {analytics?.deliveredOrders || 0}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-2.5 rounded-xl bg-white/[0.03]">
+                      <span className="text-red-400 flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-red-400" /> Cancelled
+                      </span>
+                      <span className="font-bold text-white">
+                        {analytics?.cancelledOrders || 0}
+                      </span>
+                    </div>
                   </div>
                 </div>
+
+                <button
+                  onClick={() => setActiveTab("orders")}
+                  className="w-full mt-4 bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-neutral-300 py-2.5 rounded-xl text-xs font-mono flex items-center justify-center gap-2 transition-all"
+                >
+                  <span>Manage All Orders</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
               </div>
-            )}
+            </div>
+
+            <div className="bg-[#121218] border border-[#B88A32]/20 rounded-2xl p-6 shadow-xl">
+              <h3 className="font-serif font-bold text-lg text-white mb-1">
+                Top Bestselling Luxury Frames
+              </h3>
+              <p className="text-xs text-neutral-400 font-mono mb-4">
+                Highest grossing frames ranked by units sold and revenue
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {(analytics?.bestSellers || []).map((bs, idx) => (
+                  <div
+                    key={idx}
+                    className="p-4 rounded-xl bg-white/[0.03] border border-[#B88A32]/15 flex items-center justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-[#B88A32]/20 text-[#B88A32] text-xs font-mono font-bold flex items-center justify-center">
+                          {idx + 1}
+                        </span>
+                        <p className="text-sm font-semibold text-white truncate max-w-[200px]">
+                          {bs.name}
+                        </p>
+                      </div>
+                      <p className="text-xs font-mono text-neutral-400 mt-1 pl-7">
+                        {bs.units} units sold
+                      </p>
+                    </div>
+                    <span className="text-sm font-mono font-bold text-[#B88A32]">
+                      ₹{bs.revenue.toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "orders" && (
+          <div className="space-y-6">
+            <div className="bg-[#121218] border border-[#B88A32]/20 rounded-2xl p-4 sm:p-5 shadow-lg flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4">
+              <div className="flex flex-1 items-center gap-3">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="w-4 h-4 text-neutral-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search by Order #, Customer, or Phone..."
+                    value={orderSearch}
+                    onChange={(e) => { setOrderSearch(e.target.value); setOrderPage(1); }}
+                    className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs font-mono text-white placeholder-neutral-500 focus:outline-none focus:border-[#B88A32] transition-all"
+                  />
+                </div>
+
+                <select
+                  value={orderStatusFilter}
+                  onChange={(e) => { setOrderStatusFilter(e.target.value); setOrderPage(1); }}
+                  className="bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-neutral-300 focus:outline-none focus:border-[#B88A32]"
+                >
+                  <option value="all">All Order Statuses</option>
+                  {ORDER_STATUSES.map((st) => <option key={st} value={st}>{st}</option>)}
+                </select>
+
+                <select
+                  value={paymentStatusFilter}
+                  onChange={(e) => { setPaymentStatusFilter(e.target.value); setOrderPage(1); }}
+                  className="bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-neutral-300 focus:outline-none focus:border-[#B88A32]"
+                >
+                  <option value="all">All Payment Statuses</option>
+                  {PAYMENT_STATUSES.map((pst) => <option key={pst} value={pst}>{pst}</option>)}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setOrderSort(orderSort === "newest" ? "oldest" : "newest")}
+                  className="px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-mono text-neutral-300 hover:text-white flex items-center gap-1.5 transition-all"
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5" />
+                  <span>Sort: {orderSort === "newest" ? "Newest First" : "Oldest First"}</span>
+                </button>
+
+                <button
+                  onClick={handleExportCSV}
+                  className="px-3.5 py-2 rounded-xl bg-[#B88A32] hover:bg-[#A07828] text-white text-xs font-mono font-semibold flex items-center gap-1.5 transition-all shadow-md shadow-[#B88A32]/20"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Export CSV</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-[#121218] border border-[#B88A32]/20 rounded-2xl overflow-hidden shadow-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-mono">
+                  <thead className="bg-white/[0.03] border-b border-white/10 text-neutral-400 uppercase tracking-wider text-[11px]">
+                    <tr>
+                      <th className="py-3.5 px-4 font-semibold">Order Number</th>
+                      <th className="py-3.5 px-4 font-semibold">Client</th>
+                      <th className="py-3.5 px-4 font-semibold">Items</th>
+                      <th className="py-3.5 px-4 font-semibold">Total</th>
+                      <th className="py-3.5 px-4 font-semibold">Payment</th>
+                      <th className="py-3.5 px-4 font-semibold">Order Status</th>
+                      <th className="py-3.5 px-4 font-semibold">Date</th>
+                      <th className="py-3.5 px-4 font-semibold text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 text-neutral-200">
+                    {paginatedOrders.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="py-12 text-center text-neutral-500">
+                          No matching orders found.
+                        </td>
+                      </tr>
+                    ) : (
+                      paginatedOrders.map((o) => {
+                        const orderNum = o.order_number || o.orderId || "";
+                        const customerName = o.customer?.full_name || o.customer?.name || "Client";
+                        const orderStatus = o.order_status || o.orderStatus || "Pending";
+                        const payStatus = o.payment_status || o.paymentStatus || "Pending";
+                        const payMethod = o.payment_method || o.paymentMethod || "COD";
+                        const total = o.total_amount || o.totalAmount || 0;
+
+                        return (
+                          <tr
+                            key={orderNum}
+                            className="hover:bg-white/[0.02] transition-colors cursor-pointer"
+                            onClick={() => handleOpenOrder(orderNum)}
+                          >
+                            <td className="py-4 px-4 font-bold text-[#B88A32]">
+                              {orderNum}
+                            </td>
+                            <td className="py-4 px-4">
+                              <div className="font-semibold text-white">{customerName}</div>
+                              <div className="text-[11px] text-neutral-400 font-mono">+91 {o.customer?.phone}</div>
+                            </td>
+                            <td className="py-4 px-4">
+                              <span className="px-2 py-0.5 rounded-md bg-white/[0.05] border border-white/10 text-neutral-300">
+                                {o.items?.length || 1} frame(s)
+                              </span>
+                            </td>
+                            <td className="py-4 px-4 font-bold text-white font-mono">₹{total}</td>
+                            <td className="py-4 px-4">
+                              <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider border ${
+                                payStatus.toLowerCase() === "paid"
+                                  ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                                  : "bg-amber-500/10 border-amber-500/30 text-amber-400"
+                              }`}>
+                                {payMethod.toUpperCase()} &bull; {payStatus}
+                              </span>
+                            </td>
+                            <td className="py-4 px-4">
+                              <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider border ${
+                                orderStatus.toLowerCase() === "delivered"
+                                  ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                                  : orderStatus.toLowerCase() === "cancelled"
+                                  ? "bg-red-500/10 border-red-500/30 text-red-400"
+                                  : "bg-[#B88A32]/10 border-[#B88A32]/30 text-[#B88A32]"
+                              }`}>
+                                {orderStatus}
+                              </span>
+                            </td>
+                            <td className="py-4 px-4 text-[11px] text-neutral-400 whitespace-nowrap">
+                              {new Date(o.created_at || o.createdAt || Date.now()).toLocaleDateString("en-IN", {
+                                month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
+                              })}
+                            </td>
+                            <td className="py-4 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                onClick={() => handleOpenOrder(orderNum)}
+                                className="px-3 py-1.5 rounded-lg bg-white/[0.05] hover:bg-[#B88A32] hover:text-white text-neutral-300 text-[11px] font-mono transition-all inline-flex items-center gap-1"
+                              >
+                                <span>Inspect</span>
+                                <ChevronRight className="w-3 h-3" />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="p-4 border-t border-white/10 flex justify-between items-center text-xs font-mono text-neutral-400">
+                <span>
+                  Showing {Math.min(filteredOrders.length, (orderPage - 1) * ordersPerPage + 1)} to{" "}
+                  {Math.min(filteredOrders.length, orderPage * ordersPerPage)} of {filteredOrders.length} orders
+                </span>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setOrderPage((p) => Math.max(1, p - 1))}
+                    disabled={orderPage === 1}
+                    className="px-3 py-1.5 rounded-lg bg-white/[0.05] border border-white/10 hover:bg-white/[0.1] disabled:opacity-40 transition-all"
+                  >
+                    Previous
+                  </button>
+                  <span className="px-2 font-bold text-white">{orderPage} / {totalOrderPages}</span>
+                  <button
+                    onClick={() => setOrderPage((p) => Math.min(totalOrderPages, p + 1))}
+                    disabled={orderPage >= totalOrderPages}
+                    className="px-3 py-1.5 rounded-lg bg-white/[0.05] border border-white/10 hover:bg-white/[0.1] disabled:opacity-40 transition-all"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "customers" && (
+          <div className="space-y-6">
+            <div className="bg-[#121218] border border-[#B88A32]/20 rounded-2xl p-4 sm:p-5 shadow-lg flex justify-between items-center gap-4">
+              <div className="relative flex-1 max-w-md">
+                <Search className="w-4 h-4 text-neutral-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search customer by name, phone, or city..."
+                  value={customerSearch}
+                  onChange={(e) => setCustomerSearch(e.target.value)}
+                  className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs font-mono text-white placeholder-neutral-500 focus:outline-none focus:border-[#B88A32] transition-all"
+                />
+              </div>
+              <span className="text-xs font-mono text-[#B88A32]">
+                {filteredCustomers.length} registered clientele records
+              </span>
+            </div>
+
+            <div className="bg-[#121218] border border-[#B88A32]/20 rounded-2xl overflow-hidden shadow-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-mono">
+                  <thead className="bg-white/[0.03] border-b border-white/10 text-neutral-400 uppercase tracking-wider text-[11px]">
+                    <tr>
+                      <th className="py-3.5 px-4 font-semibold">Client Name</th>
+                      <th className="py-3.5 px-4 font-semibold">Contact</th>
+                      <th className="py-3.5 px-4 font-semibold">Location</th>
+                      <th className="py-3.5 px-4 font-semibold">Orders Count</th>
+                      <th className="py-3.5 px-4 font-semibold">Lifetime Spend</th>
+                      <th className="py-3.5 px-4 font-semibold">Last Active</th>
+                      <th className="py-3.5 px-4 font-semibold text-right">Profile</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 text-neutral-200">
+                    {filteredCustomers.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="py-12 text-center text-neutral-500">
+                          No customer profiles recorded yet.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredCustomers.map((c) => (
+                        <tr
+                          key={c.id}
+                          className="hover:bg-white/[0.02] transition-colors cursor-pointer"
+                          onClick={() => handleOpenCustomer(c.id)}
+                        >
+                          <td className="py-4 px-4 font-semibold text-white">{c.fullName}</td>
+                          <td className="py-4 px-4">
+                            <div>+91 {c.phone}</div>
+                            {c.email && <div className="text-[11px] text-neutral-400">{c.email}</div>}
+                          </td>
+                          <td className="py-4 px-4 text-neutral-300">
+                            {c.city}, {c.state} ({c.pincode})
+                          </td>
+                          <td className="py-4 px-4 font-bold text-[#B88A32]">{c.orderCount} order(s)</td>
+                          <td className="py-4 px-4 font-bold text-white font-mono">
+                            ₹{c.totalSpent.toLocaleString("en-IN")}
+                          </td>
+                          <td className="py-4 px-4 text-[11px] text-neutral-400">
+                            {new Date(c.lastOrderDate).toLocaleDateString("en-IN", {
+                              month: "short", day: "numeric", year: "numeric"
+                            })}
+                          </td>
+                          <td className="py-4 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              onClick={() => handleOpenCustomer(c.id)}
+                              className="px-3 py-1.5 rounded-lg bg-white/[0.05] hover:bg-[#B88A32] hover:text-white text-neutral-300 text-[11px] font-mono transition-all inline-flex items-center gap-1"
+                            >
+                              <span>Inspect History</span>
+                              <ChevronRight className="w-3 h-3" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "inventory" && (
+          <div className="space-y-6">
+            <div className="bg-[#121218] border border-[#B88A32]/20 rounded-2xl p-4 sm:p-5 shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div className="flex flex-1 items-center gap-3 w-full sm:w-auto">
+                <div className="relative flex-1 max-w-sm">
+                  <Search className="w-4 h-4 text-neutral-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search by frame name or SKU..."
+                    value={invSearch}
+                    onChange={(e) => setInvSearch(e.target.value)}
+                    className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs font-mono text-white placeholder-neutral-500 focus:outline-none focus:border-[#B88A32] transition-all"
+                  />
+                </div>
+
+                <select
+                  value={invCategory}
+                  onChange={(e) => setInvCategory(e.target.value)}
+                  className="bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-neutral-300 focus:outline-none focus:border-[#B88A32]"
+                >
+                  {CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+                </select>
+              </div>
+
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="px-4 py-2 rounded-xl bg-[#B88A32] hover:bg-[#A07828] text-white font-mono text-xs font-semibold flex items-center gap-2 transition-all shadow-md shadow-[#B88A32]/20 shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Luxury Frame</span>
+              </button>
+            </div>
+
+            <div className="bg-[#121218] border border-[#B88A32]/20 rounded-2xl overflow-hidden shadow-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-mono">
+                  <thead className="bg-white/[0.03] border-b border-white/10 text-neutral-400 uppercase tracking-wider text-[11px]">
+                    <tr>
+                      <th className="py-3.5 px-4 font-semibold">Frame Name</th>
+                      <th className="py-3.5 px-4 font-semibold">Category</th>
+                      <th className="py-3.5 px-4 font-semibold">SKU</th>
+                      <th className="py-3.5 px-4 font-semibold">Price (₹)</th>
+                      <th className="py-3.5 px-4 font-semibold">Stock Quantity</th>
+                      <th className="py-3.5 px-4 font-semibold">Status</th>
+                      <th className="py-3.5 px-4 font-semibold text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 text-neutral-200">
+                    {filteredProducts.map((p) => (
+                      <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
+                        <td className="py-4 px-4">
+                          <div className="font-semibold text-white">{p.name}</div>
+                          <div className="text-[10px] text-neutral-500 line-clamp-1">{p.description}</div>
+                        </td>
+                        <td className="py-4 px-4 text-neutral-300">{p.category}</td>
+                        <td className="py-4 px-4 text-[#B88A32] font-mono">{p.sku}</td>
+                        <td className="py-4 px-4 font-mono font-bold text-white">
+                          <input
+                            type="number"
+                            defaultValue={p.price}
+                            onBlur={(e) => handlePriceUpdate(p.id, Number(e.target.value))}
+                            className="w-20 bg-white/[0.05] border border-white/10 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#B88A32]"
+                          />
+                        </td>
+                        <td className="py-4 px-4 font-mono font-bold">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleStockUpdate(p.id, p.stock_quantity - 1)}
+                              className="w-6 h-6 rounded bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 flex items-center justify-center text-neutral-300"
+                            >
+                              -
+                            </button>
+                            <span
+                              className={`px-2 py-0.5 rounded text-xs ${
+                                p.stock_quantity <= 5 ? "bg-red-500/20 text-red-400 font-bold" : "text-white"
+                              }`}
+                            >
+                              {p.stock_quantity}
+                            </span>
+                            <button
+                              onClick={() => handleStockUpdate(p.id, p.stock_quantity + 1)}
+                              className="w-6 h-6 rounded bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 flex items-center justify-center text-neutral-300"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <button
+                            onClick={() => handleToggleProductStatus(p)}
+                            className={`px-2.5 py-1 rounded-full text-[10px] uppercase font-bold border transition-all ${
+                              p.status === "active"
+                                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                                : p.status === "out_of_stock"
+                                ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
+                                : "bg-neutral-500/10 border-neutral-500/30 text-neutral-400"
+                            }`}
+                          >
+                            {p.status}
+                          </button>
+                        </td>
+                        <td className="py-4 px-4 text-right">
+                          <button
+                            onClick={() => handleToggleProductStatus(p)}
+                            className="px-2.5 py-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-xs font-mono text-neutral-300"
+                          >
+                            {p.status === "active" ? "Deactivate" : "Activate"}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "appointments" && (
+          <div className="space-y-6">
+            <div className="bg-[#121218] border border-[#B88A32]/20 rounded-2xl p-4 sm:p-5 shadow-lg flex justify-between items-center">
+              <div>
+                <h3 className="font-serif font-bold text-lg text-white">Clinic Appointments Registry</h3>
+                <p className="text-xs text-neutral-400 font-mono">Dr. Sheeraz Ahmad Vision Care Clinic Bookings</p>
+              </div>
+              <span className="text-xs font-mono text-[#B88A32]">{appointments.length} appointments booked</span>
+            </div>
+
+            <div className="bg-[#121218] border border-[#B88A32]/20 rounded-2xl overflow-hidden shadow-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-mono">
+                  <thead className="bg-white/[0.03] border-b border-white/10 text-neutral-400 uppercase tracking-wider text-[11px]">
+                    <tr>
+                      <th className="py-3.5 px-4 font-semibold">Patient Name</th>
+                      <th className="py-3.5 px-4 font-semibold">Phone</th>
+                      <th className="py-3.5 px-4 font-semibold">Date & Time</th>
+                      <th className="py-3.5 px-4 font-semibold">Clinical Concern</th>
+                      <th className="py-3.5 px-4 font-semibold">Status</th>
+                      <th className="py-3.5 px-4 font-semibold text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 text-neutral-200">
+                    {appointments.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="py-12 text-center text-neutral-500">
+                          No clinic appointments booked yet.
+                        </td>
+                      </tr>
+                    ) : (
+                      appointments.map((a) => (
+                        <tr key={a.appointmentId} className="hover:bg-white/[0.02] transition-colors">
+                          <td className="py-4 px-4 font-semibold text-white">{a.name}</td>
+                          <td className="py-4 px-4">+91 {a.phone}</td>
+                          <td className="py-4 px-4 text-[#B88A32] font-semibold">
+                            {a.preferredDate} &bull; {a.preferredTime}
+                          </td>
+                          <td className="py-4 px-4 text-neutral-300 max-w-xs truncate">
+                            {a.concern || "Routine Eye Examination"}
+                          </td>
+                          <td className="py-4 px-4">
+                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] uppercase font-bold border ${
+                              a.status === "confirmed"
+                                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                                : a.status === "completed"
+                                ? "bg-blue-500/10 border-blue-500/30 text-blue-400"
+                                : a.status === "cancelled"
+                                ? "bg-red-500/10 border-red-500/30 text-red-400"
+                                : "bg-amber-500/10 border-amber-500/30 text-amber-400"
+                            }`}>
+                              {a.status}
+                            </span>
+                          </td>
+                          <td className="py-4 px-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <select
+                                value={a.status}
+                                onChange={(e) => handleUpdateAptStatus(a.appointmentId, e.target.value)}
+                                className="bg-white/[0.05] border border-white/10 rounded px-2 py-1 text-xs text-neutral-300 focus:outline-none focus:border-[#B88A32]"
+                              >
+                                <option value="pending">Pending</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                              </select>
+
+                              <a
+                                href={`https://wa.me/91${a.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                                  `Hello ${a.name}, this is Dr. Sheeraz Ahmad's Clinic confirming your appointment on ${a.preferredDate} at ${a.preferredTime}.`
+                                )}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="p-1.5 rounded-lg bg-[#25D366]/20 text-[#25D366] hover:bg-[#25D366]/30 transition-colors"
+                                title="Send WhatsApp Reminder"
+                              >
+                                <MessageCircle className="w-4 h-4" />
+                              </a>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         )}
       </main>
+
+      {/* Order Details Drawer */}
+      <AnimatePresence>
+        {orderDrawerOpen && selectedOrder && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-2xl bg-[#121218] border border-[#B88A32]/30 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto space-y-6"
+            >
+              <div className="flex justify-between items-start pb-4 border-b border-white/10">
+                <div>
+                  <span className="text-[10px] font-mono text-[#8B7355] uppercase tracking-wider block">
+                    ORDER RECORD
+                  </span>
+                  <h3 className="text-xl font-mono font-bold text-[#B88A32]">
+                    {selectedOrder.order_number}
+                  </h3>
+                  <p className="text-xs text-neutral-400 font-mono mt-0.5">
+                    Placed on {new Date(selectedOrder.created_at).toLocaleString("en-IN")}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setOrderDrawerOpen(false)}
+                  className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white flex items-center justify-center transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Status Update Form */}
+              <div className="p-4 rounded-2xl bg-white/[0.03] border border-[#B88A32]/20 space-y-3">
+                <span className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <Pencil className="w-3.5 h-3.5 text-[#B88A32]" /> Update Fulfillment & Payment
+                </span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-mono uppercase text-neutral-400 block mb-1">
+                      Order Status
+                    </label>
+                    <select
+                      value={newOrderStatus}
+                      onChange={(e) => setNewOrderStatus(e.target.value)}
+                      className="w-full bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-[#B88A32]"
+                    >
+                      {ORDER_STATUSES.map((st) => (
+                        <option key={st} value={st}>{st}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-mono uppercase text-neutral-400 block mb-1">
+                      Payment Status
+                    </label>
+                    <select
+                      value={newPaymentStatus}
+                      onChange={(e) => setNewPaymentStatus(e.target.value)}
+                      className="w-full bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-[#B88A32]"
+                    >
+                      {PAYMENT_STATUSES.map((pst) => (
+                        <option key={pst} value={pst}>{pst}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-mono uppercase text-neutral-400 block mb-1">
+                    Internal Note / Audit Reason
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Dispatched with BlueDart AWB #98765432"
+                    value={internalNote}
+                    onChange={(e) => setInternalNote(e.target.value)}
+                    className="w-full bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-xs font-mono text-white placeholder-neutral-600 focus:outline-none focus:border-[#B88A32]"
+                  />
+                </div>
+
+                <button
+                  onClick={handleUpdateOrderStatus}
+                  disabled={updatingStatus}
+                  className="w-full bg-[#B88A32] hover:bg-[#A07828] text-white py-2.5 rounded-xl text-xs font-mono font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+                >
+                  {updatingStatus ? (
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <>
+                      <Check className="w-3.5 h-3.5" /> Save Status & Append to Audit Log
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Client & Shipping Details */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
+                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10">
+                  <span className="text-[10px] text-neutral-400 uppercase tracking-wider block mb-1">
+                    Customer Profile
+                  </span>
+                  <p className="font-bold text-white text-sm">
+                    {selectedOrder.customer?.full_name}
+                  </p>
+                  <p className="text-neutral-400 mt-1">Phone: +91 {selectedOrder.customer?.phone}</p>
+                  {selectedOrder.customer?.email && (
+                    <p className="text-neutral-400">Email: {selectedOrder.customer?.email}</p>
+                  )}
+                  <a
+                    href={`https://wa.me/91${selectedOrder.customer?.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                      `Hello ${selectedOrder.customer?.full_name}, this is ALIG'S WARE regarding your order ${selectedOrder.order_number}.`
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-3 inline-flex items-center gap-1.5 text-xs text-[#25D366] hover:underline"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" /> Direct WhatsApp
+                  </a>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10">
+                  <span className="text-[10px] text-neutral-400 uppercase tracking-wider block mb-1">
+                    Delivery Address
+                  </span>
+                  <p className="text-neutral-300 leading-relaxed">
+                    {selectedOrder.customer?.address}
+                    <br />
+                    {selectedOrder.customer?.city}, {selectedOrder.customer?.state} -{" "}
+                    {selectedOrder.customer?.pincode}
+                  </p>
+                  {selectedOrder.customer_notes && (
+                    <p className="text-amber-300 mt-2 text-[11px] bg-amber-500/10 p-2 rounded-lg border border-amber-500/20">
+                      Note: {selectedOrder.customer_notes}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Items Table Snapshot */}
+              <div>
+                <span className="text-xs font-mono uppercase tracking-wider text-neutral-400 block mb-2">
+                  Order Items Snapshot (Immutable Prices)
+                </span>
+                <div className="rounded-2xl border border-white/10 overflow-hidden divide-y divide-white/5 text-xs font-mono">
+                  {selectedOrder.items?.map((it: any, idx: number) => (
+                    <div key={idx} className="p-3 bg-white/[0.02] flex justify-between items-center">
+                      <div>
+                        <p className="font-semibold text-white">{it.product_name_snapshot || it.name}</p>
+                        <p className="text-neutral-400 text-[11px]">
+                          Qty: {it.quantity} &bull; Unit Snapshot: ₹{it.unit_price || it.price}
+                        </p>
+                      </div>
+                      <span className="font-bold text-[#B88A32]">
+                        ₹{it.total_price || it.unit_price * it.quantity}
+                      </span>
+                    </div>
+                  ))}
+                  <div className="p-3 bg-white/[0.04] flex justify-between items-center font-bold text-sm">
+                    <span>Total Amount</span>
+                    <span className="text-[#B88A32]">₹{selectedOrder.total_amount}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Status History Audit Trail */}
+              {selectedOrder.history && selectedOrder.history.length > 0 && (
+                <div>
+                  <span className="text-xs font-mono uppercase tracking-wider text-neutral-400 block mb-2">
+                    Official Audit Trail Timeline
+                  </span>
+                  <div className="space-y-2 text-xs font-mono">
+                    {selectedOrder.history.map((h: any, idx: number) => (
+                      <div
+                        key={idx}
+                        className="p-3 rounded-xl bg-white/[0.02] border border-white/10 flex justify-between items-center"
+                      >
+                        <div>
+                          <span className="text-[#B88A32] font-bold uppercase">{h.new_status || h.status}</span>
+                          <span className="text-neutral-300 ml-2">&mdash; {h.note}</span>
+                        </div>
+                        <span className="text-[10px] text-neutral-500">
+                          {new Date(h.changed_at).toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Customer Profile Drawer */}
+      <AnimatePresence>
+        {customerDrawerOpen && selectedCustomer && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-2xl bg-[#121218] border border-[#B88A32]/30 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto space-y-6"
+            >
+              <div className="flex justify-between items-start pb-4 border-b border-white/10">
+                <div>
+                  <span className="text-[10px] font-mono text-[#8B7355] uppercase tracking-wider block">
+                    CLIENT DOSSIER
+                  </span>
+                  <h3 className="text-xl font-serif font-bold text-white">
+                    {selectedCustomer.full_name}
+                  </h3>
+                  <p className="text-xs text-neutral-400 font-mono mt-0.5">
+                    +91 {selectedCustomer.phone} &bull; {selectedCustomer.email || "No Email"}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setCustomerDrawerOpen(false)}
+                  className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white flex items-center justify-center transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 text-xs font-mono">
+                <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10">
+                  <span className="text-neutral-400 block text-[10px] uppercase">Lifetime Spend</span>
+                  <span className="text-xl font-bold text-[#B88A32]">
+                    ₹{(selectedCustomer.totalSpent || 0).toLocaleString("en-IN")}
+                  </span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10">
+                  <span className="text-neutral-400 block text-[10px] uppercase">Total Orders</span>
+                  <span className="text-xl font-bold text-white">
+                    {selectedCustomer.totalOrders || 0}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <span className="text-xs font-mono uppercase tracking-wider text-neutral-400 block mb-2">
+                  Order History
+                </span>
+                <div className="space-y-3 font-mono text-xs">
+                  {selectedCustomer.orders?.map((co: any) => (
+                    <div
+                      key={co.order_number}
+                      className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 flex justify-between items-center"
+                    >
+                      <div>
+                        <p className="font-bold text-[#B88A32]">{co.order_number}</p>
+                        <p className="text-neutral-400 text-[11px] mt-0.5">
+                          {co.items?.length || 1} frame(s) &bull; {new Date(co.created_at).toLocaleDateString("en-IN")}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-bold text-white block">₹{co.total_amount}</span>
+                        <span className="text-[10px] text-emerald-400 font-bold uppercase">{co.order_status}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Add Product Modal */}
+      <AnimatePresence>
+        {showAddModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-lg bg-[#121218] border border-[#B88A32]/30 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-4"
+            >
+              <div className="flex justify-between items-center pb-3 border-b border-white/10">
+                <h3 className="font-serif font-bold text-lg text-white">
+                  Add New Bespoke Eyewear Frame
+                </h3>
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="w-7 h-7 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white flex items-center justify-center"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handleCreateProduct} className="space-y-3 text-xs font-mono">
+                <div>
+                  <label className="text-[10px] uppercase text-neutral-400 block mb-1">Frame Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Versailles Gold Aviator"
+                    value={newProdForm.name}
+                    onChange={(e) => setNewProdForm({ ...newProdForm, name: e.target.value })}
+                    className="w-full bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] uppercase text-neutral-400 block mb-1">Category</label>
+                    <select
+                      value={newProdForm.category}
+                      onChange={(e) => setNewProdForm({ ...newProdForm, category: e.target.value })}
+                      className="w-full bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32]"
+                    >
+                      {CATEGORIES.filter((c) => c !== "All").map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] uppercase text-neutral-400 block mb-1">SKU</label>
+                    <input
+                      type="text"
+                      placeholder="ALG-VRS-01"
+                      value={newProdForm.sku}
+                      onChange={(e) => setNewProdForm({ ...newProdForm, sku: e.target.value })}
+                      className="w-full bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32]"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-[10px] uppercase text-neutral-400 block mb-1">Price (₹) *</label>
+                    <input
+                      type="number"
+                      required
+                      value={newProdForm.price}
+                      onChange={(e) => setNewProdForm({ ...newProdForm, price: Number(e.target.value) })}
+                      className="w-full bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] uppercase text-neutral-400 block mb-1">Original (₹)</label>
+                    <input
+                      type="number"
+                      value={newProdForm.original_price}
+                      onChange={(e) => setNewProdForm({ ...newProdForm, original_price: Number(e.target.value) })}
+                      className="w-full bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] uppercase text-neutral-400 block mb-1">Stock Qty</label>
+                    <input
+                      type="number"
+                      value={newProdForm.stock_quantity}
+                      onChange={(e) => setNewProdForm({ ...newProdForm, stock_quantity: Number(e.target.value) })}
+                      className="w-full bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase text-neutral-400 block mb-1">Description</label>
+                  <textarea
+                    rows={2}
+                    value={newProdForm.description}
+                    onChange={(e) => setNewProdForm({ ...newProdForm, description: e.target.value })}
+                    className="w-full bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32] resize-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={savingProduct}
+                  className="w-full bg-[#B88A32] hover:bg-[#A07828] text-white py-3 rounded-xl font-semibold transition-all shadow-md shadow-[#B88A32]/20 flex items-center justify-center gap-2 mt-2"
+                >
+                  {savingProduct ? <RefreshCw className="w-4 h-4 animate-spin" /> : "Save to Persistent Catalog"}
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Security Password Change Modal */}
+      <AnimatePresence>
+        {showPasswordModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-md bg-[#121218] border border-[#B88A32]/30 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-4"
+            >
+              <div className="flex justify-between items-center pb-3 border-b border-white/10">
+                <h3 className="font-serif font-bold text-lg text-white flex items-center gap-2">
+                  <Key className="w-4 h-4 text-[#B88A32]" /> Change Admin Master Password
+                </h3>
+                <button
+                  onClick={() => setShowPasswordModal(false)}
+                  className="w-7 h-7 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white flex items-center justify-center"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handleChangePassword} className="space-y-3 text-xs font-mono">
+                <div>
+                  <label className="text-[10px] uppercase text-neutral-400 block mb-1">Current Password *</label>
+                  <input
+                    type="password"
+                    required
+                    placeholder="Enter current password"
+                    value={currentPw}
+                    onChange={(e) => setCurrentPw(e.target.value)}
+                    className="w-full bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase text-neutral-400 block mb-1">New Password *</label>
+                  <input
+                    type="password"
+                    required
+                    placeholder="At least 6 characters"
+                    value={newPw}
+                    onChange={(e) => setNewPw(e.target.value)}
+                    className="w-full bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase text-neutral-400 block mb-1">Confirm New Password *</label>
+                  <input
+                    type="password"
+                    required
+                    placeholder="Re-enter new password"
+                    value={confirmPw}
+                    onChange={(e) => setConfirmPw(e.target.value)}
+                    className="w-full bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32]"
+                  />
+                </div>
+
+                {pwMsg && (
+                  <p className={`text-xs text-center font-mono ${
+                    pwMsg.type === "success" ? "text-emerald-400" : "text-red-400"
+                  }`}>
+                    {pwMsg.text}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  className="w-full bg-[#B88A32] hover:bg-[#A07828] text-white py-3 rounded-xl font-semibold transition-all shadow-md shadow-[#B88A32]/20 flex items-center justify-center gap-2 mt-2"
+                >
+                  Update Master Password
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

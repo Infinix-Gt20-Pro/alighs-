@@ -20,7 +20,10 @@ import {
   MessageCircle,
   Sparkles,
   ShoppingBag,
-  AlertCircle
+  AlertCircle,
+  Copy,
+  ExternalLink,
+  PackageCheck
 } from "lucide-react";
 import { useCart, CartItem } from "@/context/CartContext";
 import Navbar from "@/components/Navbar";
@@ -64,6 +67,14 @@ export default function CheckoutPage() {
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [razorpayPaymentId, setRazorpayPaymentId] = useState<string>("");
   const [paymentStatus, setPaymentStatus] = useState<"pending" | "paid">("pending");
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyOrderId = () => {
+    if (!orderId) return;
+    navigator.clipboard.writeText(orderId);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -71,7 +82,9 @@ export default function CheckoutPage() {
     email: "",
     address: "",
     city: "",
-    pincode: ""
+    state: "Uttar Pradesh",
+    pincode: "",
+    customerNotes: ""
   });
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("COD");
@@ -115,44 +128,38 @@ export default function CheckoutPage() {
 
     // --- CASE 1: Cash On Delivery (COD) ---
     if (paymentMethod === "COD") {
-      let generatedOrderId = `AW-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.floor(
-        1000 + Math.random() * 9000
-      )}`;
-
       try {
         const res = await fetch("/api/orders", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            orderId: generatedOrderId,
             customer: {
-              name: formData.fullName,
+              fullName: formData.fullName,
               phone: formData.phone,
               email: formData.email,
               address: formData.address,
               city: formData.city,
+              state: formData.state || "Uttar Pradesh",
               pincode: formData.pincode
             },
             items: snapshotItems.map((it) => ({
               productId: it.id,
-              name: it.name,
-              price: it.price,
               quantity: it.quantity,
               color: it.color
             })),
-            paymentMethod: "cod",
-            paymentStatus: "pending",
-            totalAmount: total
+            paymentMethod: "COD",
+            paymentStatus: "Pending",
+            customerNotes: formData.customerNotes,
+            shippingCharge: delivery
           })
         });
 
-        if (res.ok) {
-          const data = await res.json();
-          if (data.orderId) generatedOrderId = data.orderId;
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to confirm order. Please try again.");
         }
-      } catch (err) {
-        console.warn("COD order dispatch error:", err);
-      } finally {
+
+        const generatedOrderId = data.order?.order_number || data.order?.orderId;
         setOrderId(generatedOrderId);
         setOrderedItems(snapshotItems);
         setOrderTotal(snapshotTotals);
@@ -161,6 +168,10 @@ export default function CheckoutPage() {
         setSubmitting(false);
         setDirection(1);
         setStep(3);
+      } catch (err: any) {
+        console.error("COD order error:", err);
+        setPaymentError(err.message || "Failed to place COD order. Please try again.");
+        setSubmitting(false);
       }
       return;
     }
@@ -195,9 +206,6 @@ export default function CheckoutPage() {
       }
 
       const rzpOrderId = orderData.order_id;
-      const customStoreOrderId = `AW-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.floor(
-        1000 + Math.random() * 9000
-      )}`;
 
       // Step 2: Configure and open Razorpay modal
       const activeKey = orderData.key_id || (!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.startsWith('rzp_test_') ? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID : null) || "rzp_live_TdNncN01Vi6Vvg";
@@ -237,8 +245,7 @@ export default function CheckoutPage() {
               body: JSON.stringify({
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                storeOrderId: customStoreOrderId
+                razorpay_signature: response.razorpay_signature
               })
             });
 
@@ -247,36 +254,38 @@ export default function CheckoutPage() {
               throw new Error(verifyData.error || "Payment signature verification failed. Please contact support.");
             }
 
-            // Step 4: Persist confirmed paid order
-            await fetch("/api/orders", {
+            // Step 4: Persist confirmed paid order in Relational Database
+            const orderRes = await fetch("/api/orders", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                orderId: customStoreOrderId,
                 customer: {
-                  name: formData.fullName,
+                  fullName: formData.fullName,
                   phone: formData.phone,
                   email: formData.email,
                   address: formData.address,
                   city: formData.city,
+                  state: formData.state || "Uttar Pradesh",
                   pincode: formData.pincode
                 },
                 items: snapshotItems.map((it) => ({
                   productId: it.id,
-                  name: it.name,
-                  price: it.price,
                   quantity: it.quantity,
                   color: it.color
                 })),
-                paymentMethod: paymentMethod.toLowerCase(),
-                paymentStatus: "paid",
+                paymentMethod: paymentMethod === "UPI" ? "UPI" : "Online",
+                paymentStatus: "Paid",
                 razorpayPaymentId: response.razorpay_payment_id,
                 razorpayOrderId: response.razorpay_order_id,
-                totalAmount: snapshotTotals.total
+                customerNotes: formData.customerNotes,
+                shippingCharge: delivery
               })
-            }).catch((e) => console.warn("Order save sync error:", e));
+            });
 
-            setOrderId(customStoreOrderId);
+            const confirmedData = await orderRes.json();
+            const officialOrderNumber = confirmedData.order?.order_number || `ALG-2026-${Math.floor(100000 + Math.random() * 900000)}`;
+
+            setOrderId(officialOrderNumber);
             setRazorpayPaymentId(response.razorpay_payment_id);
             setPaymentStatus("paid");
             setOrderedItems(snapshotItems);
@@ -540,6 +549,21 @@ export default function CheckoutPage() {
 
                         <div className="space-y-2">
                           <label className="text-xs uppercase tracking-wider text-[#4A3928] font-mono font-semibold">
+                            State / Province *
+                          </label>
+                          <input
+                            required
+                            type="text"
+                            name="state"
+                            value={formData.state}
+                            onChange={handleInputChange}
+                            placeholder="e.g. Uttar Pradesh, Delhi"
+                            className="w-full bg-[#F4E9D5]/50 border border-[#B88A32]/25 rounded-xl px-4 py-3.5 text-[#2A2118] placeholder-[#8B7355]/70 focus:outline-none focus:border-[#B88A32] focus:ring-1 focus:ring-[#B88A32] transition-all text-sm"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-xs uppercase tracking-wider text-[#4A3928] font-mono font-semibold">
                             Postal Pincode (6 Digits) *
                           </label>
                           <input
@@ -551,6 +575,20 @@ export default function CheckoutPage() {
                             onChange={handleInputChange}
                             placeholder="283203"
                             className="w-full bg-[#F4E9D5]/50 border border-[#B88A32]/25 rounded-xl px-4 py-3.5 text-[#2A2118] placeholder-[#8B7355]/70 focus:outline-none focus:border-[#B88A32] focus:ring-1 focus:ring-[#B88A32] transition-all text-sm font-mono"
+                          />
+                        </div>
+
+                        <div className="space-y-2 md:col-span-2">
+                          <label className="text-xs uppercase tracking-wider text-[#4A3928] font-mono font-semibold">
+                            Delivery Instructions / Notes (Optional)
+                          </label>
+                          <input
+                            type="text"
+                            name="customerNotes"
+                            value={formData.customerNotes}
+                            onChange={handleInputChange}
+                            placeholder="e.g. Call before delivery, delicate frame packaging requested"
+                            className="w-full bg-[#F4E9D5]/50 border border-[#B88A32]/25 rounded-xl px-4 py-3.5 text-[#2A2118] placeholder-[#8B7355]/70 focus:outline-none focus:border-[#B88A32] focus:ring-1 focus:ring-[#B88A32] transition-all text-sm"
                           />
                         </div>
                       </div>
@@ -798,26 +836,45 @@ export default function CheckoutPage() {
                       <CheckCircle2 className="w-10 h-10 stroke-[2.5]" />
                     </motion.div>
 
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#B88A32]/30 bg-[#B88A32]/10 mb-3">
-                      <div className="w-2 h-2 rounded-full bg-[#B88A32] animate-ping" />
-                      <span className="text-[11px] font-mono tracking-wider text-[#B88A32] font-semibold">
-                        ORDER DISPATCH QUEUED
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 mb-4">
+                      <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                      <span className="text-[11px] font-mono tracking-wider text-emerald-700 dark:text-emerald-400 font-bold uppercase">
+                        Order Confirmed
                       </span>
                     </div>
 
-                    <h2 className="text-3xl font-bold font-serif tracking-tight mb-2 text-[#2A2118]">
-                      Shukriya, {formData.fullName}!
+                    <h2 className="text-3xl sm:text-4xl font-bold font-serif tracking-tight mb-2 text-[#2A2118]">
+                      Thank you for shopping with ALIG'S WARE
                     </h2>
-                    <p className="text-[#6B5740] text-sm mb-6">
-                      Your bespoke eyewear selection is being prepared under Dr. Sheeraz Ahmad’s supervision.
+                    <p className="text-[#6B5740] text-sm sm:text-base max-w-lg mx-auto mb-6">
+                      Shukriya, <span className="font-semibold text-[#2A2118]">{formData.fullName}</span>! Your bespoke eyewear order has been secured and logged in our persistent order registry.
                     </p>
 
                     <div className="bg-[#F4E9D5]/50 rounded-2xl p-6 text-left mb-8 border border-[#B88A32]/20">
-                      <div className="flex justify-between items-center pb-3 border-b border-[#B88A32]/15 text-xs font-mono">
-                        <span className="text-[#8B7355]">OFFICIAL ORDER ID</span>
-                        <span className="text-[#B88A32] font-bold text-sm tracking-wider">
-                          {orderId}
-                        </span>
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b border-[#B88A32]/15 gap-2">
+                        <div>
+                          <span className="text-[#8B7355] block text-[11px] font-mono uppercase tracking-wider">OFFICIAL ORDER NUMBER</span>
+                          <span className="text-[#B88A32] font-bold text-lg sm:text-xl font-mono tracking-wider">
+                            {orderId}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleCopyOrderId}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#FFF9EF] hover:bg-[#E8D2A8]/40 border border-[#B88A32]/30 text-xs font-mono text-[#4A3928] transition-all shadow-sm active:scale-95"
+                        >
+                          {copied ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-emerald-600" />
+                              <span className="text-emerald-600 font-semibold">Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3.5 h-3.5 text-[#B88A32]" />
+                              <span>Copy ID</span>
+                            </>
+                          )}
+                        </button>
                       </div>
 
                       <div className="py-4 space-y-2 border-b border-[#B88A32]/15 text-xs">
@@ -838,7 +895,7 @@ export default function CheckoutPage() {
                         <div>
                           <span className="text-[#8B7355] block font-mono">SHIP TO</span>
                           <span className="text-[#2A2118] font-medium">
-                            {formData.address}, {formData.city} - {formData.pincode}
+                            {formData.address}, {formData.city}, {formData.state} - {formData.pincode}
                           </span>
                         </div>
                         <div>
@@ -877,23 +934,36 @@ export default function CheckoutPage() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                      <Link
+                        href={`/track-order?orderNumber=${encodeURIComponent(orderId)}&phone=${encodeURIComponent(formData.phone)}`}
+                        className="w-full sm:w-auto"
+                      >
+                        <motion.button
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
+                          className="w-full bg-[#B88A32] hover:bg-[#A07828] text-[#FFF9EF] font-semibold px-6 py-3.5 rounded-xl transition-all shadow-md shadow-[#B88A32]/25 flex items-center justify-center gap-2 text-sm"
+                        >
+                          <PackageCheck className="w-4 h-4" /> Track Order Status
+                        </motion.button>
+                      </Link>
+
                       <motion.button
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
                         onClick={handleWhatsAppShare}
-                        className="bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold px-8 py-3.5 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm"
+                        className="w-full sm:w-auto bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold px-6 py-3.5 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm"
                       >
-                        <MessageCircle className="w-5 h-5" /> Send Order Receipt on WhatsApp
+                        <MessageCircle className="w-4 h-4" /> Send Receipt on WhatsApp
                       </motion.button>
 
-                      <Link href="/shop">
+                      <Link href="/shop" className="w-full sm:w-auto">
                         <motion.button
                           whileHover={{ scale: 1.03 }}
                           whileTap={{ scale: 0.97 }}
-                          className="bg-[#F4E9D5] hover:bg-[#E8D2A8] text-[#2A2118] border border-[#B88A32]/25 font-semibold px-8 py-3.5 rounded-xl transition-all w-full sm:w-auto text-sm"
+                          className="w-full bg-[#F4E9D5] hover:bg-[#E8D2A8] text-[#2A2118] border border-[#B88A32]/25 font-semibold px-6 py-3.5 rounded-xl transition-all text-sm"
                         >
-                          Explore More Frames
+                          Continue Shopping
                         </motion.button>
                       </Link>
                     </div>

@@ -119,14 +119,22 @@ export async function dbSaveAppointment(apt: Record<string, unknown>): Promise<b
 }
 
 /** Update order status */
-export async function dbUpdateOrderStatus(orderId: string, orderStatus: string): Promise<boolean> {
+export async function dbUpdateOrderStatus(orderId: string, orderStatus: string, paymentStatus?: string): Promise<boolean> {
   const file = await getFileInfo();
   if (!file) return false;
-  const orders = (file.data.orders || []).map((o) =>
-    (o as Record<string, unknown>).orderId === orderId ? { ...o, orderStatus } : o
-  );
+  const orders = (file.data.orders || []).map((o) => {
+    const rec = o as Record<string, unknown>;
+    if (rec.orderId === orderId) {
+      return {
+        ...rec,
+        orderStatus,
+        ...(paymentStatus ? { paymentStatus } : {}),
+      };
+    }
+    return o;
+  });
   const newData: DbData = { ...file.data, orders };
-  return writeFileContent(newData, file.sha, `order: update status ${orderId} -> ${orderStatus}`);
+  return writeFileContent(newData, file.sha, `order: update status ${orderId} -> ${orderStatus}${paymentStatus ? ` (payment: ${paymentStatus})` : ''}`);
 }
 
 /** Update appointment status */

@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Script from "next/script";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle2,
@@ -18,7 +19,8 @@ import {
   Truck,
   MessageCircle,
   Sparkles,
-  ShoppingBag
+  ShoppingBag,
+  AlertCircle
 } from "lucide-react";
 import { useCart, CartItem } from "@/context/CartContext";
 import Navbar from "@/components/Navbar";
@@ -27,6 +29,19 @@ import ThemeToggle from "@/components/ThemeToggle";
 
 type Step = 1 | 2 | 3;
 type PaymentMethod = "COD" | "UPI" | "ONLINE";
+
+const loadRazorpayScript = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined") return resolve(false);
+    if ((window as any).Razorpay) return resolve(true);
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -37,6 +52,9 @@ export default function CheckoutPage() {
   const [orderId, setOrderId] = useState("");
   const [orderedItems, setOrderedItems] = useState<CartItem[]>([]);
   const [orderTotal, setOrderTotal] = useState({ subtotal: 0, delivery: 0, total: 0 });
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [razorpayPaymentId, setRazorpayPaymentId] = useState<string>("");
+  const [paymentStatus, setPaymentStatus] = useState<"pending" | "paid">("pending");
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -80,58 +98,205 @@ export default function CheckoutPage() {
   };
 
   const handlePlaceOrder = async () => {
+    setPaymentError(null);
     setSubmitting(true);
-
-    const orderPayload = {
-      customer: {
-        name: formData.fullName,
-        phone: formData.phone,
-        email: formData.email,
-        address: formData.address,
-        city: formData.city,
-        pincode: formData.pincode
-      },
-      items: items.map((it) => ({
-        productId: it.id,
-        name: it.name,
-        price: it.price,
-        quantity: it.quantity,
-        color: it.color
-      })),
-      paymentMethod,
-      totalAmount: total
-    };
-
-    let generatedOrderId = `ORD-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.floor(
-      1000 + Math.random() * 9000
-    )}`;
 
     const snapshotItems = [...items];
     const snapshotTotals = { subtotal, delivery, total };
 
+    // --- CASE 1: Cash On Delivery (COD) ---
+    if (paymentMethod === "COD") {
+      let generatedOrderId = `AW-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.floor(
+        1000 + Math.random() * 9000
+      )}`;
+
+      try {
+        const res = await fetch("/api/orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId: generatedOrderId,
+            customer: {
+              name: formData.fullName,
+              phone: formData.phone,
+              email: formData.email,
+              address: formData.address,
+              city: formData.city,
+              pincode: formData.pincode
+            },
+            items: snapshotItems.map((it) => ({
+              productId: it.id,
+              name: it.name,
+              price: it.price,
+              quantity: it.quantity,
+              color: it.color
+            })),
+            paymentMethod: "cod",
+            paymentStatus: "pending",
+            totalAmount: total
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.orderId) generatedOrderId = data.orderId;
+        }
+      } catch (err) {
+        console.warn("COD order dispatch error:", err);
+      } finally {
+        setOrderId(generatedOrderId);
+        setOrderedItems(snapshotItems);
+        setOrderTotal(snapshotTotals);
+        setPaymentStatus("pending");
+        clearCart();
+        setSubmitting(false);
+        setDirection(1);
+        setStep(3);
+      }
+      return;
+    }
+
+    // --- CASE 2: Online / UPI Payment via Razorpay Standard Web Checkout ---
     try {
-      const res = await fetch("/api/orders", {
+      const scriptReady = await loadRazorpayScript();
+      if (!scriptReady || !(window as any).Razorpay) {
+        throw new Error("Unable to load Razorpay payment window. Please check your internet connection and try again.");
+      }
+
+      // Step 1: Request backend order creation
+      const orderRes = await fetch("/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderPayload)
+        body: JSON.stringify({
+          amount: Math.round(total * 100), // in paise (min 100)
+          currency: "INR",
+          receipt: `rcpt_${Date.now()}`,
+          notes: {
+            customer_name: formData.fullName,
+            customer_phone: formData.phone,
+            customer_city: formData.city,
+            cart_count: String(items.length)
+          }
+        })
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data.order && data.order.orderId) {
-          generatedOrderId = data.order.orderId;
-        }
+      const orderData = await orderRes.json();
+      if (!orderRes.ok || !orderData.order_id) {
+        throw new Error(orderData.error || "Failed to generate Razorpay order. Please try again.");
       }
-    } catch (err) {
-      console.warn("API Order dispatch notice:", err);
-    } finally {
-      setOrderId(generatedOrderId);
-      setOrderedItems(snapshotItems);
-      setOrderTotal(snapshotTotals);
-      clearCart();
+
+      const rzpOrderId = orderData.order_id;
+      const customStoreOrderId = `AW-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.floor(
+        1000 + Math.random() * 9000
+      )}`;
+
+      // Step 2: Configure and open Razorpay modal
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_TdMMbI6vlWq7OY",
+        amount: orderData.amount,
+        currency: orderData.currency || "INR",
+        name: "ALIG'S WARE",
+        description: "Luxury Eyewear Atelier — Insured Express Order",
+        image: "https://raw.githubusercontent.com/Infinix-Gt20-Pro/alighsware/main/public/logo.png",
+        order_id: rzpOrderId,
+        prefill: {
+          name: formData.fullName,
+          email: formData.email || "",
+          contact: formData.phone
+        },
+        theme: {
+          color: "#B88A32"
+        },
+        modal: {
+          ondismiss: function () {
+            setSubmitting(false);
+            setPaymentError("Payment window was dismissed. You can retry anytime or choose Cash on Delivery.");
+          }
+        },
+        handler: async function (response: {
+          razorpay_payment_id: string;
+          razorpay_order_id: string;
+          razorpay_signature: string;
+        }) {
+          setSubmitting(true);
+          try {
+            // Step 3: Backend signature verification
+            const verifyRes = await fetch("/api/verify-payment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                storeOrderId: customStoreOrderId
+              })
+            });
+
+            const verifyData = await verifyRes.json();
+            if (!verifyRes.ok || !verifyData.success) {
+              throw new Error(verifyData.error || "Payment signature verification failed. Please contact support.");
+            }
+
+            // Step 4: Persist confirmed paid order
+            await fetch("/api/orders", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                orderId: customStoreOrderId,
+                customer: {
+                  name: formData.fullName,
+                  phone: formData.phone,
+                  email: formData.email,
+                  address: formData.address,
+                  city: formData.city,
+                  pincode: formData.pincode
+                },
+                items: snapshotItems.map((it) => ({
+                  productId: it.id,
+                  name: it.name,
+                  price: it.price,
+                  quantity: it.quantity,
+                  color: it.color
+                })),
+                paymentMethod: paymentMethod.toLowerCase(),
+                paymentStatus: "paid",
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpayOrderId: response.razorpay_order_id,
+                totalAmount: snapshotTotals.total
+              })
+            }).catch((e) => console.warn("Order save sync error:", e));
+
+            setOrderId(customStoreOrderId);
+            setRazorpayPaymentId(response.razorpay_payment_id);
+            setPaymentStatus("paid");
+            setOrderedItems(snapshotItems);
+            setOrderTotal(snapshotTotals);
+            clearCart();
+            setSubmitting(false);
+            setDirection(1);
+            setStep(3);
+          } catch (vErr: any) {
+            console.error("Verification error:", vErr);
+            setPaymentError(vErr.message || "Payment verification failed.");
+            setSubmitting(false);
+          }
+        }
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+
+      rzp.on("payment.failed", function (response: any) {
+        console.error("Payment failed callback:", response.error);
+        const reason = response.error?.description || response.error?.reason || "Transaction was declined.";
+        setPaymentError(`Payment Failed: ${reason}`);
+        setSubmitting(false);
+      });
+
+      rzp.open();
+    } catch (err: any) {
+      console.error("Order initiation error:", err);
+      setPaymentError(err.message || "Failed to start payment gateway.");
       setSubmitting(false);
-      setDirection(1);
-      setStep(3);
     }
   };
 
@@ -153,9 +318,10 @@ export default function CheckoutPage() {
           paymentMethod === "COD"
             ? "Cash on Delivery"
             : paymentMethod === "UPI"
-            ? "Instant UPI"
-            : "Card / Net Banking"
-        }\n\n` +
+            ? "Instant UPI (Razorpay)"
+            : "Cards / NetBanking (Razorpay)"
+        }\n` +
+        `*Payment Status:* ${paymentStatus === "paid" ? `✅ PAID (Txn: ${razorpayPaymentId})` : "⏳ Pending (COD)"}\n\n` +
         `*Ordered Frames:*\n${itemLines}\n\n` +
         `*Subtotal:* ₹${orderTotal.subtotal}\n` +
         `*Shipping:* ${orderTotal.delivery === 0 ? "FREE Luxury Delivery" : `₹${orderTotal.delivery}`}\n` +
@@ -422,6 +588,22 @@ export default function CheckoutPage() {
                           All orders are protected with genuine warranty and direct doctor support.
                         </p>
 
+                        {paymentError && (
+                          <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-800 dark:text-red-300 flex items-start gap-3 text-xs leading-relaxed animate-in fade-in duration-200">
+                            <AlertCircle className="w-5 h-5 shrink-0 text-red-600 dark:text-red-400 mt-0.5" />
+                            <div className="flex-1">
+                              <p className="font-bold text-sm mb-0.5 text-red-900 dark:text-red-200">Payment Notice</p>
+                              <p>{paymentError}</p>
+                            </div>
+                            <button
+                              onClick={() => setPaymentError(null)}
+                              className="text-red-600 dark:text-red-400 hover:opacity-75 font-mono text-sm px-1.5"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        )}
+
                         <div className="space-y-4">
                           {[
                             {
@@ -630,7 +812,7 @@ export default function CheckoutPage() {
                         ))}
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4 text-xs pt-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-3">
                         <div>
                           <span className="text-[#8B7355] block font-mono">SHIP TO</span>
                           <span className="text-[#2A2118] font-medium">
@@ -643,12 +825,29 @@ export default function CheckoutPage() {
                             {paymentMethod === "COD"
                               ? "Cash on Delivery"
                               : paymentMethod === "UPI"
-                              ? "Instant UPI"
-                              : "Online Gateway"}
+                              ? "Instant UPI (Razorpay)"
+                              : "Cards / Net Banking (Razorpay)"}
                           </span>
                         </div>
-                        <div className="col-span-2 pt-2 border-t border-[#B88A32]/15 flex justify-between items-center">
-                          <span className="text-[#6B5740] font-mono">Total Paid / Due</span>
+
+                        {paymentStatus === "paid" && (
+                          <div className="sm:col-span-2 pt-2 border-t border-[#B88A32]/15 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-bold text-xs tracking-wider">
+                              <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                              PAYMENT VERIFIED (RAZORPAY)
+                            </span>
+                            {razorpayPaymentId && (
+                              <span className="text-xs font-mono text-[#8B7355]">
+                                Txn Ref: <span className="text-[#2A2118] dark:text-[#F5EFE6] font-semibold">{razorpayPaymentId}</span>
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="col-span-1 sm:col-span-2 pt-2 border-t border-[#B88A32]/15 flex justify-between items-center">
+                          <span className="text-[#6B5740] font-mono">
+                            {paymentStatus === "paid" ? "Total Paid (Razorpay)" : "Total Due on Delivery"}
+                          </span>
                           <span className="text-[#B88A32] font-mono font-bold text-base">
                             ₹{orderTotal.total}
                           </span>
@@ -690,6 +889,8 @@ export default function CheckoutPage() {
       <div className="fixed bottom-6 left-6 z-40">
         <ThemeToggle variant="floating" />
       </div>
+
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
     </div>
   );
 }

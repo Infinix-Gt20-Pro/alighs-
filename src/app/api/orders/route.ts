@@ -22,6 +22,8 @@ interface StoredOrder {
   paymentMethod: string;
   orderStatus: 'placed' | 'confirmed' | 'shipped' | 'delivered';
   paymentStatus: 'pending' | 'paid' | 'failed';
+  razorpayPaymentId?: string;
+  razorpayOrderId?: string;
   createdAt: string;
 }
 
@@ -50,6 +52,7 @@ export async function POST(request: Request) {
     );
     const pm = body.paymentMethod.toLowerCase();
     const paymentMethod = pm === 'online' ? 'online' : pm === 'upi' ? 'upi' : 'cod';
+    const isPaid = body.paymentStatus === 'paid';
 
     const orderRecord: StoredOrder = {
       orderId,
@@ -70,8 +73,10 @@ export async function POST(request: Request) {
       })),
       totalAmount,
       paymentMethod,
-      orderStatus: 'placed',
-      paymentStatus: 'pending',
+      orderStatus: isPaid ? 'confirmed' : 'placed',
+      paymentStatus: isPaid ? 'paid' : (body.paymentStatus === 'failed' ? 'failed' : 'pending'),
+      ...(body.razorpayPaymentId ? { razorpayPaymentId: body.razorpayPaymentId } : {}),
+      ...(body.razorpayOrderId ? { razorpayOrderId: body.razorpayOrderId } : {}),
       createdAt: new Date().toISOString()
     };
 

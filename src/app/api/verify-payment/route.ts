@@ -2,9 +2,11 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { dbUpdateOrderStatus } from '@/lib/githubDb';
 
+const FALLBACK_KEY_SECRET = 'jQhbeYJhgZ7xWB7Fz4EDI1cE';
+
 export async function POST(request: Request) {
   try {
-    const key_secret = process.env.RAZORPAY_KEY_SECRET;
+    const key_secret = process.env.RAZORPAY_KEY_SECRET || FALLBACK_KEY_SECRET;
 
     if (!key_secret) {
       return NextResponse.json(

@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { dbUpdateOrderStatus } from '@/lib/githubDb';
 
 const LIVE_KEY_SECRET = 'GbLZfY1sCE3P1jj9yT6juJ2E';
 
@@ -59,16 +58,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Signatures match - update order if storeOrderId passed
+    // Signatures match — update order in the SINGLE canonical database
     if (storeOrderId) {
-      import('@/lib/database/db').then(({ updateOrderStatus, updatePaymentStatus }) => {
-        updatePaymentStatus(storeOrderId, 'Paid').catch(() => {});
-        updateOrderStatus(storeOrderId, 'Confirmed', 'Payment verified via Razorpay Standard Checkout').catch(() => {});
-      }).catch(() => {});
-
-      dbUpdateOrderStatus(storeOrderId, 'confirmed', 'paid').catch((err) =>
-        console.warn('DB payment status update notice:', err)
-      );
+      try {
+        const { updateOrderStatus, updatePaymentStatus } = await import('@/lib/database/db');
+        await updatePaymentStatus(storeOrderId, 'Paid');
+        await updateOrderStatus(storeOrderId, 'Confirmed', 'Payment verified via Razorpay Standard Checkout');
+      } catch (dbErr) {
+        console.warn('DB payment status update notice:', dbErr);
+      }
     }
 
     return NextResponse.json(

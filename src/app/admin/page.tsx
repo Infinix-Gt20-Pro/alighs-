@@ -248,7 +248,7 @@ export default function AdminDashboardPage() {
       const res = await fetch("/api/admin/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "change_password", username: "admin", currentPassword: currentPw, newPassword: newPw })
+        body: JSON.stringify({ action: "change-password", password: currentPw, newPassword: newPw })
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -443,6 +443,28 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleDeleteProduct = async (productId: string, productName: string) => {
+    if (!window.confirm(`Are you sure you want to deactivate "${productName}" from the catalog?`)) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/admin/inventory?id=${encodeURIComponent(productId)}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setProducts((prev) =>
+          prev.map((p) => (String(p.id) === String(productId) ? { ...p, status: "inactive" as const } : p))
+        );
+        showToast(`"${productName}" deactivated from catalog`, "info");
+      } else {
+        showToast("Failed to deactivate product", "error");
+      }
+    } catch (e) {
+      console.error("Delete product error:", e);
+      showToast("Network error deleting product", "error");
+    }
+  };
+
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingProduct(true);
@@ -485,9 +507,13 @@ export default function AdminDashboardPage() {
         setAppointments((prev) =>
           prev.map((a) => (a.appointmentId === appointmentId ? { ...a, status: status as any } : a))
         );
+        showToast(`Appointment ${appointmentId} → ${status}`, "success");
+      } else {
+        showToast("Failed to update appointment status", "error");
       }
     } catch (e) {
       console.error("Apt update error:", e);
+      showToast("Network error updating appointment", "error");
     }
   };
 
@@ -1175,7 +1201,7 @@ export default function AdminDashboardPage() {
                                 {o.items?.length || 1} frame(s)
                               </span>
                             </td>
-                            <td className="py-4 px-4 font-bold text-white font-mono">₹{total}</td>
+                            <td className="py-4 px-4 font-bold text-white font-mono">₹{Number(total).toLocaleString("en-IN")}</td>
                             <td className="py-4 px-4">
                               <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider border ${
                                 payStatus.toLowerCase() === "paid"
@@ -1470,12 +1496,21 @@ export default function AdminDashboardPage() {
                           </button>
                         </td>
                         <td className="py-4 px-4 text-right">
-                          <button
-                            onClick={() => handleToggleProductStatus(p)}
-                            className="px-2.5 py-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-xs font-mono text-neutral-300"
-                          >
-                            {p.status === "active" ? "Deactivate" : "Activate"}
-                          </button>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => handleToggleProductStatus(p)}
+                              className="px-2.5 py-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-xs font-mono text-neutral-300"
+                            >
+                              {p.status === "active" ? "Deactivate" : "Activate"}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteProduct(p.id, p.name)}
+                              className="p-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-mono transition-colors"
+                              title="Deactivate Frame"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -1687,8 +1722,8 @@ export default function AdminDashboardPage() {
                     <p className="text-neutral-400">Email: {selectedOrder.customer?.email}</p>
                   )}
                   <a
-                    href={`https://wa.me/91${selectedOrder.customer?.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-                      `Hello ${selectedOrder.customer?.full_name}, this is ALIG'S WARE regarding your order ${selectedOrder.order_number}.`
+                    href={`https://wa.me/91${(selectedOrder.customer?.phone || "").replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                      `Hello ${selectedOrder.customer?.full_name || selectedOrder.customer?.name || "Customer"}, this is ALIG'S WARE regarding your order ${selectedOrder.order_number}.`
                     )}`}
                     target="_blank"
                     rel="noreferrer"
@@ -1737,7 +1772,7 @@ export default function AdminDashboardPage() {
                   ))}
                   <div className="p-3 bg-white/[0.04] flex justify-between items-center font-bold text-sm">
                     <span>Total Amount</span>
-                    <span className="text-[#B88A32]">₹{selectedOrder.total_amount}</span>
+                    <span className="text-[#B88A32]">₹{Number(selectedOrder.total_amount).toLocaleString("en-IN")}</span>
                   </div>
                 </div>
               </div>
@@ -1787,11 +1822,21 @@ export default function AdminDashboardPage() {
                     CLIENT DOSSIER
                   </span>
                   <h3 className="text-xl font-serif font-bold text-white">
-                    {selectedCustomer.full_name}
+                    {selectedCustomer.full_name || selectedCustomer.fullName}
                   </h3>
                   <p className="text-xs text-neutral-400 font-mono mt-0.5">
                     +91 {selectedCustomer.phone} &bull; {selectedCustomer.email || "No Email"}
                   </p>
+                  <a
+                    href={`https://wa.me/91${(selectedCustomer.phone || "").replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                      `Hello ${selectedCustomer.full_name || selectedCustomer.fullName || "Valued Client"}, this is ALIG'S WARE Atelier Concierge.`
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-2.5 inline-flex items-center gap-1.5 text-xs text-[#25D366] hover:underline"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" /> Direct WhatsApp Client
+                  </a>
                 </div>
                 <button
                   onClick={() => setCustomerDrawerOpen(false)}
@@ -1812,29 +1857,37 @@ export default function AdminDashboardPage() {
                 <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10">
                   <span className="text-neutral-400 block text-[10px] uppercase">Total Orders</span>
                   <span className="text-xl font-bold text-white">
-                    {selectedCustomer.totalOrders || 0}
+                    {selectedCustomer.totalOrders || selectedCustomer.orderCount || 0}
                   </span>
                 </div>
               </div>
 
               <div>
                 <span className="text-xs font-mono uppercase tracking-wider text-neutral-400 block mb-2">
-                  Order History
+                  Order History (Click to Inspect)
                 </span>
                 <div className="space-y-3 font-mono text-xs">
                   {selectedCustomer.orders?.map((co: any) => (
                     <div
                       key={co.order_number}
-                      className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 flex justify-between items-center"
+                      onClick={() => {
+                        setCustomerDrawerOpen(false);
+                        handleOpenOrder(co.order_number);
+                      }}
+                      className="p-4 rounded-2xl bg-white/[0.02] hover:bg-white/[0.06] border border-white/10 hover:border-[#B88A32]/40 flex justify-between items-center cursor-pointer transition-all group"
+                      title="Inspect this order in fulfillment drawer"
                     >
                       <div>
-                        <p className="font-bold text-[#B88A32]">{co.order_number}</p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-bold text-[#B88A32] group-hover:underline">{co.order_number}</p>
+                          <ChevronRight className="w-3.5 h-3.5 text-neutral-500 group-hover:text-[#B88A32] transition-colors" />
+                        </div>
                         <p className="text-neutral-400 text-[11px] mt-0.5">
                           {co.items?.length || 1} frame(s) &bull; {new Date(co.created_at).toLocaleDateString("en-IN")}
                         </p>
                       </div>
                       <div className="text-right">
-                        <span className="font-bold text-white block">₹{co.total_amount}</span>
+                        <span className="font-bold text-white block">₹{Number(co.total_amount).toLocaleString("en-IN")}</span>
                         <span className="text-[10px] text-emerald-400 font-bold uppercase">{co.order_status}</span>
                       </div>
                     </div>

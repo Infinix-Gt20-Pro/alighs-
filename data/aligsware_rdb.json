@@ -9,11 +9,11 @@
       "original_price": 3000,
       "discount": 17,
       "sku": "ALG-221174",
-      "stock_quantity": 34,
+      "stock_quantity": 32,
       "image_url": "/images/products/lenskart-air-lenskart-air-switch-221174.jpg",
       "status": "active",
       "created_at": "2026-09-18T05:41:13.550Z",
-      "updated_at": "2026-09-18T05:41:22.977Z"
+      "updated_at": "2026-09-18T06:58:52.950Z"
     },
     {
       "id": "150798",
@@ -535,9 +535,36 @@
       "pincode": "282002",
       "created_at": "2026-09-17T05:41:13.550Z",
       "updated_at": "2026-09-17T05:41:13.550Z"
+    },
+    {
+      "id": "cust-1789714732950-6048",
+      "full_name": "Test VIP Client",
+      "phone": "9999888877",
+      "email": "testvip@example.com",
+      "address": "Penthouse 4B, Luxury Towers",
+      "city": "Mumbai",
+      "state": "Maharashtra",
+      "pincode": "400001",
+      "created_at": "2026-09-18T06:58:52.950Z",
+      "updated_at": "2026-09-18T06:58:52.950Z"
     }
   ],
   "orders": [
+    {
+      "id": "ord-1789714732950-7497",
+      "order_number": "ALG-2026-000004",
+      "customer_id": "cust-1789714732950-6048",
+      "subtotal": 5000,
+      "discount": 0,
+      "shipping_charge": 0,
+      "total_amount": 5000,
+      "payment_method": "ONLINE",
+      "payment_status": "Paid",
+      "order_status": "Shipped",
+      "customer_notes": "Deliver with luxury gift wrapping.",
+      "created_at": "2026-09-18T06:58:52.950Z",
+      "updated_at": "2026-09-18T06:58:52.952Z"
+    },
     {
       "id": "ord-1789710082977-2907",
       "order_number": "ALG-2026-000003",
@@ -613,6 +640,15 @@
       "quantity": 1,
       "unit_price": 2500,
       "total_price": 2500
+    },
+    {
+      "id": "item-1789714732950-8553",
+      "order_id": "ord-1789714732950-7497",
+      "product_id": "221174",
+      "product_name_snapshot": "Lenskart Air Lenskart -Air Switch",
+      "quantity": 2,
+      "unit_price": 2500,
+      "total_price": 5000
     }
   ],
   "order_status_history": [
@@ -687,18 +723,34 @@
       "new_status": "Processing",
       "changed_at": "2026-09-18T05:41:23.007Z",
       "note": "Precision anti-reflective blue-cut lenses being surfaced in atelier."
+    },
+    {
+      "id": "hist-1789714732950-2657",
+      "order_id": "ord-1789714732950-7497",
+      "old_status": null,
+      "new_status": "Confirmed",
+      "changed_at": "2026-09-18T06:58:52.950Z",
+      "note": "Order placed via ONLINE. Payment verified."
+    },
+    {
+      "id": "hist-1789714732951-1708",
+      "order_id": "ord-1789714732950-7497",
+      "old_status": "Confirmed",
+      "new_status": "Shipped",
+      "changed_at": "2026-09-18T06:58:52.951Z",
+      "note": "Dispatched via BlueDart AWB #BLU998877"
     }
   ],
   "admin_users": [
     {
       "id": "admin-default-1",
       "username": "admin",
-      "password_hash": "9935287178e6aae8477318487a5813cec3bb0e085d802095e3cf47f62ebf732e72aababa4389b5ed6442b962ffe06b0bc067f4443e0c4bf684b50554d5e3d434",
-      "salt": "e26d3c58e3c545df358544969d379c9b",
+      "password_hash": "591b3674cab1ec1d8514e8f1f779e37457e1fbb8a0129733d0fac1340b1b503cffcf92909acaf65d9f18bb4636253ff5b9626af197b29a49474f56563df93994",
+      "salt": "161efa858071a9158fde07f46d890a68",
       "role": "superadmin",
       "created_at": "2026-09-18T05:41:13.551Z",
-      "updated_at": "2026-09-18T05:41:13.551Z"
+      "updated_at": "2026-09-18T06:58:52.948Z"
     }
   ],
-  "order_counter": 3
+  "order_counter": 4
 }

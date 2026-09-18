@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
@@ -84,9 +84,12 @@ function TrackOrderContent() {
   const [error, setError] = useState<string | null>(null);
   const [order, setOrder] = useState<TrackedOrder | null>(null);
 
-  const handleTrack = async (e?: React.FormEvent) => {
+  const handleTrack = async (e?: React.FormEvent, overrideOrder?: string, overridePhone?: string) => {
     if (e) e.preventDefault();
-    if (!orderNumber.trim() || !phone.trim()) {
+    const targetOrder = (overrideOrder !== undefined ? overrideOrder : orderNumber).trim();
+    const targetPhone = (overridePhone !== undefined ? overridePhone : phone).trim();
+
+    if (!targetOrder || !targetPhone) {
       setError("Please enter both your Order Number and registered Phone Number.");
       return;
     }
@@ -99,8 +102,8 @@ function TrackOrderContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          orderNumber: orderNumber.trim(),
-          phone: phone.trim()
+          orderNumber: targetOrder,
+          phone: targetPhone
         })
       });
 
@@ -124,7 +127,7 @@ function TrackOrderContent() {
     if (urlOrder && urlPhone) {
       setOrderNumber(urlOrder);
       setPhone(urlPhone);
-      handleTrack();
+      handleTrack(undefined, urlOrder, urlPhone);
     }
   }, [searchParams]);
 

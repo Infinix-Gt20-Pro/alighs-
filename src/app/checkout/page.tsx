@@ -273,7 +273,7 @@ export default function CheckoutPage() {
                   quantity: it.quantity,
                   color: it.color
                 })),
-                paymentMethod: paymentMethod === "UPI" ? "UPI" : "Online",
+                paymentMethod: paymentMethod === "UPI" ? "UPI" : "ONLINE",
                 paymentStatus: "Paid",
                 razorpayPaymentId: response.razorpay_payment_id,
                 razorpayOrderId: response.razorpay_order_id,

@@ -105,7 +105,8 @@ interface AnalyticsData {
   todayRevenue: number;
   monthRevenue: number;
   totalUnitsSold: number;
-  aov: number;
+  aov?: number;
+  averageOrderValue?: number;
   lowStockCount: number;
   ordersPerDay: Array<{ date: string; orders: number; revenue: number }>;
   bestSellers: Array<{ name: string; units: number; revenue: number }>;
@@ -131,6 +132,16 @@ export default function AdminDashboardPage() {
   const [authMode, setAuthMode] = useState<"pin" | "password">("pin");
   const [authError, setAuthError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
+
+  // Executive Toast Notification State
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+
+  const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast((prev) => (prev?.message === message ? null : prev));
+    }, 3200);
+  };
 
   const [activeTab, setActiveTab] = useState<
     "overview" | "orders" | "customers" | "inventory" | "appointments"
@@ -286,9 +297,18 @@ export default function AdminDashboardPage() {
 
   const handleOpenOrder = async (orderNum: string) => {
     setOrderDrawerOpen(true);
-    setSelectedOrder(null);
+    const existing = orders.find(
+      (o) => (o.order_number && o.order_number.toLowerCase() === orderNum.toLowerCase()) || o.orderId === orderNum
+    );
+    if (existing) {
+      setSelectedOrder(existing);
+      setNewOrderStatus(existing.order_status || existing.orderStatus || "Pending");
+      setNewPaymentStatus(existing.payment_status || existing.paymentStatus || "Pending");
+    } else {
+      setSelectedOrder(null);
+    }
     try {
-      const res = await fetch(`/api/orders/${orderNum}`);
+      const res = await fetch(`/api/orders/${encodeURIComponent(orderNum)}`);
       if (res.ok) {
         const data = await res.json();
         setSelectedOrder(data.order);
@@ -308,7 +328,7 @@ export default function AdminDashboardPage() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          orderNumber: selectedOrder.order_number,
+          orderNumber: selectedOrder.order_number || selectedOrder.orderId,
           orderStatus: newOrderStatus,
           paymentStatus: newPaymentStatus,
           note: internalNote.trim() || `Status updated to ${newOrderStatus} via Executive Admin Panel`
@@ -318,10 +338,14 @@ export default function AdminDashboardPage() {
         const data = await res.json();
         setSelectedOrder(data.order);
         setInternalNote("");
+        showToast(`Order ${selectedOrder.order_number || selectedOrder.orderId} updated to ${newOrderStatus}!`, "success");
         fetchAllData();
+      } else {
+        showToast("Failed to update order status", "error");
       }
     } catch (e) {
       console.error("Status update error:", e);
+      showToast("Network error updating order status", "error");
     } finally {
       setUpdatingStatus(false);
     }
@@ -329,9 +353,14 @@ export default function AdminDashboardPage() {
 
   const handleOpenCustomer = async (custId: string) => {
     setCustomerDrawerOpen(true);
-    setSelectedCustomer(null);
+    const existing = customers.find((c) => c.id === custId);
+    if (existing) {
+      setSelectedCustomer(existing);
+    } else {
+      setSelectedCustomer(null);
+    }
     try {
-      const res = await fetch(`/api/admin/customers?id=${custId}`);
+      const res = await fetch(`/api/admin/customers?id=${encodeURIComponent(custId)}`);
       if (res.ok) {
         const data = await res.json();
         setSelectedCustomer(data.customer);
@@ -342,27 +371,36 @@ export default function AdminDashboardPage() {
   };
 
   const handleStockUpdate = async (productId: string, newStock: number) => {
+    const stock = Math.max(0, newStock);
     try {
       const res = await fetch("/api/admin/inventory", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: productId, stock_quantity: Math.max(0, newStock) })
+        body: JSON.stringify({ id: productId, stock_quantity: stock })
       });
       if (res.ok) {
         setProducts((prev) =>
           prev.map((p) =>
-            p.id === productId
-              ? { ...p, stock_quantity: Math.max(0, newStock), status: newStock > 0 ? "active" : "out_of_stock" }
+            String(p.id) === String(productId)
+              ? { ...p, stock_quantity: stock, status: stock > 0 ? (p.status === "inactive" ? "inactive" : "active") : "out_of_stock" }
               : p
           )
         );
+        showToast(`Stock updated to ${stock} units`, "success");
+      } else {
+        showToast("Failed to update stock", "error");
       }
     } catch (e) {
       console.error("Stock update error:", e);
+      showToast("Network error updating stock", "error");
     }
   };
 
   const handlePriceUpdate = async (productId: string, newPrice: number) => {
+    if (isNaN(newPrice) || newPrice <= 0) {
+      showToast("Please enter a valid price greater than 0", "error");
+      return;
+    }
     try {
       const res = await fetch("/api/admin/inventory", {
         method: "PUT",
@@ -370,10 +408,16 @@ export default function AdminDashboardPage() {
         body: JSON.stringify({ id: productId, price: newPrice })
       });
       if (res.ok) {
-        setProducts((prev) => prev.map((p) => (p.id === productId ? { ...p, price: newPrice } : p)));
+        setProducts((prev) =>
+          prev.map((p) => (String(p.id) === String(productId) ? { ...p, price: newPrice } : p))
+        );
+        showToast(`Price updated to ₹${newPrice.toLocaleString("en-IN")}`, "success");
+      } else {
+        showToast("Failed to save price update", "error");
       }
     } catch (e) {
       console.error("Price update error:", e);
+      showToast("Network error updating price", "error");
     }
   };
 
@@ -386,10 +430,16 @@ export default function AdminDashboardPage() {
         body: JSON.stringify({ id: product.id, status: nextStatus })
       });
       if (res.ok) {
-        setProducts((prev) => prev.map((p) => (p.id === product.id ? { ...p, status: nextStatus as any } : p)));
+        setProducts((prev) =>
+          prev.map((p) => (String(p.id) === String(product.id) ? { ...p, status: nextStatus as any } : p))
+        );
+        showToast(`Frame marked as ${nextStatus.toUpperCase()}`, "info");
+      } else {
+        showToast("Failed to update product status", "error");
       }
     } catch (e) {
       console.error("Status toggle error:", e);
+      showToast("Network error updating status", "error");
     }
   };
 
@@ -406,14 +456,19 @@ export default function AdminDashboardPage() {
         const data = await res.json();
         setProducts((prev) => [data.product, ...prev]);
         setShowAddModal(false);
+        showToast(`"${data.product.name}" added to catalog!`, "success");
         setNewProdForm({
           name: "", category: "Eyeglasses", price: 1999, original_price: 2999,
           sku: "", stock_quantity: 20, image_url: "/logo.png",
           description: "Atelier Handcrafted Luxury Titanium Frame."
         });
+      } else {
+        const data = await res.json();
+        showToast(data.error || "Failed to create frame", "error");
       }
     } catch (e) {
       console.error("Add product error:", e);
+      showToast("Network error creating frame", "error");
     } finally {
       setSavingProduct(false);
     }
@@ -498,11 +553,30 @@ export default function AdminDashboardPage() {
 
   const totalOrderPages = Math.ceil(filteredOrders.length / ordersPerPage) || 1;
 
+  const availableCategories = useMemo(() => {
+    const catSet = new Set<string>();
+    products.forEach((p) => {
+      if (p.category) catSet.add(p.category.trim());
+    });
+    ["clip-on", "eyeglasses", "sunglasses", "computer-glasses", "reading-glasses"].forEach((c) => catSet.add(c));
+    return ["All", ...Array.from(catSet).sort()];
+  }, [products]);
+
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
-      const matchesCat = invCategory === "All" || p.category === invCategory;
+      const normalize = (str: string) => (str || "").toLowerCase().replace(/[-_ ]/g, "");
+      const matchesCat =
+        invCategory === "All" ||
+        normalize(p.category) === normalize(invCategory);
+
       const query = invSearch.toLowerCase().trim();
-      const matchesSearch = !query || p.name.toLowerCase().includes(query) || p.sku.toLowerCase().includes(query);
+      const matchesSearch =
+        !query ||
+        p.name.toLowerCase().includes(query) ||
+        p.sku.toLowerCase().includes(query) ||
+        p.category.toLowerCase().includes(query) ||
+        String(p.price).includes(query);
+
       return matchesCat && matchesSearch;
     });
   }, [products, invCategory, invSearch]);
@@ -826,7 +900,7 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
                 <div className="text-2xl sm:text-3xl font-bold font-mono text-white mb-1">
-                  ₹{(analytics?.aov || 0).toLocaleString("en-IN")}
+                  ₹{(analytics?.aov || analytics?.averageOrderValue || 0).toLocaleString("en-IN")}
                 </div>
                 <div className="text-xs text-neutral-400 font-mono">
                   {analytics?.totalUnitsSold || 0} total eyewear frames dispatched
@@ -1226,7 +1300,9 @@ export default function AdminDashboardPage() {
                           <td className="py-4 px-4 text-neutral-300">
                             {c.city}, {c.state} ({c.pincode})
                           </td>
-                          <td className="py-4 px-4 font-bold text-[#B88A32]">{c.orderCount} order(s)</td>
+                          <td className="py-4 px-4 font-bold text-[#B88A32]">
+                            {c.orderCount ?? (c as any).totalOrders ?? 0} order(s)
+                          </td>
                           <td className="py-4 px-4 font-bold text-white font-mono">
                             ₹{c.totalSpent.toLocaleString("en-IN")}
                           </td>
@@ -1262,7 +1338,7 @@ export default function AdminDashboardPage() {
                   <Search className="w-4 h-4 text-neutral-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
-                    placeholder="Search by frame name or SKU..."
+                    placeholder="Search by frame name, SKU, or category..."
                     value={invSearch}
                     onChange={(e) => setInvSearch(e.target.value)}
                     className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs font-mono text-white placeholder-neutral-500 focus:outline-none focus:border-[#B88A32] transition-all"
@@ -1274,7 +1350,20 @@ export default function AdminDashboardPage() {
                   onChange={(e) => setInvCategory(e.target.value)}
                   className="bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-neutral-300 focus:outline-none focus:border-[#B88A32]"
                 >
-                  {CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+                  {availableCategories.map((cat) => {
+                    const label =
+                      cat === "All"
+                        ? "All Categories"
+                        : cat
+                            .split(/[-_]/)
+                            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                            .join(" ");
+                    return (
+                      <option key={cat} value={cat}>
+                        {label}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
@@ -1308,34 +1397,59 @@ export default function AdminDashboardPage() {
                           <div className="font-semibold text-white">{p.name}</div>
                           <div className="text-[10px] text-neutral-500 line-clamp-1">{p.description}</div>
                         </td>
-                        <td className="py-4 px-4 text-neutral-300">{p.category}</td>
+                        <td className="py-4 px-4 text-neutral-300 uppercase tracking-wider text-[11px]">
+                          {p.category}
+                        </td>
                         <td className="py-4 px-4 text-[#B88A32] font-mono">{p.sku}</td>
                         <td className="py-4 px-4 font-mono font-bold text-white">
                           <input
                             type="number"
                             defaultValue={p.price}
-                            onBlur={(e) => handlePriceUpdate(p.id, Number(e.target.value))}
+                            key={`price-${p.id}-${p.price}`}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") e.currentTarget.blur();
+                            }}
+                            onBlur={(e) => {
+                              const val = Number(e.target.value);
+                              if (!isNaN(val) && val !== p.price) {
+                                handlePriceUpdate(p.id, val);
+                              }
+                            }}
                             className="w-20 bg-white/[0.05] border border-white/10 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#B88A32]"
                           />
                         </td>
                         <td className="py-4 px-4 font-mono font-bold">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5">
                             <button
                               onClick={() => handleStockUpdate(p.id, p.stock_quantity - 1)}
-                              className="w-6 h-6 rounded bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 flex items-center justify-center text-neutral-300"
+                              className="w-6 h-6 rounded bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 flex items-center justify-center text-neutral-300 font-bold hover:text-white"
+                              title="Decrease stock"
                             >
                               -
                             </button>
-                            <span
-                              className={`px-2 py-0.5 rounded text-xs ${
-                                p.stock_quantity <= 5 ? "bg-red-500/20 text-red-400 font-bold" : "text-white"
+                            <input
+                              type="number"
+                              defaultValue={p.stock_quantity}
+                              key={`stock-${p.id}-${p.stock_quantity}`}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") e.currentTarget.blur();
+                              }}
+                              onBlur={(e) => {
+                                const val = parseInt(e.target.value, 10);
+                                if (!isNaN(val) && val !== p.stock_quantity) {
+                                  handleStockUpdate(p.id, Math.max(0, val));
+                                }
+                              }}
+                              className={`w-14 text-center bg-white/[0.04] border rounded px-1 py-0.5 text-xs font-mono font-bold focus:outline-none focus:border-[#B88A32] ${
+                                p.stock_quantity <= 5
+                                  ? "border-red-500/40 text-red-400 bg-red-500/10"
+                                  : "border-white/10 text-white"
                               }`}
-                            >
-                              {p.stock_quantity}
-                            </span>
+                            />
                             <button
                               onClick={() => handleStockUpdate(p.id, p.stock_quantity + 1)}
-                              className="w-6 h-6 rounded bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 flex items-center justify-center text-neutral-300"
+                              className="w-6 h-6 rounded bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 flex items-center justify-center text-neutral-300 font-bold hover:text-white"
+                              title="Increase stock"
                             >
                               +
                             </button>
@@ -1775,9 +1889,17 @@ export default function AdminDashboardPage() {
                       onChange={(e) => setNewProdForm({ ...newProdForm, category: e.target.value })}
                       className="w-full bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32]"
                     >
-                      {CATEGORIES.filter((c) => c !== "All").map((c) => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
+                      {availableCategories.filter((c) => c !== "All").map((c) => {
+                        const label = c
+                          .split(/[-_]/)
+                          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                          .join(" ");
+                        return (
+                          <option key={c} value={c}>
+                            {label}
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
 
@@ -1925,6 +2047,42 @@ export default function AdminDashboardPage() {
               </form>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Executive Luxury Toast Notification Pill */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 24, scale: 0.92 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.92 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className={`fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-2xl shadow-2xl backdrop-blur-xl border flex items-center gap-3 font-mono text-xs max-w-md ${
+              toast.type === "success"
+                ? "bg-[#121218]/95 border-emerald-500/40 text-emerald-300 shadow-emerald-500/10"
+                : toast.type === "error"
+                ? "bg-[#121218]/95 border-red-500/40 text-red-300 shadow-red-500/10"
+                : "bg-[#121218]/95 border-[#B88A32]/40 text-[#B88A32] shadow-[#B88A32]/10"
+            }`}
+          >
+            <div
+              className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                toast.type === "success"
+                  ? "bg-emerald-400 animate-pulse"
+                  : toast.type === "error"
+                  ? "bg-red-400"
+                  : "bg-[#B88A32]"
+              }`}
+            />
+            <span className="flex-1 font-medium">{toast.message}</span>
+            <button
+              onClick={() => setToast(null)}
+              className="ml-2 opacity-60 hover:opacity-100 transition-opacity p-0.5"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

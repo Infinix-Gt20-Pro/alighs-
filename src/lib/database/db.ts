@@ -20,8 +20,10 @@ const REPO = "Infinix-Gt20-Pro/Aligh-s---Ware";
 const DB_PATH = "data/aligsware_rdb.json";
 const API_BASE = "https://api.github.com";
 
-const LOCAL_DATA_DIR = path.join(process.cwd(), "data");
+const IS_VERCEL = !!process.env.VERCEL;
+const LOCAL_DATA_DIR = IS_VERCEL ? path.join("/tmp", "data") : path.join(process.cwd(), "data");
 const LOCAL_DB_FILE = path.join(LOCAL_DATA_DIR, "aligsware_rdb.json");
+const BUNDLED_DB_FILE = path.join(process.cwd(), "data", "aligsware_rdb.json");
 
 // In-memory relational store
 let store: DatabaseStore | null = null;
@@ -281,13 +283,20 @@ async function syncToGitHub(data: DatabaseStore, message: string): Promise<boole
 export async function getDatabase(): Promise<DatabaseStore> {
   if (store) return store;
 
-  // 1. Try local file
+  // 1. Try local or temp file
   if (fs.existsSync(LOCAL_DB_FILE)) {
     try {
       const raw = fs.readFileSync(LOCAL_DB_FILE, "utf-8");
       store = JSON.parse(raw);
     } catch (e) {
       console.warn("Could not parse local DB file:", e);
+    }
+  } else if (fs.existsSync(BUNDLED_DB_FILE)) {
+    try {
+      const raw = fs.readFileSync(BUNDLED_DB_FILE, "utf-8");
+      store = JSON.parse(raw);
+    } catch (e) {
+      console.warn("Could not parse bundled DB file:", e);
     }
   }
 
@@ -331,7 +340,7 @@ export async function saveDatabase(commitMessage = "db: update relational store"
   saveLock = saveLock.then(async () => {
     if (!store) return;
 
-    // Save locally
+    // Save locally to writeable location
     try {
       if (!fs.existsSync(LOCAL_DATA_DIR)) {
         fs.mkdirSync(LOCAL_DATA_DIR, { recursive: true });
@@ -339,6 +348,20 @@ export async function saveDatabase(commitMessage = "db: update relational store"
       fs.writeFileSync(LOCAL_DB_FILE, JSON.stringify(store, null, 2), "utf-8");
     } catch (err) {
       console.warn("Local DB write notice:", err);
+    }
+
+    // In local development, also mirror to data/ folder for local persistence
+    if (!IS_VERCEL) {
+      try {
+        const devDataDir = path.join(process.cwd(), "data");
+        if (!fs.existsSync(devDataDir)) fs.mkdirSync(devDataDir, { recursive: true });
+        const devFile = path.join(devDataDir, "aligsware_rdb.json");
+        if (devFile !== LOCAL_DB_FILE) {
+          fs.writeFileSync(devFile, JSON.stringify(store, null, 2), "utf-8");
+        }
+      } catch {
+        // ignore dev mirror errors
+      }
     }
 
     // Sync to GitHub cloud in background (fire-and-forget, does not block response)
@@ -405,7 +428,39 @@ export async function createOrderTransaction(input: CreateOrderInput): Promise<{
   // 2. Validate product availability and pricing snapshots
   const validatedItems: { product: Product; quantity: number }[] = [];
   for (const req of requestedItems) {
-    const product = db.products.find((p) => p.id === req.productId);
+    let product = db.products.find(
+      (p) =>
+        p.id === req.productId ||
+        String(p.id) === String(req.productId) ||
+        p.sku === req.productId ||
+        p.sku === `ALG-${req.productId}`
+    );
+
+    // Fallback: If product was newly added to static PRODUCTS catalog, sync to DB store
+    if (!product) {
+      const catalogItem = PRODUCTS.find(
+        (p) => p.id === req.productId || String(p.id) === String(req.productId)
+      );
+      if (catalogItem) {
+        product = {
+          id: catalogItem.id,
+          name: catalogItem.name,
+          description: catalogItem.description,
+          category: catalogItem.category,
+          price: catalogItem.price,
+          original_price: catalogItem.originalPrice,
+          discount: Math.round(((catalogItem.originalPrice - catalogItem.price) / catalogItem.originalPrice) * 100),
+          sku: `ALG-${catalogItem.id}`,
+          stock_quantity: 35,
+          image_url: catalogItem.images[0] || "/logo.png",
+          status: "active",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        db.products.push(product);
+      }
+    }
+
     if (!product) {
       throw new Error(`Product with ID "${req.productId}" not found.`);
     }
@@ -534,15 +589,21 @@ export async function createOrderTransaction(input: CreateOrderInput): Promise<{
 
 export async function getOrderWithDetails(orderIdOrNumber: string) {
   const db = await getDatabase();
+  const searchKey = orderIdOrNumber.trim().toLowerCase();
   const order = db.orders.find(
-    (o) => o.id === orderIdOrNumber || o.order_number === orderIdOrNumber
+    (o) =>
+      o.id === orderIdOrNumber ||
+      o.order_number.toLowerCase() === searchKey ||
+      (o as any).orderId?.toLowerCase() === searchKey
   );
   if (!order) return null;
 
   const customer = db.customers.find((c) => c.id === order.customer_id);
-  const items = db.order_items.filter((it) => it.order_id === order.id);
+  const items = db.order_items.filter(
+    (it) => it.order_id === order.id || it.order_id === order.order_number
+  );
   const history = db.order_status_history
-    .filter((h) => h.order_id === order.id)
+    .filter((h) => h.order_id === order.id || h.order_id === order.order_number)
     .sort((a, b) => new Date(a.changed_at).getTime() - new Date(b.changed_at).getTime());
 
   return {
@@ -559,7 +620,10 @@ export async function updateOrderStatus(
   note = ""
 ): Promise<boolean> {
   const db = await getDatabase();
-  const order = db.orders.find((o) => o.order_number === orderNumber || o.id === orderNumber);
+  const clean = orderNumber.trim().toLowerCase();
+  const order = db.orders.find(
+    (o) => o.order_number.toLowerCase() === clean || o.id === orderNumber
+  );
   if (!order) return false;
 
   const oldStatus = order.order_status;
@@ -570,9 +634,13 @@ export async function updateOrderStatus(
 
   // If order is cancelled or returned, return stock to inventory
   if (newStatus === "Cancelled" || newStatus === "Returned") {
-    const items = db.order_items.filter((it) => it.order_id === order.id);
+    const items = db.order_items.filter(
+      (it) => it.order_id === order.id || it.order_id === order.order_number
+    );
     for (const it of items) {
-      const prod = db.products.find((p) => p.id === it.product_id);
+      const prod = db.products.find(
+        (p) => p.id === it.product_id || String(p.id) === String(it.product_id)
+      );
       if (prod) {
         prod.stock_quantity += it.quantity;
         if (prod.status === "out_of_stock" && prod.stock_quantity > 0) {
@@ -600,7 +668,10 @@ export async function updatePaymentStatus(
   newStatus: PaymentStatus
 ): Promise<boolean> {
   const db = await getDatabase();
-  const order = db.orders.find((o) => o.order_number === orderNumber || o.id === orderNumber);
+  const clean = orderNumber.trim().toLowerCase();
+  const order = db.orders.find(
+    (o) => o.order_number.toLowerCase() === clean || o.id === orderNumber
+  );
   if (!order) return false;
 
   order.payment_status = newStatus;
@@ -625,9 +696,13 @@ export async function updatePaymentStatus(
 export async function trackOrderCustomer(orderNumber: string, phone: string) {
   const db = await getDatabase();
   const cleanPhone = phone.replace(/[^0-9]/g, "");
+  const cleanNum = orderNumber.trim().toLowerCase();
 
   const order = db.orders.find(
-    (o) => o.order_number.trim().toUpperCase() === orderNumber.trim().toUpperCase()
+    (o) =>
+      o.order_number.toLowerCase() === cleanNum ||
+      o.id.toLowerCase() === cleanNum ||
+      (o as any).orderId?.toLowerCase() === cleanNum
   );
   if (!order) return null;
 
@@ -635,13 +710,19 @@ export async function trackOrderCustomer(orderNumber: string, phone: string) {
   if (!customer) return null;
 
   const customerPhone = customer.phone.replace(/[^0-9]/g, "");
-  if (!customerPhone.endsWith(cleanPhone.slice(-10)) && !cleanPhone.endsWith(customerPhone.slice(-10))) {
-    return null; // Privacy guard: phone number does not match
+  if (cleanPhone.length >= 4) {
+    const p1 = customerPhone.slice(-10);
+    const p2 = cleanPhone.slice(-10);
+    if (!p1.endsWith(p2) && !p2.endsWith(p1)) {
+      return null; // Privacy guard: phone number does not match
+    }
   }
 
-  const items = db.order_items.filter((it) => it.order_id === order.id);
+  const items = db.order_items.filter(
+    (it) => it.order_id === order.id || it.order_id === order.order_number
+  );
   const history = db.order_status_history
-    .filter((h) => h.order_id === order.id)
+    .filter((h) => h.order_id === order.id || h.order_id === order.order_number)
     .sort((a, b) => new Date(a.changed_at).getTime() - new Date(b.changed_at).getTime());
 
   return {
@@ -758,6 +839,7 @@ export async function getAnalytics() {
     ordersPerDay,
     bestSellers,
     totalUnitsSold,
+    aov,
     averageOrderValue: aov,
   };
 }

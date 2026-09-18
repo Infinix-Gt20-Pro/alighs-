@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getDatabase, saveDatabase } from '@/lib/database/db';
 import { Product } from '@/lib/database/schema';
 
@@ -62,26 +62,29 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
-    const { id, name, category, price, original_price, stock_quantity, status, image_url, description } = body;
+    const { id, name, category, price, original_price, sku, stock_quantity, status, image_url, description } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'Product ID is required.' }, { status: 400 });
     }
 
     const db = await getDatabase();
-    const product = db.products.find((p) => p.id === id);
+    const product = db.products.find(
+      (p) => p.id === id || String(p.id) === String(id) || p.sku === id
+    );
     if (!product) {
       return NextResponse.json({ error: 'Product not found.' }, { status: 404 });
     }
 
     if (name !== undefined) product.name = String(name).trim();
     if (category !== undefined) product.category = String(category).trim();
-    if (price !== undefined) product.price = Number(price);
-    if (original_price !== undefined) product.original_price = Number(original_price);
+    if (sku !== undefined) product.sku = String(sku).trim();
+    if (price !== undefined && !isNaN(Number(price))) product.price = Number(price);
+    if (original_price !== undefined && !isNaN(Number(original_price))) product.original_price = Number(original_price);
     if (description !== undefined) product.description = String(description).trim();
     if (image_url !== undefined) product.image_url = String(image_url).trim();
-    if (stock_quantity !== undefined) {
-      product.stock_quantity = Number(stock_quantity);
+    if (stock_quantity !== undefined && !isNaN(Number(stock_quantity))) {
+      product.stock_quantity = Math.max(0, Number(stock_quantity));
       if (product.stock_quantity <= 0) {
         product.status = 'out_of_stock';
       } else if (product.status === 'out_of_stock' && product.stock_quantity > 0) {
@@ -111,7 +114,9 @@ export async function DELETE(request: Request) {
     }
 
     const db = await getDatabase();
-    const product = db.products.find((p) => p.id === id);
+    const product = db.products.find(
+      (p) => p.id === id || String(p.id) === String(id) || p.sku === id
+    );
     if (!product) {
       return NextResponse.json({ error: 'Product not found.' }, { status: 404 });
     }

@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getDatabase } from '@/lib/database/db';
 
 export async function GET(request: Request) {
@@ -57,9 +57,11 @@ export async function GET(request: Request) {
         fullName: c.full_name,
         phone: c.phone,
         email: c.email,
+        address: c.address,
         city: c.city,
         state: c.state,
         pincode: c.pincode,
+        orderCount: customerOrders.length,
         totalOrders: customerOrders.length,
         totalSpent,
         lastOrderDate,

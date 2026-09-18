@@ -1,16 +1,30 @@
 import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 
-const FALLBACK_KEY_ID = 'rzp_live_TdNncN01Vi6Vvg';
-const FALLBACK_KEY_SECRET = 'GbLZfY1sCE3P1jj9yT6juJ2E';
+const LIVE_KEY_ID = 'rzp_live_TdNncN01Vi6Vvg';
+const LIVE_KEY_SECRET = 'GbLZfY1sCE3P1jj9yT6juJ2E';
+
+function getActiveCredentials() {
+  const envKey = process.env.RAZORPAY_KEY_ID;
+  const envSecret = process.env.RAZORPAY_KEY_SECRET;
+
+  // If Vercel env contains an outdated rzp_test_ key, prioritize active live key
+  if (!envKey || envKey.startsWith('rzp_test_')) {
+    return { key_id: LIVE_KEY_ID, key_secret: LIVE_KEY_SECRET };
+  }
+
+  return {
+    key_id: envKey,
+    key_secret: envSecret || LIVE_KEY_SECRET,
+  };
+}
 
 /**
  * GET /api/create-order
  * Diagnostic Health Check: Tests Razorpay connection and credentials
  */
 export async function GET() {
-  const key_id = process.env.RAZORPAY_KEY_ID || FALLBACK_KEY_ID;
-  const key_secret = process.env.RAZORPAY_KEY_SECRET || FALLBACK_KEY_SECRET;
+  const { key_id, key_secret } = getActiveCredentials();
 
   if (!key_id || !key_secret) {
     return NextResponse.json(
@@ -75,8 +89,7 @@ export async function GET() {
  */
 export async function POST(request: Request) {
   try {
-    const key_id = process.env.RAZORPAY_KEY_ID || FALLBACK_KEY_ID;
-    const key_secret = process.env.RAZORPAY_KEY_SECRET || FALLBACK_KEY_SECRET;
+    const { key_id, key_secret } = getActiveCredentials();
 
     if (!key_id || !key_secret) {
       return NextResponse.json(

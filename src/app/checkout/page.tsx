@@ -200,8 +200,9 @@ export default function CheckoutPage() {
       )}`;
 
       // Step 2: Configure and open Razorpay modal
+      const activeKey = orderData.key_id || (!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.startsWith('rzp_test_') ? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID : null) || "rzp_live_TdNncN01Vi6Vvg";
       const options = {
-        key: orderData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_live_TdNncN01Vi6Vvg",
+        key: activeKey,
         amount: orderData.amount,
         currency: orderData.currency || "INR",
         name: "ALIG'S WARE",

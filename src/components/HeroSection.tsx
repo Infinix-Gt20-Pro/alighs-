@@ -49,13 +49,13 @@ export default function HeroSection() {
   return (
     <section
       ref={containerRef}
-      className="relative w-full min-h-screen pt-24 sm:pt-28 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#F4E9D5] via-[#E8D2A8]/50 to-[#F4E9D5] overflow-hidden flex flex-col justify-between items-center selection:bg-[#B88A32]/30"
+      className="relative w-full min-h-screen pt-24 sm:pt-28 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#F4E9D5] via-[#E8D2A8]/50 to-[#F4E9D5] dark:from-[#0A0A0E] dark:via-[#14141C] dark:to-[#0A0A0E] overflow-hidden flex flex-col justify-between items-center selection:bg-[#B88A32]/30 transition-colors duration-300"
     >
       {/* Warm Ambient Shifting Atmosphere */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] sm:w-[900px] h-[600px] sm:h-[900px] rounded-full bg-gradient-to-br from-[#D4AF62]/25 via-[#B88A32]/15 to-transparent blur-[140px] sm:blur-[180px]" />
-        <div className="absolute -bottom-20 right-10 w-[450px] h-[450px] rounded-full bg-[#D6B878]/25 blur-[130px]" />
-        <div className="absolute top-20 left-10 w-[400px] h-[400px] rounded-full bg-[#FFF9EF]/40 blur-[110px]" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] sm:w-[900px] h-[600px] sm:h-[900px] rounded-full bg-gradient-to-br from-[#D4AF62]/25 via-[#B88A32]/15 to-transparent dark:from-[#D4AF62]/20 dark:via-[#B88A32]/10 blur-[140px] sm:blur-[180px]" />
+        <div className="absolute -bottom-20 right-10 w-[450px] h-[450px] rounded-full bg-[#D6B878]/25 dark:bg-[#D4AF62]/15 blur-[130px]" />
+        <div className="absolute top-20 left-10 w-[400px] h-[400px] rounded-full bg-[#FFF9EF]/40 dark:bg-[#B88A32]/10 blur-[110px]" />
       </div>
 
       {/* =========================================================================
@@ -67,10 +67,10 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FFF9EF] border border-[#B88A32]/25 shadow-sm mb-4"
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FFF9EF] dark:bg-[#161622] border border-[#B88A32]/25 dark:border-[#D4AF62]/30 shadow-sm mb-4"
         >
-          <Sparkles className="w-3.5 h-3.5 text-[#B88A32]" />
-          <span className="text-[11px] font-mono tracking-[0.28em] text-[#4A3928] uppercase font-bold">
+          <Sparkles className="w-3.5 h-3.5 text-[#B88A32] dark:text-[#D4AF62]" />
+          <span className="text-[11px] font-mono tracking-[0.28em] text-[#4A3928] dark:text-[#D4AF62] uppercase font-bold">
             ALIG&apos;S WARE &bull; FIROZABAD
           </span>
         </motion.div>
@@ -80,10 +80,10 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.1 }}
-          className="font-cinzel text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-[0.06em] text-[#2A2118] leading-[0.94] uppercase drop-shadow-sm"
+          className="font-cinzel text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-[0.06em] text-[#2A2118] dark:text-[#F5EFE6] leading-[0.94] uppercase drop-shadow-sm"
         >
           SCULPTED<br />
-          <span className="inline-block mt-1 sm:mt-2 text-transparent bg-clip-text bg-gradient-to-r from-[#2A2118] via-[#B88A32] to-[#2A2118]">
+          <span className="inline-block mt-1 sm:mt-2 text-transparent bg-clip-text bg-gradient-to-r from-[#2A2118] via-[#B88A32] to-[#2A2118] dark:from-[#F5EFE6] dark:via-[#D4AF62] dark:to-[#F5EFE6]">
             VISION.
           </span>
         </motion.h1>
@@ -93,7 +93,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2 }}
-          className="font-cormorant italic text-lg sm:text-2xl md:text-3xl text-[#4A3928] tracking-wide mt-2 sm:mt-3"
+          className="font-cormorant italic text-lg sm:text-2xl md:text-3xl text-[#4A3928] dark:text-[#B8ADA0] tracking-wide mt-2 sm:mt-3"
         >
           Firozabad &bull; Precision Eyewear
         </motion.p>
@@ -120,51 +120,51 @@ export default function HeroSection() {
           {/* 1. BETA TITANIUM (Left Arm) */}
           <div className="absolute top-[34%] left-[6%] lg:left-[10%] flex items-center gap-2.5">
             <div className="flex flex-col text-right">
-              <span className="text-[10px] font-mono tracking-[0.24em] font-black text-[#B88A32] uppercase">
+              <span className="text-[10px] font-mono tracking-[0.24em] font-black text-[#B88A32] dark:text-[#D4AF62] uppercase">
                 BETA TITANIUM
               </span>
-              <span className="text-[11px] font-mono text-[#4A3928] font-medium">
+              <span className="text-[11px] font-mono text-[#4A3928] dark:text-[#D1C7BA] font-medium">
                 Japanese Memory Flex
               </span>
             </div>
-            <div className="w-8 h-[1px] bg-[#B88A32]/60" />
-            <div className="w-2 h-2 rounded-full bg-[#B88A32] ring-4 ring-[#B88A32]/25 shadow-sm" />
+            <div className="w-8 h-[1px] bg-[#B88A32]/60 dark:bg-[#D4AF62]/60" />
+            <div className="w-2 h-2 rounded-full bg-[#B88A32] dark:bg-[#D4AF62] ring-4 ring-[#B88A32]/25 dark:ring-[#D4AF62]/25 shadow-sm" />
           </div>
 
           {/* 2. 18.4g ULTRA-LIGHT (Top Bridge) */}
           <div className="absolute top-[14%] left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5">
-            <div className="px-3.5 py-1 rounded-full bg-[#FFF9EF]/95 border border-[#B88A32]/35 shadow-sm flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#B88A32] animate-pulse" />
-              <span className="text-[10px] font-mono tracking-[0.22em] font-black text-[#2A2118] uppercase">
+            <div className="px-3.5 py-1 rounded-full bg-[#FFF9EF]/95 dark:bg-[#161622]/95 border border-[#B88A32]/35 dark:border-[#D4AF62]/35 shadow-sm flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#B88A32] dark:bg-[#D4AF62] animate-pulse" />
+              <span className="text-[10px] font-mono tracking-[0.22em] font-black text-[#2A2118] dark:text-[#F5EFE6] uppercase">
                 18.4g ULTRA-LIGHT
               </span>
             </div>
-            <div className="w-[1px] h-5 bg-[#B88A32]/50" />
+            <div className="w-[1px] h-5 bg-[#B88A32]/50 dark:bg-[#D4AF62]/50" />
           </div>
 
           {/* 3. PRECISION FIT (Silicone Pads) */}
           <div className="absolute bottom-[24%] left-[12%] lg:left-[16%] flex items-center gap-2.5">
             <div className="flex flex-col text-right">
-              <span className="text-[10px] font-mono tracking-[0.24em] font-black text-[#B88A32] uppercase">
+              <span className="text-[10px] font-mono tracking-[0.24em] font-black text-[#B88A32] dark:text-[#D4AF62] uppercase">
                 PRECISION FIT
               </span>
-              <span className="text-[11px] font-mono text-[#4A3928] font-medium">
+              <span className="text-[11px] font-mono text-[#4A3928] dark:text-[#D1C7BA] font-medium">
                 Contoured Silicone Pads
               </span>
             </div>
-            <div className="w-7 h-[1px] bg-[#B88A32]/60" />
-            <div className="w-2 h-2 rounded-full bg-[#B88A32] ring-4 ring-[#B88A32]/25 shadow-sm" />
+            <div className="w-7 h-[1px] bg-[#B88A32]/60 dark:bg-[#D4AF62]/60" />
+            <div className="w-2 h-2 rounded-full bg-[#B88A32] dark:bg-[#D4AF62] ring-4 ring-[#B88A32]/25 dark:ring-[#D4AF62]/25 shadow-sm" />
           </div>
 
           {/* 4. OPTICAL CLARITY (Right Lens) */}
           <div className="absolute top-[38%] right-[6%] lg:right-[10%] flex items-center gap-2.5">
-            <div className="w-2 h-2 rounded-full bg-[#B88A32] ring-4 ring-[#B88A32]/25 shadow-sm" />
-            <div className="w-8 h-[1px] bg-[#B88A32]/60" />
+            <div className="w-2 h-2 rounded-full bg-[#B88A32] dark:bg-[#D4AF62] ring-4 ring-[#B88A32]/25 dark:ring-[#D4AF62]/25 shadow-sm" />
+            <div className="w-8 h-[1px] bg-[#B88A32]/60 dark:bg-[#D4AF62]/60" />
             <div className="flex flex-col text-left">
-              <span className="text-[10px] font-mono tracking-[0.24em] font-black text-[#B88A32] uppercase">
+              <span className="text-[10px] font-mono tracking-[0.24em] font-black text-[#B88A32] dark:text-[#D4AF62] uppercase">
                 OPTICAL CLARITY
               </span>
-              <span className="text-[11px] font-mono text-[#4A3928] font-medium">
+              <span className="text-[11px] font-mono text-[#4A3928] dark:text-[#D1C7BA] font-medium">
                 420nm Sapphire Crystal
               </span>
             </div>
@@ -173,8 +173,8 @@ export default function HeroSection() {
 
         {/* 360° Drag Inspection Floating Control Pill */}
         <div className="absolute bottom-2 z-20 pointer-events-auto">
-          <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FFF9EF]/95 backdrop-blur-md border border-[#B88A32]/35 shadow-sm text-xs font-mono text-[#4A3928]">
-            <Compass className="w-3.5 h-3.5 text-[#B88A32] animate-spin" style={{ animationDuration: "12s" }} />
+          <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FFF9EF]/95 dark:bg-[#161622]/95 backdrop-blur-md border border-[#B88A32]/35 dark:border-[#D4AF62]/35 shadow-sm text-xs font-mono text-[#4A3928] dark:text-[#D4AF62]">
+            <Compass className="w-3.5 h-3.5 text-[#B88A32] dark:text-[#D4AF62] animate-spin" style={{ animationDuration: "12s" }} />
             <span className="font-semibold text-[11px] tracking-wider uppercase">
               360&deg; DRAG TO INSPECT
             </span>
@@ -182,7 +182,7 @@ export default function HeroSection() {
               <button
                 type="button"
                 onClick={() => setDragOffset({ x: 0, y: 0 })}
-                className="ml-1 text-[10px] px-2 py-0.5 rounded-full bg-[#B88A32]/15 hover:bg-[#B88A32]/25 text-[#B88A32] font-semibold transition-colors"
+                className="ml-1 text-[10px] px-2 py-0.5 rounded-full bg-[#B88A32]/15 dark:bg-[#D4AF62]/20 hover:bg-[#B88A32]/25 dark:hover:bg-[#D4AF62]/30 text-[#B88A32] dark:text-[#D4AF62] font-semibold transition-colors"
               >
                 Reset
               </button>
@@ -207,14 +207,14 @@ export default function HeroSection() {
 
           <Link
             href="/appointment"
-            className="cursor-pointer px-8 sm:px-10 py-3.5 rounded-full bg-[#FFF9EF] hover:bg-white border border-[#B88A32]/35 text-[#2A2118] font-bold text-xs sm:text-sm tracking-[0.16em] uppercase transition-all duration-300 shadow-sm active:scale-[0.98]"
+            className="cursor-pointer px-8 sm:px-10 py-3.5 rounded-full bg-[#FFF9EF] dark:bg-[#161622] hover:bg-white dark:hover:bg-[#1E1E2C] border border-[#B88A32]/35 dark:border-[#D4AF62]/40 text-[#2A2118] dark:text-[#F5EFE6] font-bold text-xs sm:text-sm tracking-[0.16em] uppercase transition-all duration-300 shadow-sm active:scale-[0.98]"
           >
             BOOK TRY-ON
           </Link>
         </div>
 
         {/* Scroll Indicator Prompt */}
-        <div className="flex items-center justify-center gap-1.5 text-[11px] font-mono tracking-[0.24em] text-[#6B5740] uppercase font-bold">
+        <div className="flex items-center justify-center gap-1.5 text-[11px] font-mono tracking-[0.24em] text-[#6B5740] dark:text-[#B8ADA0] uppercase font-bold">
           <span className="text-sm animate-bounce">&darr;</span>
           <span>SCROLL TO INSPECT</span>
         </div>

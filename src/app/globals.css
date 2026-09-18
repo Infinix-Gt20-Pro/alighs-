@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #F4E9D5;
   --foreground: #2A2118;
@@ -12,6 +14,20 @@
   --color-accent-light: #D4AF62;
   --color-secondary-light: #FFF9EF;
   --color-secondary-dark: #6B5740;
+}
+
+.dark {
+  --background: #0A0A0E;
+  --foreground: #F5EFE6;
+  --color-bg-base: #0A0A0E;
+  --color-bg-mid: #14141C;
+  --color-bg-deep: #1E1E28;
+  --color-text-main: #F5EFE6;
+  --color-text-sub: #B8ADA0;
+  --color-accent: #D4AF62;
+  --color-accent-light: #F3E5AB;
+  --color-secondary-light: #161622;
+  --color-secondary-dark: #2A2118;
 }
 
 @theme inline {
@@ -29,12 +45,17 @@ html {
   color-scheme: light;
 }
 
+html.dark {
+  color-scheme: dark;
+}
+
 body {
-  background-color: #F4E9D5;
-  color: #2A2118;
+  background-color: var(--background);
+  color: var(--foreground);
   font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
   min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* ==========================================================================
@@ -102,6 +123,53 @@ body {
 .glass-pill:hover {
   background-color: #FFF9EF;
   border-color: rgba(184, 138, 50, 0.5);
+}
+
+/* Dark Mode Frosted Glass Styles — Obsidian & Gold */
+.dark .glass {
+  background-color: rgba(20, 20, 28, 0.82);
+  border-color: rgba(212, 175, 98, 0.24);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+}
+
+.dark .glass-card {
+  background: linear-gradient(
+    135deg,
+    rgba(24, 24, 34, 0.92) 0%,
+    rgba(16, 16, 22, 0.85) 100%
+  );
+  border-color: rgba(212, 175, 98, 0.22);
+  box-shadow: 
+    0 10px 35px 0 rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+.dark .glass-card:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(32, 32, 44, 0.98) 0%,
+    rgba(20, 20, 28, 0.92) 100%
+  );
+  border-color: rgba(212, 175, 98, 0.45);
+  box-shadow: 
+    0 18px 45px 0 rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+}
+
+.dark .glass-panel {
+  background-color: rgba(18, 18, 26, 0.9);
+  border-color: rgba(212, 175, 98, 0.22);
+  box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.6);
+}
+
+.dark .glass-pill {
+  background-color: rgba(24, 24, 34, 0.85);
+  border-color: rgba(212, 175, 98, 0.28);
+}
+
+.dark .glass-pill:hover {
+  background-color: #1A1A26;
+  border-color: rgba(212, 175, 98, 0.55);
 }
 
 /* Subtle glowing pulse animations */

@@ -23,6 +23,7 @@ import {
 import { useCart, CartItem } from "@/context/CartContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ThemeToggle from "@/components/ThemeToggle";
 
 type Step = 1 | 2 | 3;
 type PaymentMethod = "COD" | "UPI" | "ONLINE";
@@ -182,7 +183,7 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4E9D5] text-[#2A2118] flex flex-col selection:bg-[#B88A32]/30 selection:text-[#2A2118]">
+    <div className="min-h-screen bg-[#F4E9D5] dark:bg-[#0A0A0E] text-[#2A2118] dark:text-[#F5EFE6] flex flex-col selection:bg-[#B88A32]/30 selection:text-[#2A2118] dark:selection:text-[#F5EFE6] transition-colors duration-300">
       <Navbar />
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-36 pb-20 w-full relative">
@@ -684,6 +685,11 @@ export default function CheckoutPage() {
       </main>
 
       <Footer />
+
+      {/* Floating Theme Switcher */}
+      <div className="fixed bottom-6 left-6 z-40">
+        <ThemeToggle variant="floating" />
+      </div>
     </div>
   );
 }

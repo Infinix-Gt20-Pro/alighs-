@@ -124,28 +124,28 @@ export default function ModelScrollExperience() {
   return (
     <section
       ref={containerRef}
-      className="relative h-[200vh] sm:h-[220vh] bg-[#F4E9D5] w-full max-w-full overflow-hidden"
+      className="relative h-[200vh] sm:h-[220vh] bg-[#F4E9D5] dark:bg-[#0A0A0E] w-full max-w-full overflow-hidden transition-colors duration-300"
     >
       {/* Sticky Viewport Container */}
       <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
         
         {/* Background Ambient Glows */}
         <div className="pointer-events-none absolute inset-0 z-0">
-          <div className="absolute top-1/3 left-1/4 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] rounded-full bg-[#B88A32]/12 blur-[120px]" />
-          <div className="absolute bottom-1/4 right-1/4 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] rounded-full bg-[#D4AF62]/10 blur-[130px]" />
+          <div className="absolute top-1/3 left-1/4 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] rounded-full bg-[#B88A32]/12 dark:bg-[#B88A32]/8 blur-[120px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] rounded-full bg-[#D4AF62]/10 dark:bg-[#D4AF62]/5 blur-[130px]" />
         </div>
 
         {/* Section Top Header & Model Switcher Bar */}
         <div className="absolute top-4 sm:top-8 z-40 w-full px-3 sm:px-4 max-w-5xl mx-auto flex flex-col items-center pointer-events-none">
-          <div className="pointer-events-auto inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full border border-[#B88A32]/30 bg-[#FFF9EF]/90 backdrop-blur-md mb-2 shadow-[0_2px_15px_rgba(184,138,50,0.15)]">
-            <Sparkles className="w-3 h-3 text-[#B88A32]" />
-            <span className="text-[10px] sm:text-[11px] font-mono tracking-widest text-[#2A2118] uppercase">
+          <div className="pointer-events-auto inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full border border-[#B88A32]/30 dark:border-[#B88A32]/40 bg-[#FFF9EF]/90 dark:bg-[#161622]/90 backdrop-blur-md mb-2 shadow-[0_2px_15px_rgba(184,138,50,0.15)]">
+            <Sparkles className="w-3 h-3 text-[#B88A32] dark:text-[#D4AF62]" />
+            <span className="text-[10px] sm:text-[11px] font-mono tracking-widest text-[#2A2118] dark:text-[#F5EFE6] uppercase">
               Editorial Runway Showcase
             </span>
           </div>
 
           {/* Model Switcher Buttons */}
-          <div className="pointer-events-auto flex items-center gap-1.5 bg-[#FFF9EF]/95 p-1 sm:p-1.5 rounded-full border border-[#B88A32]/25 backdrop-blur-xl shadow-lg max-w-full overflow-x-auto">
+          <div className="pointer-events-auto flex items-center gap-1.5 bg-[#FFF9EF]/95 dark:bg-[#12121A]/95 p-1 sm:p-1.5 rounded-full border border-[#B88A32]/25 dark:border-[#B88A32]/40 backdrop-blur-xl shadow-lg max-w-full overflow-x-auto">
             {MODELS.map((m, idx) => {
               const isSelected = activeModelIdx === idx;
               return (
@@ -155,11 +155,11 @@ export default function ModelScrollExperience() {
                   className={`px-3.5 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                     isSelected
                       ? "bg-gradient-to-r from-[#B88A32] to-[#D4AF62] text-white font-bold shadow-[0_2px_12px_rgba(184,138,50,0.35)]"
-                      : "text-[#6B5740] hover:text-[#2A2118] hover:bg-[#F4E9D5]"
+                      : "text-[#6B5740] dark:text-[#A09383] hover:text-[#2A2118] dark:hover:text-[#F5EFE6] hover:bg-[#F4E9D5] dark:hover:bg-[#1C1C2A]"
                   }`}
                 >
                   {m.video ? (
-                    <Film className="w-3 h-3 text-[#B88A32]" />
+                    <Film className="w-3 h-3 text-[#B88A32] dark:text-[#D4AF62]" />
                   ) : (
                     <span className="w-2 h-2 rounded-full" style={{ backgroundColor: m.finishColor }} />
                   )}
@@ -183,7 +183,7 @@ export default function ModelScrollExperience() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="relative w-full h-full max-h-[84vh] sm:max-h-[90vh] rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(60,36,21,0.15)] border border-[#C6A463]/15 bg-[#F5EFE0]"
+                className="relative w-full h-full max-h-[84vh] sm:max-h-[90vh] rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(60,36,21,0.15)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.8)] border border-[#C6A463]/15 dark:border-[#B88A32]/30 bg-[#F5EFE0] dark:bg-[#14141E]"
               >
                 {activeModel.video ? (
                   <video
@@ -211,10 +211,10 @@ export default function ModelScrollExperience() {
                 {/* Soft Vignette & Subtle Warm Gradient Overlays */}
                 <motion.div
                   style={{ opacity: overlayDarkness }}
-                  className="absolute inset-0 bg-[#3C2415] pointer-events-none"
+                  className="absolute inset-0 bg-[#3C2415] dark:bg-black pointer-events-none"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#FAF7F0] via-transparent to-[#FAF7F0]/60 pointer-events-none" />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#FAF7F0]/80 via-transparent to-[#FAF7F0]/80 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#FAF7F0] dark:from-[#0A0A0E] via-transparent to-[#FAF7F0]/60 dark:to-[#0A0A0E]/60 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#FAF7F0]/80 dark:from-[#0A0A0E]/80 via-transparent to-[#FAF7F0]/80 dark:to-[#0A0A0E]/80 pointer-events-none" />
 
                 {/* Blue-Cut Sapphire Optical Sheen Simulation */}
                 {blueCutActive && (
@@ -234,18 +234,18 @@ export default function ModelScrollExperience() {
           style={{ opacity: phase1Opacity, y: phase1Y }}
           className="absolute left-4 right-4 sm:right-auto sm:left-12 lg:left-16 bottom-10 sm:bottom-16 z-30 max-w-sm sm:max-w-md mx-auto sm:mx-0 pointer-events-none"
         >
-          <div className="p-6 sm:p-7 rounded-3xl border border-[#B88A32]/30 bg-[#FFF9EF]/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(42,33,24,0.12)]">
-            <span className="font-cinzel text-3xl sm:text-4xl font-black text-[#B88A32] block tracking-tight mb-1">
+          <div className="p-6 sm:p-7 rounded-3xl border border-[#B88A32]/30 dark:border-[#B88A32]/40 bg-[#FFF9EF]/95 dark:bg-[#12121A]/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(42,33,24,0.12)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
+            <span className="font-cinzel text-3xl sm:text-4xl font-black text-[#B88A32] dark:text-[#D4AF62] block tracking-tight mb-1">
               01
             </span>
-            <h3 className="font-cinzel text-xl sm:text-2xl lg:text-3xl font-black tracking-[0.14em] text-[#2A2118] uppercase mb-3 drop-shadow-sm">
+            <h3 className="font-cinzel text-xl sm:text-2xl lg:text-3xl font-black tracking-[0.14em] text-[#2A2118] dark:text-[#F5EFE6] uppercase mb-3 drop-shadow-sm">
               ATELIER SILHOUETTE
             </h3>
-            <p className="font-cormorant italic text-xl sm:text-2xl text-[#4A3928] leading-tight mb-3">
+            <p className="font-cormorant italic text-xl sm:text-2xl text-[#4A3928] dark:text-[#D5C7B5] leading-tight mb-3">
               Precision designed<br />
               for everyday vision.
             </p>
-            <div className="flex items-center gap-2 text-[10px] font-mono tracking-[0.18em] text-[#B88A32] uppercase font-bold border-t border-[#B88A32]/20 pt-2.5">
+            <div className="flex items-center gap-2 text-[10px] font-mono tracking-[0.18em] text-[#B88A32] dark:text-[#D4AF62] uppercase font-bold border-t border-[#B88A32]/20 dark:border-[#B88A32]/30 pt-2.5">
               <span>{activeModel.name} &bull; {activeModel.spec}</span>
             </div>
           </div>
@@ -256,25 +256,25 @@ export default function ModelScrollExperience() {
           style={{ opacity: phase2Opacity, y: phase2Y }}
           className="absolute left-4 right-4 sm:left-auto sm:right-12 bottom-12 sm:top-28 z-30 max-w-sm sm:max-w-md mx-auto sm:mx-0 pointer-events-none"
         >
-          <div className="p-5 sm:p-6 rounded-3xl border border-[#B88A32]/30 bg-[#FFF9EF]/95 backdrop-blur-2xl shadow-[0_15px_40px_rgba(42,33,24,0.1)]">
-            <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-mono text-[#B88A32] mb-1.5 font-bold">
+          <div className="p-5 sm:p-6 rounded-3xl border border-[#B88A32]/30 dark:border-[#B88A32]/40 bg-[#FFF9EF]/95 dark:bg-[#12121A]/95 backdrop-blur-2xl shadow-[0_15px_40px_rgba(42,33,24,0.1)] dark:shadow-[0_15px_40px_rgba(0,0,0,0.6)]">
+            <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-mono text-[#B88A32] dark:text-[#D4AF62] mb-1.5 font-bold">
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>02 • SAPPHIRE OPTICAL CLARITY</span>
             </div>
-            <h3 className="font-cinzel text-lg sm:text-2xl font-bold text-[#2A2118] mb-1">
+            <h3 className="font-cinzel text-lg sm:text-2xl font-bold text-[#2A2118] dark:text-[#F5EFE6] mb-1">
               {activeModel.frameName}
             </h3>
-            <p className="text-[11px] sm:text-xs text-[#4A3928] leading-relaxed mb-3">
+            <p className="text-[11px] sm:text-xs text-[#4A3928] dark:text-[#D5C7B5] leading-relaxed mb-3">
               Precision hand-beveled optics with multi-layer sapphire anti-glare filtration and 420nm high-energy blue protection.
             </p>
             <div className="grid grid-cols-2 gap-2 text-[10px] sm:text-[11px] font-mono">
-              <div className="p-2 rounded-xl bg-[#F4E9D5] border border-[#B88A32]/20">
-                <span className="text-[#6B5740] block text-[9px]">BLUE-CUT</span>
-                <span className="text-[#2A2118] font-bold">420nm Sapphire</span>
+              <div className="p-2 rounded-xl bg-[#F4E9D5] dark:bg-[#1A1A26] border border-[#B88A32]/20 dark:border-[#B88A32]/30">
+                <span className="text-[#6B5740] dark:text-[#A09383] block text-[9px]">BLUE-CUT</span>
+                <span className="text-[#2A2118] dark:text-[#F5EFE6] font-bold">420nm Sapphire</span>
               </div>
-              <div className="p-2 rounded-xl bg-[#F4E9D5] border border-[#B88A32]/20">
-                <span className="text-[#6B5740] block text-[9px]">MASS</span>
-                <span className="text-[#B88A32] font-bold">18g Feather</span>
+              <div className="p-2 rounded-xl bg-[#F4E9D5] dark:bg-[#1A1A26] border border-[#B88A32]/20 dark:border-[#B88A32]/30">
+                <span className="text-[#6B5740] dark:text-[#A09383] block text-[9px]">MASS</span>
+                <span className="text-[#B88A32] dark:text-[#D4AF62] font-bold">18g Feather</span>
               </div>
             </div>
           </div>
@@ -285,23 +285,23 @@ export default function ModelScrollExperience() {
           style={{ opacity: phase3Opacity, y: phase3Y }}
           className="absolute bottom-6 sm:bottom-10 z-40 w-full px-3 sm:px-4 max-w-2xl mx-auto flex flex-col items-center"
         >
-          <div className="w-full p-5 sm:p-6 rounded-3xl border border-[#B88A32]/35 bg-[#FFF9EF]/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(184,138,50,0.2)] flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="w-full p-5 sm:p-6 rounded-3xl border border-[#B88A32]/35 dark:border-[#B88A32]/50 bg-[#FFF9EF]/95 dark:bg-[#12121A]/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(184,138,50,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.7)] flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-center sm:text-left w-full sm:w-auto">
-              <div className="flex items-center justify-center sm:justify-start gap-1.5 text-[10px] sm:text-xs font-mono text-[#B88A32] mb-1 font-semibold">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <div className="flex items-center justify-center sm:justify-start gap-1.5 text-[10px] sm:text-xs font-mono text-[#B88A32] dark:text-[#D4AF62] mb-1 font-semibold">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <span>IN STOCK &bull; DISPATCH TODAY</span>
               </div>
-              <h4 className="font-cinzel text-lg sm:text-2xl font-bold text-[#2A2118]">
+              <h4 className="font-cinzel text-lg sm:text-2xl font-bold text-[#2A2118] dark:text-[#F5EFE6]">
                 {activeModel.frameName}
               </h4>
               <div className="flex items-baseline justify-center sm:justify-start gap-2.5 mt-1">
-                <span className="text-2xl sm:text-3xl font-bold font-mono text-[#B88A32]">
+                <span className="text-2xl sm:text-3xl font-bold font-mono text-[#B88A32] dark:text-[#D4AF62]">
                   ₹{activeModel.price}
                 </span>
-                <span className="text-xs sm:text-sm font-mono text-[#6B5740] line-through">
+                <span className="text-xs sm:text-sm font-mono text-[#6B5740] dark:text-[#A09383] line-through">
                   ₹{activeModel.originalPrice}
                 </span>
-                <span className="text-[10px] sm:text-xs font-mono text-emerald-800 bg-emerald-500/15 px-2 py-0.5 rounded-full font-semibold">
+                <span className="text-[10px] sm:text-xs font-mono text-emerald-800 dark:text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded-full font-semibold">
                   Save {Math.round(((activeModel.originalPrice - activeModel.price) / activeModel.originalPrice) * 100)}%
                 </span>
               </div>
@@ -318,7 +318,7 @@ export default function ModelScrollExperience() {
 
               <Link
                 href={`/shop/${activeModel.slug}`}
-                className="px-4 py-3 rounded-xl border border-[#B88A32]/30 hover:bg-[#F4E9D5] text-[#2A2118] text-xs font-mono tracking-wider text-center transition-colors font-semibold"
+                className="px-4 py-3 rounded-xl border border-[#B88A32]/30 dark:border-[#B88A32]/40 bg-[#FFF9EF] dark:bg-[#1A1A26] hover:bg-[#F4E9D5] dark:hover:bg-[#252538] text-[#2A2118] dark:text-[#F5EFE6] text-xs font-mono tracking-wider text-center transition-colors font-semibold"
               >
                 Specs
               </Link>
@@ -330,9 +330,9 @@ export default function ModelScrollExperience() {
         <div className="absolute right-3 sm:right-6 bottom-4 sm:bottom-6 z-40 hidden sm:block">
           <button
             onClick={() => setBlueCutActive(!blueCutActive)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 border border-[#C6A463]/20 text-[11px] font-mono text-[#3C2415] hover:border-[#C6A463] backdrop-blur-xl transition-all shadow-md cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 dark:bg-[#161622]/90 border border-[#C6A463]/20 dark:border-[#B88A32]/30 text-[11px] font-mono text-[#3C2415] dark:text-[#F5EFE6] hover:border-[#C6A463] dark:hover:border-[#D4AF62] backdrop-blur-xl transition-all shadow-md cursor-pointer"
           >
-            <Zap className={`w-3 h-3 ${blueCutActive ? "text-[#C6A463]" : "text-[#A69580]"}`} />
+            <Zap className={`w-3 h-3 ${blueCutActive ? "text-[#C6A463] dark:text-[#D4AF62]" : "text-[#A69580]"}`} />
             <span>420nm: {blueCutActive ? "ON" : "OFF"}</span>
           </button>
         </div>

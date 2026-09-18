@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function AppointmentPage() {
   const [formData, setFormData] = useState({
@@ -120,7 +121,7 @@ export default function AppointmentPage() {
   const today = new Date().toISOString().split("T")[0];
 
   return (
-    <div className="min-h-screen bg-[#F4E9D5] text-[#2A2118] flex flex-col selection:bg-[#B88A32]/30 selection:text-[#2A2118]">
+    <div className="min-h-screen bg-[#F4E9D5] dark:bg-[#0A0A0E] text-[#2A2118] dark:text-[#F5EFE6] flex flex-col selection:bg-[#B88A32]/30 selection:text-[#2A2118] dark:selection:text-[#F5EFE6] transition-colors duration-300">
       <Navbar />
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-36 pb-20 w-full relative">
@@ -499,6 +500,11 @@ export default function AppointmentPage() {
       </main>
 
       <Footer />
+
+      {/* Floating Theme Switcher */}
+      <div className="fixed bottom-6 left-6 z-40">
+        <ThemeToggle variant="floating" />
+      </div>
     </div>
   );
 }

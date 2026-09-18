@@ -26,7 +26,7 @@ function InstagramIcon({ className = "w-4 h-4" }: { className?: string }) {
 
 export default function Footer() {
   return (
-    <footer className="w-full border-t border-[#C6A463]/20 bg-[#3C2415] shadow-[inset_0_1px_0_0_rgba(198,164,99,0.1)] pt-16 pb-10">
+    <footer className="w-full border-t border-[#C6A463]/20 dark:border-[#B88A32]/30 bg-[#3C2415] dark:bg-[#07070A] shadow-[inset_0_1px_0_0_rgba(198,164,99,0.1)] dark:shadow-[inset_0_1px_0_0_rgba(184,138,50,0.15)] pt-16 pb-10 transition-colors duration-300">
       <div className="container mx-auto px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
           

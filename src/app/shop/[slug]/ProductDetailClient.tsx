@@ -20,6 +20,7 @@ import {
 import { useCart } from "@/context/CartContext";
 import FrameSilhouette from "@/components/FrameSilhouette";
 import { DEFAULT_PRODUCTS, ProductType, getFallbackProductBySlug } from "@/lib/products-data";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const COLOR_MAP: Record<string, string> = {
   black: "#141416",
@@ -107,24 +108,24 @@ export default function ProductDetailClient() {
   const relatedProducts = DEFAULT_PRODUCTS.filter((p) => p.slug !== product.slug).slice(0, 3);
 
   return (
-    <main className="min-h-screen bg-[#F4E9D5] text-[#2A2118] pt-28 pb-24 relative overflow-hidden selection:bg-[#B88A32]/30 selection:text-[#2A2118]">
+    <main className="min-h-screen bg-[#F4E9D5] dark:bg-[#0A0A0E] text-[#2A2118] dark:text-[#F5EFE6] pt-28 pb-24 relative overflow-hidden selection:bg-[#B88A32]/30 selection:text-[#2A2118] dark:selection:text-[#F5EFE6] transition-colors duration-300">
       {/* Ambient Lighting */}
-      <div className="absolute top-20 right-1/4 w-[600px] h-[500px] bg-gradient-to-br from-[#D4AF62]/20 via-[#B88A32]/10 to-transparent rounded-full blur-[160px] pointer-events-none -z-10" />
-      <div className="absolute bottom-20 left-1/4 w-[600px] h-[500px] bg-gradient-to-tr from-[#E8D2A8]/30 via-[#D6B878]/15 to-transparent rounded-full blur-[160px] pointer-events-none -z-10" />
+      <div className="absolute top-20 right-1/4 w-[600px] h-[500px] bg-gradient-to-br from-[#D4AF62]/20 via-[#B88A32]/10 to-transparent dark:from-[#D4AF62]/10 dark:via-[#B88A32]/5 rounded-full blur-[160px] pointer-events-none -z-10" />
+      <div className="absolute bottom-20 left-1/4 w-[600px] h-[500px] bg-gradient-to-tr from-[#E8D2A8]/30 via-[#D6B878]/15 to-transparent dark:from-[#B88A32]/10 dark:via-transparent rounded-full blur-[160px] pointer-events-none -z-10" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Navigation Breadcrumb */}
         <div className="flex items-center justify-between gap-4 mb-8">
           <Link
             href="/shop"
-            className="cursor-pointer inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#FFF9EF] hover:bg-white border border-[#B88A32]/30 text-xs font-mono text-[#2A2118] hover:text-[#B88A32] transition-all group shadow-sm"
+            className="cursor-pointer inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#FFF9EF] dark:bg-[#161622] hover:bg-white dark:hover:bg-[#202030] border border-[#B88A32]/30 dark:border-[#B88A32]/40 text-xs font-mono text-[#2A2118] dark:text-[#F5EFE6] hover:text-[#B88A32] dark:hover:text-[#D4AF62] transition-all group shadow-sm"
           >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform text-[#B88A32]" />
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform text-[#B88A32] dark:text-[#D4AF62]" />
             <span>&larr; Back to Collection</span>
           </Link>
           <Link
             href="/"
-            className="cursor-pointer inline-flex items-center gap-1.5 text-xs font-mono text-[#6B5740] hover:text-[#2A2118] transition-colors"
+            className="cursor-pointer inline-flex items-center gap-1.5 text-xs font-mono text-[#6B5740] dark:text-[#A09383] hover:text-[#2A2118] dark:hover:text-[#F5EFE6] transition-colors"
           >
             <span>Home</span>
           </Link>
@@ -134,10 +135,10 @@ export default function ProductDetailClient() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           {/* Left Column: Visual Showcase Card */}
           <div className="space-y-6 lg:sticky lg:top-28">
-            <div className="relative rounded-3xl bg-[#FFF9EF] border border-[#B88A32]/25 p-10 flex flex-col items-center justify-center min-h-[380px] sm:min-h-[460px] shadow-[0_15px_45px_rgba(42,33,24,0.08)] overflow-hidden group">
+            <div className="relative rounded-3xl bg-[#FFF9EF] dark:bg-[#12121A] border border-[#B88A32]/25 dark:border-[#B88A32]/35 p-10 flex flex-col items-center justify-center min-h-[380px] sm:min-h-[460px] shadow-[0_15px_45px_rgba(42,33,24,0.08)] dark:shadow-[0_15px_45px_rgba(0,0,0,0.6)] overflow-hidden group">
               {/* Card Badges */}
               <div className="absolute top-6 left-6 flex items-center gap-2 z-10">
-                <span className="text-[10px] font-mono text-[#B88A32] uppercase tracking-widest px-3 py-1 rounded-full bg-[#F4E9D5] border border-[#B88A32]/30 font-bold shadow-sm">
+                <span className="text-[10px] font-mono text-[#B88A32] dark:text-[#D4AF62] uppercase tracking-widest px-3 py-1 rounded-full bg-[#F4E9D5] dark:bg-[#1C1C2A] border border-[#B88A32]/30 dark:border-[#B88A32]/40 font-bold shadow-sm">
                   {product.material.toUpperCase()} &bull; {product.weight}
                 </span>
                 {product.bestSeller && (
@@ -182,10 +183,10 @@ export default function ProductDetailClient() {
               </div>
 
               <div className="relative text-center">
-                <span className="text-xs font-mono text-[#B88A32] uppercase tracking-widest font-bold">
+                <span className="text-xs font-mono text-[#B88A32] dark:text-[#D4AF62] uppercase tracking-widest font-bold">
                   Selected Finish: {activeColor}
                 </span>
-                <p className="text-[11px] text-[#6B5740] mt-1 font-mono">
+                <p className="text-[11px] text-[#6B5740] dark:text-[#A09383] mt-1 font-mono">
                   Optical Bench Tested &bull; Japanese Alloy Precision
                 </p>
               </div>
@@ -193,20 +194,20 @@ export default function ProductDetailClient() {
 
             {/* Quality Certifications Row */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="p-3.5 rounded-2xl bg-[#FFF9EF] border border-[#B88A32]/25 text-center shadow-sm">
-                <ShieldCheck className="w-4 h-4 text-[#B88A32] mx-auto mb-1.5" />
-                <span className="text-[10px] font-mono text-[#6B5740] uppercase tracking-wider block">Coating</span>
-                <span className="text-xs font-bold text-[#2A2118] block">Sapphire 420nm</span>
+              <div className="p-3.5 rounded-2xl bg-[#FFF9EF] dark:bg-[#14141E] border border-[#B88A32]/25 dark:border-[#B88A32]/35 text-center shadow-sm">
+                <ShieldCheck className="w-4 h-4 text-[#B88A32] dark:text-[#D4AF62] mx-auto mb-1.5" />
+                <span className="text-[10px] font-mono text-[#6B5740] dark:text-[#A09383] uppercase tracking-wider block">Coating</span>
+                <span className="text-xs font-bold text-[#2A2118] dark:text-[#F5EFE6] block">Sapphire 420nm</span>
               </div>
-              <div className="p-3.5 rounded-2xl bg-[#FFF9EF] border border-[#B88A32]/25 text-center shadow-sm">
-                <Truck className="w-4 h-4 text-[#B88A32] mx-auto mb-1.5" />
-                <span className="text-[10px] font-mono text-[#6B5740] uppercase tracking-wider block">Delivery</span>
-                <span className="text-xs font-bold text-[#2A2118] block">Free Express</span>
+              <div className="p-3.5 rounded-2xl bg-[#FFF9EF] dark:bg-[#14141E] border border-[#B88A32]/25 dark:border-[#B88A32]/35 text-center shadow-sm">
+                <Truck className="w-4 h-4 text-[#B88A32] dark:text-[#D4AF62] mx-auto mb-1.5" />
+                <span className="text-[10px] font-mono text-[#6B5740] dark:text-[#A09383] uppercase tracking-wider block">Delivery</span>
+                <span className="text-xs font-bold text-[#2A2118] dark:text-[#F5EFE6] block">Free Express</span>
               </div>
-              <div className="p-3.5 rounded-2xl bg-[#FFF9EF] border border-[#B88A32]/25 text-center shadow-sm">
-                <Award className="w-4 h-4 text-emerald-600 mx-auto mb-1.5" />
-                <span className="text-[10px] font-mono text-[#6B5740] uppercase tracking-wider block">Doctor Check</span>
-                <span className="text-xs font-bold text-[#2A2118] block">AMU Certified</span>
+              <div className="p-3.5 rounded-2xl bg-[#FFF9EF] dark:bg-[#14141E] border border-[#B88A32]/25 dark:border-[#B88A32]/35 text-center shadow-sm">
+                <Award className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mx-auto mb-1.5" />
+                <span className="text-[10px] font-mono text-[#6B5740] dark:text-[#A09383] uppercase tracking-wider block">Doctor Check</span>
+                <span className="text-xs font-bold text-[#2A2118] dark:text-[#F5EFE6] block">AMU Certified</span>
               </div>
             </div>
           </div>
@@ -214,45 +215,45 @@ export default function ProductDetailClient() {
           {/* Right Column: Customizer & Purchase */}
           <div className="space-y-8">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFF9EF] border border-[#B88A32]/30 text-[11px] font-mono text-[#4A3928] uppercase tracking-widest mb-3 shadow-sm">
-                <Sparkles className="w-3.5 h-3.5 text-[#B88A32]" />
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFF9EF] dark:bg-[#161622] border border-[#B88A32]/30 dark:border-[#B88A32]/40 text-[11px] font-mono text-[#4A3928] dark:text-[#D5C7B5] uppercase tracking-widest mb-3 shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 text-[#B88A32] dark:text-[#D4AF62]" />
                 <span className="capitalize">{product.category.replace("-", " ")}</span>
                 <span>&bull;</span>
                 <span className="capitalize">{product.frameShape}</span>
               </div>
 
-              <h1 className="text-3xl sm:text-5xl font-black text-[#2A2118] tracking-tight font-cinzel">
+              <h1 className="text-3xl sm:text-5xl font-black text-[#2A2118] dark:text-[#F5EFE6] tracking-tight font-cinzel">
                 {product.name}
               </h1>
 
               <div className="flex items-baseline gap-4 mt-4">
-                <span className="text-3xl sm:text-4xl font-bold font-mono text-[#B88A32]">
+                <span className="text-3xl sm:text-4xl font-bold font-mono text-[#B88A32] dark:text-[#D4AF62]">
                   ₹{product.price.toLocaleString()}
                 </span>
                 {product.originalPrice && (
                   <>
-                    <span className="text-xl text-[#8B7355] line-through font-mono">
+                    <span className="text-xl text-[#8B7355] dark:text-[#A09383] line-through font-mono">
                       ₹{product.originalPrice.toLocaleString()}
                     </span>
-                    <span className="text-xs font-mono font-bold text-emerald-600 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-300">
+                    <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-700">
                       SAVE {discount}%
                     </span>
                   </>
                 )}
               </div>
 
-              <p className="text-[#4A3928] text-sm sm:text-base mt-4 font-cormorant italic leading-relaxed">
+              <p className="text-[#4A3928] dark:text-[#D5C7B5] text-sm sm:text-base mt-4 font-cormorant italic leading-relaxed">
                 {product.description}
               </p>
             </div>
 
             {/* Frame Finish Selector */}
-            <div className="p-5 rounded-2xl bg-[#FFF9EF] border border-[#B88A32]/25 space-y-3 shadow-sm">
+            <div className="p-5 rounded-2xl bg-[#FFF9EF] dark:bg-[#12121A] border border-[#B88A32]/25 dark:border-[#B88A32]/35 space-y-3 shadow-sm">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono uppercase tracking-wider text-[#6B5740]">
+                <span className="text-xs font-mono uppercase tracking-wider text-[#6B5740] dark:text-[#A09383]">
                   Select Frame Finish:
                 </span>
-                <span className="text-xs font-bold text-[#2A2118] font-mono">{activeColor}</span>
+                <span className="text-xs font-bold text-[#2A2118] dark:text-[#F5EFE6] font-mono">{activeColor}</span>
               </div>
 
               <div className="flex flex-wrap gap-2.5">
@@ -265,8 +266,8 @@ export default function ProductDetailClient() {
                       onClick={() => setSelectedColorIdx(idx)}
                       className={`cursor-pointer flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs transition-all ${
                         isSelected
-                          ? "bg-[#B88A32]/15 border-2 border-[#B88A32] text-[#2A2118] font-bold shadow-sm"
-                          : "bg-[#F4E9D5] text-[#6B5740] hover:text-[#2A2118] border border-[#B88A32]/20"
+                          ? "bg-[#B88A32]/15 dark:bg-[#B88A32]/25 border-2 border-[#B88A32] text-[#2A2118] dark:text-[#F5EFE6] font-bold shadow-sm"
+                          : "bg-[#F4E9D5] dark:bg-[#1A1A26] text-[#6B5740] dark:text-[#A09383] hover:text-[#2A2118] dark:hover:text-[#F5EFE6] border border-[#B88A32]/20 dark:border-[#B88A32]/30"
                       }`}
                     >
                       <span className="w-3.5 h-3.5 rounded-full border border-black/20" style={{ backgroundColor: cHex }} />
@@ -278,8 +279,8 @@ export default function ProductDetailClient() {
             </div>
 
             {/* Lens Type Customizer */}
-            <div className="p-5 rounded-2xl bg-[#FFF9EF] border border-[#B88A32]/25 space-y-3 shadow-sm">
-              <span className="text-xs font-mono uppercase tracking-wider text-[#6B5740] block">
+            <div className="p-5 rounded-2xl bg-[#FFF9EF] dark:bg-[#12121A] border border-[#B88A32]/25 dark:border-[#B88A32]/35 space-y-3 shadow-sm">
+              <span className="text-xs font-mono uppercase tracking-wider text-[#6B5740] dark:text-[#A09383] block">
                 Select Lens Prescription Option:
               </span>
 
@@ -294,12 +295,12 @@ export default function ProductDetailClient() {
                     onClick={() => setLensType(lt.id)}
                     className={`cursor-pointer p-3.5 rounded-xl text-left border transition-all ${
                       lensType === lt.id
-                        ? "bg-[#B88A32]/15 border-2 border-[#B88A32] text-[#2A2118] shadow-sm font-semibold"
-                        : "bg-[#F4E9D5] border-[#B88A32]/20 text-[#6B5740] hover:text-[#2A2118]"
+                        ? "bg-[#B88A32]/15 dark:bg-[#B88A32]/25 border-2 border-[#B88A32] text-[#2A2118] dark:text-[#F5EFE6] shadow-sm font-semibold"
+                        : "bg-[#F4E9D5] dark:bg-[#1A1A26] border-[#B88A32]/20 dark:border-[#B88A32]/30 text-[#6B5740] dark:text-[#A09383] hover:text-[#2A2118] dark:hover:text-[#F5EFE6]"
                     }`}
                   >
-                    <span className="text-xs font-bold block text-[#2A2118]">{lt.title}</span>
-                    <span className="text-[11px] text-[#6B5740] block mt-1">{lt.desc}</span>
+                    <span className="text-xs font-bold block text-[#2A2118] dark:text-[#F5EFE6]">{lt.title}</span>
+                    <span className="text-[11px] text-[#6B5740] dark:text-[#A09383] block mt-1">{lt.desc}</span>
                   </button>
                 ))}
               </div>
@@ -308,18 +309,18 @@ export default function ProductDetailClient() {
             {/* Quantity Counter & Primary Actions */}
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <span className="text-xs font-mono text-[#6B5740] uppercase tracking-wider">Quantity:</span>
-                <div className="inline-flex items-center rounded-xl bg-[#F4E9D5] border border-[#B88A32]/25 p-1">
+                <span className="text-xs font-mono text-[#6B5740] dark:text-[#A09383] uppercase tracking-wider">Quantity:</span>
+                <div className="inline-flex items-center rounded-xl bg-[#F4E9D5] dark:bg-[#1A1A26] border border-[#B88A32]/25 dark:border-[#B88A32]/35 p-1">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="cursor-pointer p-1.5 text-[#6B5740] hover:text-[#2A2118]"
+                    className="cursor-pointer p-1.5 text-[#6B5740] dark:text-[#A09383] hover:text-[#2A2118] dark:hover:text-[#F5EFE6]"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
-                  <span className="px-4 text-sm font-mono font-bold text-[#2A2118]">{quantity}</span>
+                  <span className="px-4 text-sm font-mono font-bold text-[#2A2118] dark:text-[#F5EFE6]">{quantity}</span>
                   <button
                     onClick={() => setQuantity(quantity + 1)}
-                    className="cursor-pointer p-1.5 text-[#6B5740] hover:text-[#2A2118]"
+                    className="cursor-pointer p-1.5 text-[#6B5740] dark:text-[#A09383] hover:text-[#2A2118] dark:hover:text-[#F5EFE6]"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -355,36 +356,36 @@ export default function ProductDetailClient() {
 
               <Link
                 href="/appointment"
-                className="cursor-pointer w-full py-3 rounded-2xl bg-[#FFF9EF] hover:bg-white border border-[#B88A32]/25 text-[#4A3928] hover:text-[#2A2118] text-xs flex items-center justify-center gap-2 transition-colors shadow-sm"
+                className="cursor-pointer w-full py-3 rounded-2xl bg-[#FFF9EF] dark:bg-[#14141E] hover:bg-white dark:hover:bg-[#1C1C2A] border border-[#B88A32]/25 dark:border-[#B88A32]/35 text-[#4A3928] dark:text-[#D5C7B5] hover:text-[#2A2118] dark:hover:text-[#F5EFE6] text-xs flex items-center justify-center gap-2 transition-colors shadow-sm"
               >
-                <Calendar className="w-3.5 h-3.5 text-[#B88A32]" />
+                <Calendar className="w-3.5 h-3.5 text-[#B88A32] dark:text-[#D4AF62]" />
                 <span>Want Dr. Sheeraz Ahmad to check your power in Firozabad? Book Appointment</span>
               </Link>
             </div>
 
             {/* Technical Specifications Table */}
-            <div className="p-6 rounded-3xl bg-[#FFF9EF] border border-[#B88A32]/25 space-y-4 shadow-sm">
-              <h3 className="text-sm font-mono text-[#2A2118] font-bold uppercase tracking-wider flex items-center gap-2">
-                <FileText className="w-4 h-4 text-[#B88A32]" />
+            <div className="p-6 rounded-3xl bg-[#FFF9EF] dark:bg-[#12121A] border border-[#B88A32]/25 dark:border-[#B88A32]/35 space-y-4 shadow-sm">
+              <h3 className="text-sm font-mono text-[#2A2118] dark:text-[#F5EFE6] font-bold uppercase tracking-wider flex items-center gap-2">
+                <FileText className="w-4 h-4 text-[#B88A32] dark:text-[#D4AF62]" />
                 Optical Architecture &amp; Dimensions
               </h3>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2 text-xs">
                 <div>
-                  <span className="text-[#6B5740] block font-mono">Frame Material</span>
-                  <span className="font-bold text-[#2A2118] capitalize mt-0.5 block">{product.material}</span>
+                  <span className="text-[#6B5740] dark:text-[#A09383] block font-mono">Frame Material</span>
+                  <span className="font-bold text-[#2A2118] dark:text-[#F5EFE6] capitalize mt-0.5 block">{product.material}</span>
                 </div>
                 <div>
-                  <span className="text-[#6B5740] block font-mono">Total Weight</span>
-                  <span className="font-bold text-[#2A2118] mt-0.5 block">{product.weight}</span>
+                  <span className="text-[#6B5740] dark:text-[#A09383] block font-mono">Total Weight</span>
+                  <span className="font-bold text-[#2A2118] dark:text-[#F5EFE6] mt-0.5 block">{product.weight}</span>
                 </div>
                 <div>
-                  <span className="text-[#6B5740] block font-mono">Contour Silhouette</span>
-                  <span className="font-bold text-[#2A2118] capitalize mt-0.5 block">{product.frameShape}</span>
+                  <span className="text-[#6B5740] dark:text-[#A09383] block font-mono">Contour Silhouette</span>
+                  <span className="font-bold text-[#2A2118] dark:text-[#F5EFE6] capitalize mt-0.5 block">{product.frameShape}</span>
                 </div>
                 <div>
-                  <span className="text-[#6B5740] block font-mono">Lens Coating</span>
-                  <span className="font-bold text-[#2A2118] mt-0.5 block">Anti-Glare Sapphire</span>
+                  <span className="text-[#6B5740] dark:text-[#A09383] block font-mono">Lens Coating</span>
+                  <span className="font-bold text-[#2A2118] dark:text-[#F5EFE6] mt-0.5 block">Anti-Glare Sapphire</span>
                 </div>
               </div>
             </div>
@@ -392,13 +393,13 @@ export default function ProductDetailClient() {
         </div>
 
         {/* Related Handcrafted Frames */}
-        <div className="mt-28 border-t border-[#B88A32]/20 pt-16">
+        <div className="mt-28 border-t border-[#B88A32]/20 dark:border-[#B88A32]/30 pt-16">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <span className="text-xs font-mono text-[#B88A32] uppercase tracking-widest block font-bold">Complete Your Style</span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-[#2A2118] font-cinzel mt-1">Similar Handcrafted Frames</h2>
+              <span className="text-xs font-mono text-[#B88A32] dark:text-[#D4AF62] uppercase tracking-widest block font-bold">Complete Your Style</span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-[#2A2118] dark:text-[#F5EFE6] font-cinzel mt-1">Similar Handcrafted Frames</h2>
             </div>
-            <Link href="/shop" className="cursor-pointer text-xs font-mono text-[#B88A32] hover:underline font-bold">
+            <Link href="/shop" className="cursor-pointer text-xs font-mono text-[#B88A32] dark:text-[#D4AF62] hover:underline font-bold">
               View All 40+ Frames &rarr;
             </Link>
           </div>
@@ -408,24 +409,29 @@ export default function ProductDetailClient() {
               <Link
                 key={rel.slug}
                 href={`/shop/${rel.slug}`}
-                className="group p-5 rounded-3xl bg-[#FFF9EF] border border-[#B88A32]/20 hover:border-[#B88A32]/50 transition-all flex flex-col justify-between shadow-sm"
+                className="group p-5 rounded-3xl bg-[#FFF9EF] dark:bg-[#12121A] border border-[#B88A32]/20 dark:border-[#B88A32]/30 hover:border-[#B88A32]/50 dark:hover:border-[#B88A32]/60 transition-all flex flex-col justify-between shadow-sm"
               >
-                <div className="w-full h-36 rounded-2xl bg-gradient-to-br from-[#F4E9D5] to-[#E8D2A8] border border-[#B88A32]/15 flex items-center justify-center text-4xl group-hover:scale-105 transition-transform duration-300 shadow-sm">
+                <div className="w-full h-36 rounded-2xl bg-gradient-to-br from-[#F4E9D5] to-[#E8D2A8] dark:from-[#181824] dark:to-[#12121D] border border-[#B88A32]/15 dark:border-[#B88A32]/25 flex items-center justify-center text-4xl group-hover:scale-105 transition-transform duration-300 shadow-sm">
                   👓
                 </div>
                 <div className="mt-4">
-                  <h4 className="text-sm font-bold text-[#2A2118] font-cinzel group-hover:text-[#B88A32] transition-colors">
+                  <h4 className="text-sm font-bold text-[#2A2118] dark:text-[#F5EFE6] font-cinzel group-hover:text-[#B88A32] dark:group-hover:text-[#D4AF62] transition-colors">
                     {rel.name}
                   </h4>
                   <div className="flex items-center justify-between mt-1 text-xs font-mono">
-                    <span className="text-[#6B5740] capitalize">{rel.material}</span>
-                    <span className="font-bold text-[#B88A32]">₹{rel.price}</span>
+                    <span className="text-[#6B5740] dark:text-[#A09383] capitalize">{rel.material}</span>
+                    <span className="font-bold text-[#B88A32] dark:text-[#D4AF62]">₹{rel.price}</span>
                   </div>
                 </div>
               </Link>
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Floating Theme Switcher */}
+      <div className="fixed bottom-6 left-6 z-40">
+        <ThemeToggle variant="floating" />
       </div>
     </main>
   );

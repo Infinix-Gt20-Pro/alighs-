@@ -44,7 +44,8 @@ interface TrackedOrder {
   prescription_name?: string;
   customer: {
     full_name: string;
-    address: string;
+    address?: string;
+    masked_address?: string;
     city: string;
     state: string;
     pincode: string;
@@ -540,9 +541,14 @@ function TrackOrderContent() {
                       {order.customer.full_name}
                     </p>
                     <p className="text-xs text-[#6B5740] dark:text-[#B8A898] mt-1 leading-relaxed">
-                      {order.customer.address}, {order.customer.city}
-                      <br />
-                      {order.customer.state} - {order.customer.pincode}
+                      {order.customer.masked_address || (
+                        <>
+                          {order.customer.address ? `${order.customer.address}, ` : ""}
+                          {order.customer.city}
+                          <br />
+                          {order.customer.state} - {order.customer.pincode}
+                        </>
+                      )}
                     </p>
                   </div>
 

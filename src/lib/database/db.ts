@@ -206,7 +206,7 @@ export async function getOrderWithDetails(orderIdOrNumber: string) {
   const { data: orderList, error: orderErr } = await insforge.database
     .from('orders')
     .select('*')
-    .or(`id.eq.${clean},order_number.eq.${clean}`)
+    .or(`id.eq.${clean},order_number.eq.${clean},order_number.ilike.${clean}`)
     .limit(1);
 
   if (orderErr || !orderList || orderList.length === 0) return null;
@@ -239,7 +239,7 @@ export async function updateOrderStatus(
   const { data: orders } = await insforge.database
     .from('orders')
     .select('id, order_status, order_number')
-    .or(`id.eq.${clean},order_number.eq.${clean}`)
+    .or(`id.eq.${clean},order_number.eq.${clean},order_number.ilike.${clean}`)
     .limit(1);
 
   if (!orders || orders.length === 0) return false;
@@ -285,7 +285,7 @@ export async function updatePaymentStatus(
   const { data: orders } = await insforge.database
     .from('orders')
     .select('id, payment_status, order_status, order_number')
-    .or(`id.eq.${clean},order_number.eq.${clean}`)
+    .or(`id.eq.${clean},order_number.eq.${clean},order_number.ilike.${clean}`)
     .limit(1);
 
   if (!orders || orders.length === 0) return false;
@@ -334,11 +334,25 @@ export async function trackOrderCustomer(orderNumber: string, phone: string) {
   const cleanPhone = phone.replace(/[^0-9]/g, '');
   const cleanNum = orderNumber.trim();
 
-  // Find order
+  // 1. First attempt: PostgreSQL Atomic Security Definer RPC
+  try {
+    const { data: rpcData, error: rpcErr } = await insforge.database.rpc('track_order_atomic', {
+      p_order_number: cleanNum,
+      p_phone: cleanPhone,
+    });
+
+    if (!rpcErr && rpcData && rpcData.success && rpcData.order) {
+      return rpcData.order;
+    }
+  } catch (rpcEx) {
+    console.warn('RPC track_order_atomic fallback to query:', rpcEx);
+  }
+
+  // 2. Second attempt / Fallback: Direct database query
   const { data: orders } = await insforge.database
     .from('orders')
     .select('*')
-    .or(`id.eq.${cleanNum},order_number.eq.${cleanNum}`)
+    .or(`id.eq.${cleanNum},order_number.eq.${cleanNum},order_number.ilike.${cleanNum}`)
     .limit(1);
 
   if (!orders || orders.length === 0) return null;
@@ -373,9 +387,7 @@ export async function trackOrderCustomer(orderNumber: string, phone: string) {
   // Privacy Masking for guest tracking:
   // Do NOT expose street address or full customer phone/email
   const maskAddress = (addr: string, city: string, pincode: string) => {
-    const words = addr.split(' ');
-    const maskedWords = words.map(w => w.length > 2 ? `${w[0]}***` : w);
-    return `${maskedWords.slice(0, 2).join(' ')}, ${city} - ${pincode}`;
+    return `${city}, ${customer.state || ''} - ${pincode}`;
   };
 
   return {

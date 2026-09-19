@@ -39,11 +39,17 @@ export async function POST(request: Request) {
         state: body.customer.state || 'Uttar Pradesh',
         pincode: body.customer.pincode,
       },
-      items: body.items.map((it: any) => ({
-        productId: String(it.productId || it.id),
-        quantity: Number(it.quantity) || 1,
-        color: it.color,
-      })),
+      items: body.items.map((it: any) => {
+        let pId = String(it.productId || it.id || '').trim();
+        if (it.color && pId.endsWith(`-${it.color}`)) {
+          pId = pId.slice(0, -(it.color.length + 1));
+        }
+        return {
+          productId: pId,
+          quantity: Math.max(1, Number(it.quantity) || 1),
+          color: it.color,
+        };
+      }),
       paymentMethod: body.paymentMethod || 'COD',
       paymentStatus: body.paymentStatus,
       customerNotes: body.customerNotes || body.notes,

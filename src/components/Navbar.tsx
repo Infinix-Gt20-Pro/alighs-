@@ -2,19 +2,23 @@
 "use client";
 
 import Image from "next/image";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingBag, Menu, X, Calendar } from "lucide-react";
+import { ShoppingBag, Menu, X, Calendar, User, LogOut, PackageCheck } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Navbar() {
   const { cartCount, openCart } = useCart();
+  const { user, openAuthModal, signOut } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const accountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let prev = false;
@@ -30,13 +34,34 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 4 Core Navigation Links requested by LO
+  // Close account dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (accountRef.current && !accountRef.current.contains(event.target as Node)) {
+        setIsAccountMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Core Navigation Links
   const navLinks = [
     { name: "Collection", href: "/shop" },
     { name: "Atelier", href: "/#the-frame" },
     { name: "Clinical", href: "/#doctor-section" },
     { name: "About", href: "/#doctor-section" },
   ];
+
+  const getInitials = (name?: string, email?: string) => {
+    if (name) {
+      const parts = name.trim().split(" ");
+      if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    if (email) return email.slice(0, 2).toUpperCase();
+    return "CL";
+  };
 
   return (
     <>
@@ -49,9 +74,7 @@ export default function Navbar() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           
-          {/* ===================================================================
-              BRAND LOGO & TITLE: ALIG'S WARE
-             =================================================================== */}
+          {/* BRAND LOGO & TITLE: ALIG'S WARE */}
           <Link href="/" className="cursor-pointer flex items-center gap-2.5 sm:gap-3 group">
             <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden border border-[#B88A32]/40 bg-[#2A2118] dark:bg-[#121218] shadow-[0_0_15px_rgba(184,138,50,0.25)] group-hover:scale-105 transition-transform duration-300 shrink-0">
               <Image
@@ -73,9 +96,7 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* ===================================================================
-              CENTER NAV PILL: Collection   Atelier   Clinical   About
-             =================================================================== */}
+          {/* CENTER NAV PILL: Collection Atelier Clinical About */}
           <nav className="hidden md:flex items-center gap-1 sm:gap-1.5 px-5 py-2 rounded-full bg-[#FFF9EF]/90 dark:bg-[#14141C]/90 border border-[#B88A32]/25 dark:border-[#B88A32]/30 backdrop-blur-xl shadow-sm">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
@@ -95,17 +116,93 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* ===================================================================
-              RIGHT ACTION: Desktop (ThemeToggle + BOOK TRY-ON + Bag) vs Mobile (ONLY ☰)
-             =================================================================== */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          {/* RIGHT ACTION: Desktop (Theme + Account + BOOK TRY-ON + Bag) vs Mobile */}
+          <div className="flex items-center gap-2 sm:gap-2.5">
             {/* Desktop Only: Theme Toggle Switcher */}
             <ThemeToggle variant="navbar" className="hidden md:inline-flex" />
+
+            {/* Desktop Only: Account Trigger & Dropdown */}
+            <div className="relative hidden md:inline-flex" ref={accountRef}>
+              {user ? (
+                <button
+                  type="button"
+                  onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
+                  aria-label="User Account Menu"
+                  className="cursor-pointer w-9 h-9 rounded-full bg-gradient-to-br from-[#B88A32] to-[#7A5A1A] p-0.5 shadow-sm hover:scale-105 transition-transform"
+                >
+                  <div className="w-full h-full rounded-full bg-[#2A2118] dark:bg-[#121218] flex items-center justify-center text-[11px] font-mono font-bold text-[#D4AF62]">
+                    {getInitials(user.name, user.email)}
+                  </div>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => openAuthModal("signin")}
+                  aria-label="Client Sign In"
+                  className="cursor-pointer p-2 rounded-full bg-[#FFF9EF] dark:bg-[#161622] hover:bg-[#F4E9D5] dark:hover:bg-[#1E1E2C] border border-[#B88A32]/25 dark:border-[#D4AF62]/35 text-[#2A2118] dark:text-[#F5EFE6] hover:text-[#B88A32] dark:hover:text-[#D4AF62] transition-all duration-200 shadow-sm flex items-center gap-1.5 px-3"
+                >
+                  <User className="w-4 h-4 text-[#B88A32] dark:text-[#D4AF62]" />
+                  <span className="text-[10px] font-mono tracking-wider font-bold uppercase">SIGN IN</span>
+                </button>
+              )}
+
+              {/* Account Dropdown */}
+              <AnimatePresence>
+                {isAccountMenuOpen && user && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full mt-2 w-56 bg-[#FFF9EF] dark:bg-[#121218] border border-[#B88A32]/30 rounded-2xl p-2 shadow-xl z-50 font-sans"
+                  >
+                    <div className="px-3 py-2 border-b border-[#B88A32]/15 dark:border-[#B88A32]/20 mb-1">
+                      <div className="text-xs font-bold font-cinzel text-[#2A2118] dark:text-[#F5EFE6] truncate">
+                        {user.name || "Valued Client"}
+                      </div>
+                      <div className="text-[10px] font-mono text-[#6B5740] dark:text-[#A89F91] truncate">
+                        {user.email}
+                      </div>
+                    </div>
+
+                    <Link
+                      href="/track-order"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-[#2A2118] dark:text-[#F5EFE6] hover:bg-[#F4E9D5]/70 dark:hover:bg-[#1A1A24] transition-colors"
+                    >
+                      <PackageCheck className="w-3.5 h-3.5 text-[#B88A32]" />
+                      <span>Track My Orders</span>
+                    </Link>
+
+                    <Link
+                      href="/appointment"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-[#2A2118] dark:text-[#F5EFE6] hover:bg-[#F4E9D5]/70 dark:hover:bg-[#1A1A24] transition-colors"
+                    >
+                      <Calendar className="w-3.5 h-3.5 text-[#B88A32]" />
+                      <span>Booked Consultations</span>
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsAccountMenuOpen(false);
+                        signOut();
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-red-600 dark:text-red-400 hover:bg-red-500/10 transition-colors text-left mt-1 border-t border-[#B88A32]/10"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Sign Out</span>
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             {/* Desktop Only: BOOK TRY-ON */}
             <Link
               href="/appointment"
-              className="cursor-pointer hidden md:inline-flex items-center gap-2 px-6 sm:px-7 py-2.5 rounded-full bg-gradient-to-r from-[#B88A32] via-[#D4AF62] to-[#B88A32] hover:brightness-105 text-white font-bold text-xs font-mono tracking-[0.16em] uppercase shadow-[0_4px_20px_rgba(184,138,50,0.35)] transition-all duration-300 active:scale-95"
+              className="cursor-pointer hidden md:inline-flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-[#B88A32] via-[#D4AF62] to-[#B88A32] hover:brightness-105 text-white font-bold text-xs font-mono tracking-[0.14em] uppercase shadow-[0_4px_20px_rgba(184,138,50,0.35)] transition-all duration-300 active:scale-95"
             >
               <Calendar className="w-3.5 h-3.5 text-white" />
               <span>BOOK TRY-ON</span>
@@ -116,7 +213,7 @@ export default function Navbar() {
               type="button"
               onClick={openCart}
               aria-label="Open Shopping Bag"
-              className="cursor-pointer relative hidden md:inline-flex p-2.5 rounded-full bg-[#FFF9EF] dark:bg-[#161622] hover:bg-[#F4E9D5] dark:hover:bg-[#1E1E2C] border border-[#B88A32]/25 dark:border-[#D4AF62]/35 text-[#2A2118] dark:text-[#F5EFE6] hover:text-[#B88A32] dark:hover:text-[#D4AF62] transition-all duration-200 shadow-sm"
+              className="cursor-pointer relative hidden md:inline-flex p-2 rounded-full bg-[#FFF9EF] dark:bg-[#161622] hover:bg-[#F4E9D5] dark:hover:bg-[#1E1E2C] border border-[#B88A32]/25 dark:border-[#D4AF62]/35 text-[#2A2118] dark:text-[#F5EFE6] hover:text-[#B88A32] dark:hover:text-[#D4AF62] transition-all duration-200 shadow-sm"
             >
               <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-[#2A2118] dark:text-[#F5EFE6]" />
               {cartCount > 0 && (
@@ -147,9 +244,7 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* =======================================================================
-          MOBILE SLIDE-OUT DRAWER
-         ======================================================================= */}
+      {/* MOBILE SLIDE-OUT DRAWER */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
@@ -190,18 +285,70 @@ export default function Navbar() {
                   </button>
                 </div>
 
+                {/* Account Section in Mobile Drawer */}
+                <div className="mt-4 p-3 rounded-2xl bg-[#F4E9D5]/70 dark:bg-[#1A1A24]/90 border border-[#B88A32]/20">
+                  {user ? (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-[#B88A32] text-white flex items-center justify-center font-bold text-xs font-mono">
+                          {getInitials(user.name, user.email)}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-xs font-bold font-cinzel text-[#2A2118] dark:text-[#F5EFE6] truncate max-w-[120px]">
+                            {user.name}
+                          </span>
+                          <span className="text-[9px] font-mono text-[#6B5740] dark:text-[#A89F91]">
+                            Client Account
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          signOut();
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="p-1.5 text-xs text-red-500 font-mono"
+                      >
+                        <LogOut className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        openAuthModal("signin");
+                      }}
+                      className="w-full py-2 px-3 rounded-xl bg-[#B88A32] text-white text-xs font-mono font-bold tracking-wider uppercase flex items-center justify-center gap-2"
+                    >
+                      <User className="w-4 h-4" />
+                      <span>SIGN IN / REGISTER</span>
+                    </button>
+                  )}
+                </div>
+
                 {/* Nav Links */}
-                <div className="flex flex-col gap-2 mt-6">
+                <div className="flex flex-col gap-2 mt-4">
                   {navLinks.map((link) => (
                     <Link
                       key={link.name}
                       href={link.href}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="px-4 py-3 rounded-2xl text-base font-cinzel font-bold tracking-[0.12em] uppercase text-[#2A2118] dark:text-[#F5EFE6] hover:text-[#B88A32] dark:hover:text-[#D4AF62] hover:bg-[#F4E9D5]/70 dark:hover:bg-[#1A1A24] transition-colors"
+                      className="px-4 py-2.5 rounded-2xl text-sm font-cinzel font-bold tracking-[0.12em] uppercase text-[#2A2118] dark:text-[#F5EFE6] hover:text-[#B88A32] dark:hover:text-[#D4AF62] hover:bg-[#F4E9D5]/70 dark:hover:bg-[#1A1A24] transition-colors"
                     >
                       {link.name}
                     </Link>
                   ))}
+
+                  <Link
+                    href="/track-order"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-2.5 rounded-2xl text-sm font-cinzel font-bold tracking-[0.12em] uppercase text-[#2A2118] dark:text-[#F5EFE6] hover:text-[#B88A32] dark:hover:text-[#D4AF62] hover:bg-[#F4E9D5]/70 dark:hover:bg-[#1A1A24] transition-colors flex items-center gap-2"
+                  >
+                    <PackageCheck className="w-4 h-4 text-[#B88A32]" />
+                    <span>Track Order</span>
+                  </Link>
                 </div>
 
                 {/* Mobile Drawer Theme Switcher Row */}
@@ -211,7 +358,7 @@ export default function Navbar() {
               </div>
 
               {/* Drawer Footer CTA */}
-              <div className="flex flex-col gap-3 pt-6 border-t border-[#B88A32]/20 dark:border-[#B88A32]/30">
+              <div className="flex flex-col gap-3 pt-4 border-t border-[#B88A32]/20 dark:border-[#B88A32]/30">
                 {/* Shopping Bag row in mobile drawer */}
                 <button
                   type="button"
@@ -238,7 +385,7 @@ export default function Navbar() {
                   BOOK TRY-ON
                 </Link>
 
-                <div className="text-center text-[10px] text-[#6B5740] dark:text-[#A89F91] font-mono uppercase tracking-widest pt-2">
+                <div className="text-center text-[10px] text-[#6B5740] dark:text-[#A89F91] font-mono uppercase tracking-widest pt-1">
                   Firozabad, UP &bull; +91 72173 71499
                 </div>
               </div>

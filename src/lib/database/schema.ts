@@ -1,4 +1,4 @@
-﻿export type OrderStatus =
+export type OrderStatus =
   | 'Pending'
   | 'Confirmed'
   | 'Processing'
@@ -36,6 +36,7 @@ export interface Product {
 
 export interface Customer {
   id: string;
+  user_id?: string;
   full_name: string;
   phone: string;
   email: string;
@@ -49,6 +50,7 @@ export interface Customer {
 
 export interface Order {
   id: string;
+  user_id?: string;
   order_number: string; // e.g. ALG-2026-000001
   customer_id: string;
   subtotal: number;

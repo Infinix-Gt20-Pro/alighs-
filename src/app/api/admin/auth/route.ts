@@ -1,39 +1,45 @@
-﻿import { NextResponse } from 'next/server';
-import { authenticateAdmin, changeAdminPassword, getDatabase } from '@/lib/database/db';
+import { NextResponse } from 'next/server';
+import { authenticateAdmin, changeAdminPassword } from '@/lib/database/db';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
-    const { action, password, newPassword } = body;
+    const { action, username, password, newPassword } = body;
 
     if (action === 'login') {
-      if (!password) {
-        return NextResponse.json({ error: 'Password or PIN is required' }, { status: 400 });
+      const userKey = String(username || 'admin').trim();
+      const pass = String(password || '').trim();
+
+      if (!pass) {
+        return NextResponse.json({ error: 'Password is required' }, { status: 400 });
       }
-      const isValid = await authenticateAdmin(String(password).trim());
-      if (!isValid) {
+
+      const authResult = await authenticateAdmin(userKey, pass);
+      if (!authResult.valid) {
         return NextResponse.json(
-          { error: 'Invalid admin credentials. Please enter your passcode.' },
+          { error: 'Invalid admin credentials. Access denied.' },
           { status: 401 }
         );
       }
+
       return NextResponse.json({
         success: true,
         message: 'Admin authenticated successfully',
-        role: 'superadmin',
-        token: `adm_${Date.now()}_aligs`,
+        role: authResult.role || 'superadmin',
+        token: `adm_${Date.now()}_${authResult.role}`,
       });
     }
 
     if (action === 'change-password') {
+      const userKey = String(username || 'admin').trim();
       if (!password || !newPassword) {
         return NextResponse.json(
           { error: 'Current password and new password are required.' },
           { status: 400 }
         );
       }
-      const isValid = await authenticateAdmin(String(password).trim());
-      if (!isValid) {
+      const authResult = await authenticateAdmin(userKey, String(password).trim());
+      if (!authResult.valid) {
         return NextResponse.json({ error: 'Current password is incorrect.' }, { status: 401 });
       }
       if (String(newPassword).length < 6) {

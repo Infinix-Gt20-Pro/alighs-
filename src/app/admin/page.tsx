@@ -189,23 +189,13 @@ export default function AdminDashboardPage() {
   const [pwMsg, setPwMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem("aligs_admin_authenticated");
-    if (saved === "true") setIsAuthenticated(true);
+    const token = localStorage.getItem("aligs_admin_session_token");
+    if (token && token.startsWith("adm_")) {
+      setIsAuthenticated(true);
+    }
   }, []);
 
-  const handlePinLogin = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const clean = pinInput.trim();
-    if (["786", "6396", "7217", "1499", "admin"].includes(clean)) {
-      setIsAuthenticated(true);
-      localStorage.setItem("aligs_admin_authenticated", "true");
-      setAuthError("");
-    } else {
-      setAuthError("Invalid Passcode. Enter 786 or 6396.");
-    }
-  };
-
-  const handlePasswordLogin = async (e: React.FormEvent) => {
+  const handleAdminLogin = async (e: React.FormEvent, identifier: string, secret: string) => {
     e.preventDefault();
     setAuthLoading(true);
     setAuthError("");
@@ -213,17 +203,23 @@ export default function AdminDashboardPage() {
       const res = await fetch("/api/admin/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "login", username: usernameInput.trim(), password: passwordInput })
+        body: JSON.stringify({
+          action: "login",
+          username: identifier.trim(),
+          password: secret.trim()
+        })
       });
       const data = await res.json();
-      if (res.ok && data.success) {
+      if (res.ok && data.success && data.token) {
         setIsAuthenticated(true);
-        localStorage.setItem("aligs_admin_authenticated", "true");
+        localStorage.setItem("aligs_admin_session_token", data.token);
+        localStorage.setItem("aligs_admin_role", data.role || "superadmin");
+        showToast("Authenticated successfully. Welcome to Executive Atelier OS.", "success");
       } else {
-        setAuthError(data.error || "Invalid username or password.");
+        setAuthError(data.error || "Invalid executive credentials. Access denied.");
       }
     } catch {
-      setAuthError("Failed to reach authentication service.");
+      setAuthError("Failed to connect to authentication server. Please check your network.");
     } finally {
       setAuthLoading(false);
     }
@@ -231,6 +227,8 @@ export default function AdminDashboardPage() {
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    localStorage.removeItem("aligs_admin_session_token");
+    localStorage.removeItem("aligs_admin_role");
     localStorage.removeItem("aligs_admin_authenticated");
     setPinInput("");
     setUsernameInput("");
@@ -649,7 +647,7 @@ export default function AdminDashboardPage() {
                 authMode === "pin" ? "text-[#B88A32] border-b-2 border-[#B88A32]" : "text-neutral-500 hover:text-neutral-300"
               }`}
             >
-              Quick Passcode (786)
+              Security Passcode
             </button>
             <button
               onClick={() => { setAuthMode("password"); setAuthError(""); }}
@@ -657,12 +655,12 @@ export default function AdminDashboardPage() {
                 authMode === "password" ? "text-[#B88A32] border-b-2 border-[#B88A32]" : "text-neutral-500 hover:text-neutral-300"
               }`}
             >
-              Master Credentials
+              Executive Credentials
             </button>
           </div>
 
           {authMode === "pin" ? (
-            <form onSubmit={handlePinLogin} className="space-y-4">
+            <form onSubmit={(e) => handleAdminLogin(e, "admin", pinInput)} className="space-y-4">
               <div>
                 <label className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 block mb-1.5">
                   Security Passcode
@@ -670,7 +668,7 @@ export default function AdminDashboardPage() {
                 <input
                   type="password"
                   autoFocus
-                  placeholder="Enter 786 or 6396"
+                  placeholder="Enter Passcode"
                   value={pinInput}
                   onChange={(e) => setPinInput(e.target.value)}
                   className="w-full bg-white/[0.04] border border-[#B88A32]/30 rounded-xl px-4 py-3 text-center text-lg tracking-widest text-white placeholder-neutral-600 focus:outline-none focus:border-[#B88A32] transition-all font-mono"
@@ -681,13 +679,14 @@ export default function AdminDashboardPage() {
 
               <button
                 type="submit"
-                className="w-full bg-[#B88A32] hover:bg-[#A07828] text-white font-semibold py-3.5 rounded-xl transition-all shadow-lg shadow-[#B88A32]/25 text-sm flex items-center justify-center gap-2"
+                disabled={authLoading}
+                className="w-full bg-[#B88A32] hover:bg-[#A07828] text-white font-semibold py-3.5 rounded-xl transition-all shadow-lg shadow-[#B88A32]/25 text-sm flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <Lock className="w-4 h-4" /> Enter Command Center
+                <Lock className="w-4 h-4" /> {authLoading ? "Verifying..." : "Enter Command Center"}
               </button>
             </form>
           ) : (
-            <form onSubmit={handlePasswordLogin} className="space-y-4">
+            <form onSubmit={(e) => handleAdminLogin(e, usernameInput, passwordInput)} className="space-y-4">
               <div>
                 <label className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 block mb-1.5">
                   Admin Username

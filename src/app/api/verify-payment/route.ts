@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
+import insforge from '@/lib/insforge';
+import { updateOrderStatus, updatePaymentStatus } from '@/lib/database/db';
 
 const LIVE_KEY_SECRET = 'GbLZfY1sCE3P1jj9yT6juJ2E';
 
@@ -34,7 +36,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Step 3 Algorithm: HMAC-SHA256(order_id + "|" + payment_id, KEY_SECRET)
+    // Step 1: HMAC-SHA256(order_id + "|" + payment_id, KEY_SECRET)
     const expectedPayload = `${razorpay_order_id}|${razorpay_payment_id}`;
     const generatedSignature = crypto
       .createHmac('sha256', key_secret)
@@ -52,20 +54,25 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Payment verification failed: Signature mismatch',
+          error: 'Payment verification failed: Cryptographic signature mismatch',
         },
         { status: 400 }
       );
     }
 
-    // Signatures match — update order in the SINGLE canonical database
-    if (storeOrderId) {
+    // Step 2: Idempotent order update in InsForge PostgreSQL
+    const orderLookupKey = storeOrderId || razorpay_order_id;
+    if (orderLookupKey) {
       try {
-        const { updateOrderStatus, updatePaymentStatus } = await import('@/lib/database/db');
-        await updatePaymentStatus(storeOrderId, 'Paid');
-        await updateOrderStatus(storeOrderId, 'Confirmed', 'Payment verified via Razorpay Standard Checkout');
+        await updatePaymentStatus(orderLookupKey, 'Paid');
+        await updateOrderStatus(
+          orderLookupKey,
+          'Confirmed',
+          `Payment verified via Razorpay HMAC signature (Payment ID: ${razorpay_payment_id})`,
+          'razorpay_webhook'
+        );
       } catch (dbErr) {
-        console.warn('DB payment status update notice:', dbErr);
+        console.warn('InsForge payment status update notice:', dbErr);
       }
     }
 

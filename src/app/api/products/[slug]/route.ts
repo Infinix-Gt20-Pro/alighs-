@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/db';
-import Product from '@/lib/models/Product';
+import insforge from '@/lib/insforge';
 import { getFallbackProductBySlug } from '@/lib/products-data';
 
 export const dynamic = 'force-dynamic';
@@ -12,13 +11,17 @@ export async function GET(
   const { slug } = await params;
 
   try {
-    await connectDB();
-    const product = await Product.findOne({ slug });
-    if (product) {
-      return NextResponse.json(product);
+    const { data, error } = await insforge.database
+      .from('products')
+      .select('*')
+      .or(`id.eq.${slug},sku.eq.${slug},sku.eq.ALG-${slug}`)
+      .limit(1);
+
+    if (!error && data && data.length > 0) {
+      return NextResponse.json(data[0]);
     }
   } catch (err) {
-    console.warn('MongoDB query note: using resilient catalog data for slug:', slug);
+    console.warn('InsForge product slug query notice:', err);
   }
 
   const fallback = getFallbackProductBySlug(slug);

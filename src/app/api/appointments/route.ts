@@ -1,17 +1,5 @@
 import { NextResponse } from 'next/server';
-import { dbGetAppointments, dbSaveAppointment, dbUpdateAppointmentStatus } from '@/lib/githubDb';
-
-interface StoredAppointment {
-  appointmentId: string;
-  name: string;
-  phone: string;
-  preferredDate: string;
-  preferredTime: string;
-  concern: string;
-  details?: string;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
-  createdAt: string;
-}
+import insforge from '@/lib/insforge';
 
 function generateAppointmentId() {
   const date = new Date();
@@ -33,24 +21,47 @@ export async function POST(request: Request) {
     }
 
     const appointmentId = body.appointmentId || generateAppointmentId();
-    const aptRecord: StoredAppointment = {
-      appointmentId,
-      name: body.name,
-      phone: body.phone,
-      preferredDate: String(preferredDate),
-      preferredTime: String(preferredTime),
-      concern: body.concern,           // Store as-is — full English sentence
+    const now = new Date().toISOString();
+
+    const newAppointment = {
+      id: `apt_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`,
+      user_id: body.userId || null,
+      appointment_id: appointmentId,
+      name: String(body.name).trim(),
+      phone: String(body.phone).trim(),
+      email: body.email ? String(body.email).trim() : null,
+      preferred_date: String(preferredDate),
+      preferred_time: String(preferredTime),
+      concern: String(body.concern),
       details: body.details || '',
       status: 'confirmed',
-      createdAt: new Date().toISOString()
+      created_at: now,
+      updated_at: now,
     };
 
-    // Save persistently to GitHub DB
-    dbSaveAppointment(aptRecord as unknown as Record<string, unknown>).catch((e) =>
-      console.warn('GitHub DB appointment save failed:', e)
-    );
+    const { error } = await insforge.database
+      .from('appointments')
+      .insert([newAppointment]);
 
-    return NextResponse.json(aptRecord, { status: 201 });
+    if (error) {
+      console.error('Error inserting appointment into InsForge:', error);
+      throw new Error('Failed to save appointment in database.');
+    }
+
+    return NextResponse.json(
+      {
+        appointmentId: newAppointment.appointment_id,
+        name: newAppointment.name,
+        phone: newAppointment.phone,
+        preferredDate: newAppointment.preferred_date,
+        preferredTime: newAppointment.preferred_time,
+        concern: newAppointment.concern,
+        details: newAppointment.details,
+        status: newAppointment.status,
+        createdAt: newAppointment.created_at,
+      },
+      { status: 201 }
+    );
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal server error';
     return NextResponse.json({ error: message }, { status: 500 });
@@ -59,10 +70,30 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
-    const appointments = await dbGetAppointments();
+    const { data: appointments, error } = await insforge.database
+      .from('appointments')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    const formatted = (appointments || []).map((a: any) => ({
+      appointmentId: a.appointment_id,
+      name: a.name,
+      phone: a.phone,
+      preferredDate: a.preferred_date,
+      preferredTime: a.preferred_time,
+      concern: a.concern,
+      details: a.details,
+      status: a.status,
+      createdAt: a.created_at,
+    }));
+
     return NextResponse.json({
-      appointments,
-      totalCount: appointments.length
+      appointments: formatted,
+      totalCount: formatted.length,
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal server error';
@@ -79,7 +110,15 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'Missing appointmentId or status' }, { status: 400 });
     }
 
-    await dbUpdateAppointmentStatus(appointmentId, status);
+    const { error } = await insforge.database
+      .from('appointments')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('appointment_id', appointmentId);
+
+    if (error) {
+      throw error;
+    }
+
     return NextResponse.json({ success: true, appointmentId, status });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal server error';

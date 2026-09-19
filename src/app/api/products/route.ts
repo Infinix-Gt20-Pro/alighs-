@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/db';
-import Product from '@/lib/models/Product';
+import insforge from '@/lib/insforge';
 import { getFallbackProducts } from '@/lib/products-data';
 
 export const dynamic = 'force-dynamic';
@@ -12,26 +11,33 @@ export async function GET(request: Request) {
   const sort = searchParams.get('sort') || undefined;
 
   try {
-    await connectDB();
-    const query: Record<string, string> = {};
-    if (category && category !== 'All') query.category = category;
-    if (frameShape) query.frameShape = frameShape;
+    let query = insforge.database
+      .from('products')
+      .select('*')
+      .eq('status', 'active');
 
-    const sortOption: Record<string, 1 | -1> = {};
-    if (sort === 'price-asc' || sort === 'price_asc') sortOption.price = 1;
-    else if (sort === 'price-desc' || sort === 'price_desc') sortOption.price = -1;
-    else if (sort === 'newest') sortOption.createdAt = -1;
-    else if (sort === 'popular') sortOption.bestSeller = -1;
-    else sortOption.createdAt = -1;
+    if (category && category !== 'All') {
+      query = query.ilike('category', `%${category}%`);
+    }
 
-    const products = await Product.find(query).sort(sortOption);
-    if (products && products.length > 0) {
+    if (sort === 'price-asc' || sort === 'price_asc') {
+      query = query.order('price', { ascending: true });
+    } else if (sort === 'price-desc' || sort === 'price_desc') {
+      query = query.order('price', { ascending: false });
+    } else {
+      query = query.order('created_at', { ascending: false });
+    }
+
+    const { data: products, error } = await query;
+
+    if (!error && products && products.length > 0) {
       return NextResponse.json(products);
     }
   } catch (err) {
-    console.warn('MongoDB query note: using resilient catalog data');
+    console.warn('InsForge products query notice:', err);
   }
 
+  // Fallback to static catalog definition
   const fallback = getFallbackProducts({ category, frameShape, sort });
   return NextResponse.json(fallback);
 }

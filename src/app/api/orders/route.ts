@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import {
   createOrderTransaction,
   getDatabase,
@@ -49,6 +49,7 @@ export async function POST(request: Request) {
       customerNotes: body.customerNotes || body.notes,
       razorpayOrderId: body.razorpayOrderId || body.razorpay_order_id,
       razorpayPaymentId: body.razorpayPaymentId || body.razorpay_payment_id,
+      userId: body.userId || null,
     });
 
     return NextResponse.json(
@@ -117,7 +118,13 @@ export async function GET(request: Request) {
       };
     });
 
+    const userId = searchParams.get('userId') || searchParams.get('user_id');
+
     // Filtering
+    if (userId) {
+      list = list.filter((o) => o.user_id === userId);
+    }
+
     if (status && status !== 'all') {
       list = list.filter((o) => o.order_status.toLowerCase() === status.toLowerCase());
     }

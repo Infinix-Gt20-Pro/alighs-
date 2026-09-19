@@ -26,6 +26,7 @@ import {
   PackageCheck
 } from "lucide-react";
 import { useCart, CartItem } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -58,6 +59,7 @@ const loadRazorpayScript = (): Promise<boolean> => {
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, cartTotal, clearCart } = useCart();
+  const { user } = useAuth();
   const [step, setStep] = useState<Step>(1);
   const [direction, setDirection] = useState(1);
   const [submitting, setSubmitting] = useState(false);
@@ -99,6 +101,18 @@ export default function CheckoutPage() {
       router.push("/cart");
     }
   }, [items, step, orderedItems, router]);
+
+  // Autofill form if user is logged in
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        fullName: prev.fullName || user.name || "",
+        email: prev.email || user.email || "",
+        phone: prev.phone || user.phone || "",
+      }));
+    }
+  }, [user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -150,7 +164,8 @@ export default function CheckoutPage() {
             paymentMethod: "COD",
             paymentStatus: "Pending",
             customerNotes: formData.customerNotes,
-            shippingCharge: delivery
+            shippingCharge: delivery,
+            userId: user?.id || null,
           })
         });
 
@@ -278,7 +293,8 @@ export default function CheckoutPage() {
                 razorpayPaymentId: response.razorpay_payment_id,
                 razorpayOrderId: response.razorpay_order_id,
                 customerNotes: formData.customerNotes,
-                shippingCharge: delivery
+                shippingCharge: delivery,
+                userId: user?.id || null,
               })
             });
 

@@ -4,8 +4,11 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Stethoscope, Eye, Activity, MapPin, MessageCircle, Phone, Sparkles, ShieldCheck } from "lucide-react";
+import { useDeviceTier } from "@/hooks/useDeviceTier";
 
 export default function DoctorSection() {
+  const { enableEntranceAnimations } = useDeviceTier();
+
   const services = [
     {
       icon: <Eye className="w-6 h-6 text-[#B88A32]" />,
@@ -39,8 +42,8 @@ export default function DoctorSection() {
         
         {/* Editorial Section Header: THE CLINICAL SIDE */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={enableEntranceAnimations ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
+          whileInView={enableEntranceAnimations ? { opacity: 1, y: 0 } : undefined}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
           className="text-center mb-12 sm:mb-16"
@@ -64,8 +67,8 @@ export default function DoctorSection() {
           
           {/* Doctor Profile Card */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={enableEntranceAnimations ? { opacity: 0, x: -30 } : { opacity: 1, x: 0 }}
+            whileInView={enableEntranceAnimations ? { opacity: 1, x: 0 } : undefined}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="p-6 sm:p-9 rounded-3xl sm:rounded-[36px] border-2 border-[#B88A32]/35 dark:border-[#B88A32]/50 bg-[#FFF9EF] dark:bg-[#12121A] flex flex-col h-full shadow-[0_15px_45px_rgba(42,33,24,0.08)] dark:shadow-[0_15px_45px_rgba(0,0,0,0.6)] relative overflow-hidden transition-colors duration-300"
@@ -133,8 +136,8 @@ export default function DoctorSection() {
 
           {/* Right Column: Clinical Capabilities & Book Try-on */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={enableEntranceAnimations ? { opacity: 0, x: 30 } : { opacity: 1, x: 0 }}
+            whileInView={enableEntranceAnimations ? { opacity: 1, x: 0 } : undefined}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.4 }}
             className="flex flex-col h-full gap-6"

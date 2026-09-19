@@ -6,12 +6,27 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Compass, Sparkles, ArrowRight, ShieldCheck } from "lucide-react";
+import { useDeviceTier } from "@/hooks/useDeviceTier";
+
+import FrameSilhouette from "./FrameSilhouette";
 
 const GlassesHeroCanvas = dynamic(() => import("./GlassesHeroCanvas"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="w-8 h-8 rounded-full border border-[#B88A32]/30 border-t-[#B88A32] animate-spin" />
+    <div className="w-full h-full flex flex-col items-center justify-center">
+      <div className="relative flex flex-col items-center justify-center">
+        <FrameSilhouette
+          shape="round"
+          color="#B88A32"
+          className="w-72 sm:w-96 h-40 sm:h-52 drop-shadow-[0_20px_40px_rgba(184,138,50,0.25)] transition-opacity duration-300"
+        />
+        <div className="absolute inset-x-0 -bottom-4 flex items-center justify-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#B88A32] animate-ping" />
+          <span className="text-[10px] font-mono tracking-[0.24em] text-[#B88A32] dark:text-[#D4AF62] uppercase font-semibold">
+            Atelier 3D Loading...
+          </span>
+        </div>
+      </div>
     </div>
   ),
 });
@@ -29,14 +44,29 @@ export default function HeroSection() {
   const [is360Active, setIs360Active] = useState<boolean>(true);
   const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [scrollProgress, setScrollProgress] = useState(0);
+  const { enableBlurOrbs, tier } = useDeviceTier();
 
   useEffect(() => {
+    let ticking = false;
+    let lastProgress = -1;
+
     const handleScroll = () => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-      const progress = Math.min(Math.max(-rect.top / (rect.height - windowHeight || 1), 0), 1);
-      setScrollProgress(progress);
+      if (ticking) return;
+      ticking = true;
+
+      requestAnimationFrame(() => {
+        if (containerRef.current) {
+          const rect = containerRef.current.getBoundingClientRect();
+          const windowHeight = window.innerHeight;
+          const progress = Math.min(Math.max(-rect.top / (rect.height - windowHeight || 1), 0), 1);
+          // Only re-render if progress moved noticeably (> 0.5%)
+          if (Math.abs(progress - lastProgress) > 0.005) {
+            lastProgress = progress;
+            setScrollProgress(progress);
+          }
+        }
+        ticking = false;
+      });
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -51,12 +81,14 @@ export default function HeroSection() {
       ref={containerRef}
       className="relative w-full min-h-screen pt-24 sm:pt-28 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#F4E9D5] via-[#E8D2A8]/50 to-[#F4E9D5] dark:from-[#0A0A0E] dark:via-[#14141C] dark:to-[#0A0A0E] overflow-hidden flex flex-col justify-between items-center selection:bg-[#B88A32]/30 transition-colors duration-300"
     >
-      {/* Warm Ambient Shifting Atmosphere */}
-      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] sm:w-[900px] h-[600px] sm:h-[900px] rounded-full bg-gradient-to-br from-[#D4AF62]/25 via-[#B88A32]/15 to-transparent dark:from-[#D4AF62]/20 dark:via-[#B88A32]/10 blur-[140px] sm:blur-[180px]" />
-        <div className="absolute -bottom-20 right-10 w-[450px] h-[450px] rounded-full bg-[#D6B878]/25 dark:bg-[#D4AF62]/15 blur-[130px]" />
-        <div className="absolute top-20 left-10 w-[400px] h-[400px] rounded-full bg-[#FFF9EF]/40 dark:bg-[#B88A32]/10 blur-[110px]" />
-      </div>
+      {/* Warm Ambient Shifting Atmosphere - Gated by tier */}
+      {enableBlurOrbs && (
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+          <div className={`absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] sm:w-[900px] h-[600px] sm:h-[900px] rounded-full bg-gradient-to-br from-[#D4AF62]/25 via-[#B88A32]/15 to-transparent dark:from-[#D4AF62]/20 dark:via-[#B88A32]/10 ${tier === "MEDIUM" ? "blur-[60px]" : "blur-[140px] sm:blur-[180px]"}`} />
+          <div className={`absolute -bottom-20 right-10 w-[450px] h-[450px] rounded-full bg-[#D6B878]/25 dark:bg-[#D4AF62]/15 ${tier === "MEDIUM" ? "blur-[60px]" : "blur-[130px]"}`} />
+          <div className={`absolute top-20 left-10 w-[400px] h-[400px] rounded-full bg-[#FFF9EF]/40 dark:bg-[#B88A32]/10 ${tier === "MEDIUM" ? "blur-[50px]" : "blur-[110px]"}`} />
+        </div>
+      )}
 
       {/* =========================================================================
           TOP: MONUMENTAL OPENING TYPOGRAPHY

@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ExternalLink, Heart, MessageCircle, Sparkles, CheckCircle2, ShieldCheck } from "lucide-react";
+import { useDeviceTier } from "@/hooks/useDeviceTier";
 
 const INSTAGRAM_POSTS = [
   {
@@ -69,10 +70,14 @@ function InstagramIcon({ className = "w-4 h-4" }: { className?: string }) {
 }
 
 export default function InstagramSection() {
+  const { enableBlurOrbs, tier } = useDeviceTier();
+
   return (
     <section className="relative py-12 sm:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto overflow-hidden">
-      {/* Background Soft Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-r from-pink-500/5 via-purple-500/5 to-amber-500/5 rounded-full blur-[130px] pointer-events-none -z-10" />
+      {/* Background Soft Glow - Gated by device tier */}
+      {enableBlurOrbs && (
+        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-r from-pink-500/5 via-purple-500/5 to-amber-500/5 rounded-full pointer-events-none -z-10 ${tier === "MEDIUM" ? "blur-[50px]" : "blur-[130px]"}`} />
+      )}
 
       {/* Header Profile Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 pb-6 border-b border-[#C6A463]/15 dark:border-[#B88A32]/30">

@@ -7,14 +7,17 @@ import { motion } from "framer-motion";
 import { DEFAULT_PRODUCTS, ProductType } from "@/lib/products-data";
 import { useCart } from "@/context/CartContext";
 import { ShoppingBag, ArrowRight, Sparkles, Check, Star, ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import { useDeviceTier } from "@/hooks/useDeviceTier";
 
 export default function FeaturedShowcase() {
   const { addToCart } = useCart();
+  const { tier } = useDeviceTier();
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [activeIndex, setActiveIndex] = useState(0);
   const [addedSlug, setAddedSlug] = useState<string | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const stageRef = useRef<HTMLDivElement>(null);
+  const mouseTicking = useRef(false);
 
   const filters = [
     { id: "all", label: "All Curations" },
@@ -57,11 +60,20 @@ export default function FeaturedShowcase() {
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!stageRef.current) return;
-    const rect = stageRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    setMousePos({ x, y });
+    if (tier === "LOW" || !stageRef.current || mouseTicking.current) return;
+    mouseTicking.current = true;
+    const clientX = e.clientX;
+    const clientY = e.clientY;
+
+    requestAnimationFrame(() => {
+      if (stageRef.current) {
+        const rect = stageRef.current.getBoundingClientRect();
+        const x = (clientX - rect.left) / rect.width - 0.5;
+        const y = (clientY - rect.top) / rect.height - 0.5;
+        setMousePos({ x, y });
+      }
+      mouseTicking.current = false;
+    });
   };
 
   const handleMouseLeave = () => {
@@ -168,7 +180,7 @@ export default function FeaturedShowcase() {
               xOffset = 0;
               zIndex = 30;
               scale = 1.0;
-              rotateY = mousePos.x * 8; // subtle interactive tilt
+              rotateY = tier !== "LOW" ? mousePos.x * 8 : 0; // subtle interactive tilt
               opacity = 1.0;
             } else if (offset === -1 || isPrev) {
               xOffset = -300;
@@ -205,7 +217,7 @@ export default function FeaturedShowcase() {
                   x: xOffset,
                   scale,
                   rotateY,
-                  rotateX: isCenter ? -mousePos.y * 6 : 0,
+                  rotateX: isCenter && tier !== "LOW" ? -mousePos.y * 6 : 0,
                   opacity,
                   zIndex,
                 }}

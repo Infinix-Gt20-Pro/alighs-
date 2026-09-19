@@ -16,6 +16,8 @@ import {
   ChevronDown
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useInViewFast } from "@/hooks/useInViewFast";
+import { useDeviceTier } from "@/hooks/useDeviceTier";
 
 const MODELS = [
   {
@@ -66,6 +68,8 @@ const MODELS = [
 export default function ModelScrollExperience() {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const isInView = useInViewFast(containerRef, "300px");
+  const { tier } = useDeviceTier();
   const [activeModelIdx, setActiveModelIdx] = useState(0);
   const [blueCutActive, setBlueCutActive] = useState(true);
   const { addToCart, openCart } = useCart();
@@ -75,14 +79,17 @@ export default function ModelScrollExperience() {
     offset: ["start start", "end end"]
   });
 
-  // Ensure video plays smoothly without seek stutter
+  // Ensure video only plays when in view and on capable devices
   useEffect(() => {
     const v = videoRef.current;
-    if (v && MODELS[activeModelIdx].video) {
-      v.currentTime = 0;
+    if (!v) return;
+
+    if (isInView && MODELS[activeModelIdx].video && tier !== "LOW") {
       v.play().catch(() => {});
+    } else {
+      v.pause();
     }
-  }, [activeModelIdx]);
+  }, [activeModelIdx, isInView, tier]);
 
   // Subtle cinematic zooms & lighting depth during scroll
   const modelScale = useTransform(scrollYProgress, [0, 0.5, 1], [1.0, 1.04, 1.09]);
@@ -185,14 +192,14 @@ export default function ModelScrollExperience() {
                 transition={{ duration: 0.3 }}
                 className="relative w-full h-full max-h-[84vh] sm:max-h-[90vh] rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(60,36,21,0.15)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.8)] border border-[#C6A463]/15 dark:border-[#B88A32]/30 bg-[#F5EFE0] dark:bg-[#14141E]"
               >
-                {activeModel.video ? (
+                {activeModel.video && tier !== "LOW" ? (
                   <video
                     ref={videoRef}
                     autoPlay
                     loop
                     muted
                     playsInline
-                    preload="auto"
+                    preload="metadata"
                     className="w-full h-full object-cover object-center brightness-98 contrast-102 will-change-transform"
                   >
                     <source src={activeModel.video} type="video/mp4" />
@@ -202,7 +209,7 @@ export default function ModelScrollExperience() {
                     src={activeModel.image}
                     alt={activeModel.name}
                     fill
-                    priority
+                    priority={false}
                     className="object-contain object-center brightness-98 contrast-102"
                     sizes="(max-width: 1024px) 100vw, 1200px"
                   />

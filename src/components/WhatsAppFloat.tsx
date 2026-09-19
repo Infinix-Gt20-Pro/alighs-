@@ -2,8 +2,11 @@
 
 import { motion } from "framer-motion";
 import { MessageCircle } from "lucide-react";
+import { useDeviceTier } from "@/hooks/useDeviceTier";
 
 export default function WhatsAppFloat() {
+  const { tier } = useDeviceTier();
+
   return (
     <motion.div
       initial={{ scale: 0, opacity: 0 }}
@@ -12,7 +15,7 @@ export default function WhatsAppFloat() {
       className="fixed bottom-6 right-6 z-50"
     >
       <div className="relative group">
-        <div className="absolute -inset-2 bg-[#25D366] rounded-full opacity-40 group-hover:opacity-60 blur-md animate-pulse"></div>
+        <div className={`absolute -inset-2 bg-[#25D366] rounded-full opacity-30 group-hover:opacity-60 blur-md ${tier !== "LOW" ? "animate-pulse" : ""}`}></div>
         <motion.a
           href="https://wa.me/917217371499?text=Hi%20ALIGSWARE!%20I'm%20interested%20in%20your%20premium%20eyewear%20collection."
           target="_blank"

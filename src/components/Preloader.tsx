@@ -66,9 +66,7 @@ export default function Preloader({ onComplete, isLoading = true }: PreloaderPro
           initial={{ opacity: 1 }}
           exit={{
             opacity: 0,
-            scale: 1.02,
-            filter: "blur(10px)",
-            transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+            transition: { duration: 0.35, ease: "easeOut" },
           }}
           className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#FFFDF5] text-[#3C2415] selection:bg-none"
         >

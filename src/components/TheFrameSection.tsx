@@ -7,6 +7,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, ShoppingBag, Eye, Check, ArrowRight, ShieldCheck } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useDeviceTier } from "@/hooks/useDeviceTier";
 
 export interface FrameItem {
   id: string;
@@ -91,6 +92,7 @@ export default function TheFrameSection() {
   const [selectedId, setSelectedId] = useState<string>("frame-01");
   const [added, setAdded] = useState(false);
   const { addToCart, openCart } = useCart();
+  const { enableBlurOrbs, tier } = useDeviceTier();
 
   const activeFrame = FRAMES.find((f) => f.id === selectedId) || FRAMES[0];
   const frame02 = FRAMES[1];
@@ -118,8 +120,10 @@ export default function TheFrameSection() {
 
   return (
     <section id="the-frame" className="relative w-full py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#D6B878]/30 via-[#F4E9D5] to-[#F4E9D5] dark:from-[#0A0A0E] dark:via-[#12121A] dark:to-[#0A0A0E] border-t border-[#B88A32]/20 dark:border-[#B88A32]/30 overflow-hidden transition-colors duration-300">
-      {/* Ambient background warm glows */}
-      <div className="pointer-events-none absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-gradient-to-br from-[#D4AF62]/25 via-[#B88A32]/10 to-transparent dark:from-[#D4AF62]/15 dark:via-transparent blur-[140px] -z-10" />
+      {/* Ambient background warm glows - Gated by device tier */}
+      {enableBlurOrbs && (
+        <div className={`pointer-events-none absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-gradient-to-br from-[#D4AF62]/25 via-[#B88A32]/10 to-transparent dark:from-[#D4AF62]/15 dark:via-transparent -z-10 ${tier === "MEDIUM" ? "blur-[60px]" : "blur-[140px]"}`} />
+      )}
 
       <div className="max-w-6xl mx-auto flex flex-col items-center">
         {/* Section Header */}

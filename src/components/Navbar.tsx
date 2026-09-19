@@ -17,10 +17,16 @@ export default function Navbar() {
   const pathname = usePathname();
 
   useEffect(() => {
+    let prev = false;
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      const isOver = window.scrollY > 20;
+      if (isOver !== prev) {
+        prev = isOver;
+        setScrolled(isOver);
+      }
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 

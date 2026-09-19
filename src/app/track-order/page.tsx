@@ -20,11 +20,13 @@ import {
   ArrowLeft,
   Calendar,
   CreditCard,
-  Phone
+  Phone,
+  LogIn
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useAuth } from "@/context/AuthContext";
 
 interface TrackedOrder {
   order_number: string;
@@ -78,11 +80,32 @@ function getMilestoneIndex(status: string): number {
 
 function TrackOrderContent() {
   const searchParams = useSearchParams();
+  const { user, openAuthModal } = useAuth();
   const [orderNumber, setOrderNumber] = useState(searchParams.get("orderNumber") || "");
   const [phone, setPhone] = useState(searchParams.get("phone") || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [order, setOrder] = useState<TrackedOrder | null>(null);
+  const [userOrders, setUserOrders] = useState<any[]>([]);
+  const [loadingUserOrders, setLoadingUserOrders] = useState(false);
+
+  // Fetch logged in user's personal orders
+  useEffect(() => {
+    if (user?.id) {
+      setLoadingUserOrders(true);
+      fetch(`/api/orders?userId=${encodeURIComponent(user.id)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.orders) {
+            setUserOrders(data.orders);
+          }
+        })
+        .catch(() => {})
+        .finally(() => setLoadingUserOrders(false));
+    } else {
+      setUserOrders([]);
+    }
+  }, [user]);
 
   const handleTrack = async (e?: React.FormEvent, overrideOrder?: string, overridePhone?: string) => {
     if (e) e.preventDefault();
@@ -245,6 +268,73 @@ function TrackOrderContent() {
               )}
             </button>
           </form>
+
+          {/* Logged in User Quick Select */}
+          {user ? (
+            <div className="mt-6 pt-6 border-t border-[#B88A32]/20">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-mono font-semibold uppercase text-[#B88A32]">
+                  Your Account Orders ({userOrders.length})
+                </span>
+                <span className="text-[11px] text-[#8B7355]">Signed in as {user.name || user.email}</span>
+              </div>
+              {loadingUserOrders ? (
+                <div className="flex items-center gap-2 text-xs text-[#8B7355] py-2 font-mono">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-[#B88A32]" />
+                  <span>Loading your atelier order history...</span>
+                </div>
+              ) : userOrders.length > 0 ? (
+                <div className="space-y-2">
+                  {userOrders.map((uo) => (
+                    <button
+                      key={uo.id}
+                      type="button"
+                      onClick={() => {
+                        setOrderNumber(uo.order_number);
+                        setPhone(uo.customer?.phone || "");
+                        handleTrack(undefined, uo.order_number, uo.customer?.phone || "");
+                      }}
+                      className="w-full text-left p-3 rounded-xl bg-[#F4E9D5]/60 dark:bg-white/[0.03] hover:bg-[#E8D2A8]/50 dark:hover:bg-white/[0.07] border border-[#B88A32]/20 transition-all flex items-center justify-between text-xs group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Package className="w-4 h-4 text-[#B88A32]" />
+                        <div>
+                          <p className="font-mono font-bold text-[#2A2118] dark:text-[#F5EFE6]">
+                            {uo.order_number}
+                          </p>
+                          <p className="text-[10px] text-[#8B7355]">
+                            {new Date(uo.created_at).toLocaleDateString("en-IN", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric"
+                            })} • ₹{uo.total_amount}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-full text-[10px] font-mono uppercase bg-[#B88A32]/10 text-[#B88A32] font-semibold">
+                        {uo.order_status}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-[#8B7355] italic">
+                  No orders found under your account. Place an order while signed in to see it listed here!
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="mt-6 pt-5 border-t border-[#B88A32]/15 flex items-center justify-between text-xs text-[#6B5740]">
+              <span>Have an atelier account?</span>
+              <button
+                type="button"
+                onClick={() => openAuthModal("signin")}
+                className="px-3 py-1.5 rounded-lg bg-[#B88A32]/15 hover:bg-[#B88A32]/25 text-[#B88A32] font-mono text-xs font-bold uppercase transition-colors"
+              >
+                Sign In to View All Orders
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Order Details Display */}

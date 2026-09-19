@@ -2,9 +2,23 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-require('dotenv').config({ path: path.join(__dirname, '../.env.local') });
+// Load .env.local manually without external dotenv dependency
+try {
+  const envContent = fs.readFileSync(path.join(__dirname, '../.env.local'), 'utf8');
+  for (const line of envContent.split('\n')) {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
+      const idx = trimmed.indexOf('=');
+      const key = trimmed.slice(0, idx).trim();
+      const val = trimmed.slice(idx + 1).trim().replace(/^['"]|['"]$/g, '');
+      if (!process.env[key]) {
+        process.env[key] = val;
+      }
+    }
+  }
+} catch (e) {}
 
-const API_KEY = process.env.INSFORGE_API_KEY || '';
+const API_KEY = process.env.INSFORGE_API_KEY || 'ik_a65122a10f512c700497de812a0e796a';
 const API_BASE_URL = process.env.NEXT_PUBLIC_INSFORGE_URL || 'https://7fxjpnj5.us-east.insforge.app';
 
 function runMcpCommand(toolName, toolArgs) {

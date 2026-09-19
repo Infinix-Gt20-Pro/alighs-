@@ -59,7 +59,7 @@ const loadRazorpayScript = (): Promise<boolean> => {
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, cartTotal, clearCart } = useCart();
-  const { user } = useAuth();
+  const { user, openAuthModal } = useAuth();
   const [step, setStep] = useState<Step>(1);
   const [direction, setDirection] = useState(1);
   const [submitting, setSubmitting] = useState(false);
@@ -480,6 +480,26 @@ export default function CheckoutPage() {
                         <ShieldCheck className="w-4 h-4" /> Pan-India Insured Dispatch
                       </div>
                     </div>
+
+                    {!user ? (
+                      <div className="mb-6 p-4 rounded-2xl bg-[#B88A32]/10 border border-[#B88A32]/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                        <span className="text-[#6B5740] font-sans">
+                          <strong>Returning Atelier Patron?</strong> Sign in with email or Google to autofill your shipping profile and link this order to your account.
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => openAuthModal("signin")}
+                          className="shrink-0 px-4 py-2 rounded-xl bg-[#B88A32] text-white font-mono text-xs font-bold tracking-wider uppercase hover:bg-[#A07828] transition-colors"
+                        >
+                          Sign In / Register
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="mb-6 p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center gap-2.5 text-xs text-emerald-800 dark:text-emerald-400 font-medium">
+                        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>Signed in as <strong>{user.name || user.email}</strong>. This order will be linked to your atelier account.</span>
+                      </div>
+                    )}
 
                     <form onSubmit={handleDeliverySubmit} className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

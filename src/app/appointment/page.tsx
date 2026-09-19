@@ -1,7 +1,6 @@
-// src/app/appointment/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -18,13 +17,16 @@ import {
   MapPin,
   Sparkles,
   ArrowRight,
-  ArrowLeft
+  ArrowLeft,
+  LogIn
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useAuth } from "@/context/AuthContext";
 
 export default function AppointmentPage() {
+  const { user, openAuthModal } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -37,6 +39,16 @@ export default function AppointmentPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [appointmentId, setAppointmentId] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        name: prev.name || user.name || "",
+        phone: prev.phone || user.phone || ""
+      }));
+    }
+  }, [user]);
 
   const TIME_SLOTS = [
     "10:00 AM - 11:00 AM (Morning Clinic)",
@@ -71,6 +83,7 @@ export default function AppointmentPage() {
     setLoading(true);
 
     const payload = {
+      userId: user?.id || null,
       name: formData.name,
       phone: formData.phone,
       preferredDate: formData.date,
@@ -248,6 +261,27 @@ export default function AppointmentPage() {
                         100% Free Consultation
                       </span>
                     </div>
+
+                    {!user ? (
+                      <div className="mb-6 p-3.5 rounded-2xl bg-[#B88A32]/10 border border-[#B88A32]/25 flex items-center justify-between gap-3 text-xs">
+                        <span className="text-[#6B5740] font-sans">
+                          Sign in to link this consultation to your atelier profile and view history.
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => openAuthModal("signin")}
+                          className="shrink-0 px-3 py-1.5 rounded-xl bg-[#B88A32] text-white font-mono text-[11px] font-bold tracking-wider uppercase hover:bg-[#A07828] transition-colors flex items-center gap-1.5"
+                        >
+                          <LogIn className="w-3.5 h-3.5" />
+                          <span>Sign In</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="mb-6 p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center gap-2 text-xs text-emerald-800 dark:text-emerald-400">
+                        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>Signed in as <strong>{user.name || user.email}</strong>. This appointment will be tied to your account.</span>
+                      </div>
+                    )}
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -21,7 +21,10 @@ import {
   Calendar,
   CreditCard,
   Phone,
-  LogIn
+  LogIn,
+  FileText,
+  Eye,
+  Paperclip
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -37,6 +40,8 @@ interface TrackedOrder {
   subtotal: number;
   shipping_charge: number;
   total_amount: number;
+  prescription_url?: string;
+  prescription_name?: string;
   customer: {
     full_name: string;
     address: string;
@@ -302,12 +307,19 @@ function TrackOrderContent() {
                           <p className="font-mono font-bold text-[#2A2118] dark:text-[#F5EFE6]">
                             {uo.order_number}
                           </p>
-                          <p className="text-[10px] text-[#8B7355]">
-                            {new Date(uo.created_at).toLocaleDateString("en-IN", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric"
-                            })} • ₹{uo.total_amount}
+                          <p className="text-[10px] text-[#8B7355] flex items-center gap-2">
+                            <span>
+                              {new Date(uo.created_at).toLocaleDateString("en-IN", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric"
+                              })} • ₹{uo.total_amount}
+                            </span>
+                            {uo.prescription_url && (
+                              <span className="inline-flex items-center gap-0.5 text-[9px] font-mono text-[#B88A32] bg-[#B88A32]/15 px-1.5 py-0.5 rounded">
+                                <Paperclip className="w-2.5 h-2.5" /> Rx
+                              </span>
+                            )}
                           </p>
                         </div>
                       </div>
@@ -533,6 +545,34 @@ function TrackOrderContent() {
                       {order.customer.state} - {order.customer.pincode}
                     </p>
                   </div>
+
+                  {order.prescription_url && (
+                    <div className="bg-[#FFF9EF] dark:bg-[#121218] border border-[#B88A32]/25 rounded-3xl p-6 shadow-xl shadow-[#2A2118]/5">
+                      <h3 className="text-sm font-mono uppercase tracking-wider text-[#8B7355] mb-3 flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-[#B88A32]" />
+                        Optical Prescription
+                      </h3>
+                      <div className="p-3.5 rounded-xl bg-[#F4E9D5]/50 dark:bg-white/[0.04] border border-[#B88A32]/20 flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold text-[#2A2118] dark:text-[#F5EFE6] truncate">
+                            {order.prescription_name || "Prescription Document"}
+                          </p>
+                          <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono flex items-center gap-1 mt-0.5">
+                            <ShieldCheck className="w-3 h-3" /> Attached via InsForge Storage
+                          </p>
+                        </div>
+                        <a
+                          href={order.prescription_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#B88A32] hover:bg-[#A07828] text-white text-xs font-mono font-medium transition-colors shadow-sm flex-shrink-0"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>View</span>
+                        </a>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="bg-[#FFF9EF] dark:bg-[#121218] border border-[#B88A32]/25 rounded-3xl p-6 shadow-xl shadow-[#2A2118]/5">
                     <h3 className="text-sm font-mono uppercase tracking-wider text-[#8B7355] mb-2 flex items-center gap-2">

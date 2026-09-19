@@ -10,7 +10,8 @@ import {
   LogOut, MapPin, TrendingUp, Archive, Plus, Trash2, Pencil,
   AlertTriangle, X, Settings2, Sparkles, Database, ArrowRight,
   SlidersHorizontal, Check, Globe, Download, Users, BarChart3,
-  Eye, ShoppingBag, Layers, Key, DollarSign, ChevronRight, Filter
+  Eye, ShoppingBag, Layers, Key, DollarSign, ChevronRight, Filter,
+  Paperclip, FileText
 } from "lucide-react";
 
 interface OrderItem {
@@ -48,6 +49,8 @@ interface OrderRecord {
   payment_status: string;
   paymentStatus?: string;
   customer_notes?: string;
+  prescription_url?: string;
+  prescription_name?: string;
   created_at: string;
   createdAt?: string;
 }
@@ -61,6 +64,9 @@ interface AppointmentRecord {
   concern: string;
   status: "pending" | "confirmed" | "completed" | "cancelled";
   createdAt: string;
+  attachmentUrl?: string;
+  attachmentName?: string;
+  attachmentSize?: number;
 }
 
 interface ProductRecord {
@@ -1598,6 +1604,18 @@ export default function AdminDashboardPage() {
                               >
                                 <MessageCircle className="w-4 h-4" />
                               </a>
+
+                              {a.attachmentUrl && (
+                                <a
+                                  href={a.attachmentUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="p-1.5 rounded-lg bg-[#B88A32]/20 text-[#B88A32] hover:bg-[#B88A32]/30 transition-colors"
+                                  title={`View Attached Prescription: ${a.attachmentName || "File"}`}
+                                >
+                                  <Paperclip className="w-4 h-4" />
+                                </a>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -1749,6 +1767,34 @@ export default function AdminDashboardPage() {
                   )}
                 </div>
               </div>
+
+              {/* Optical Prescription File Attachment */}
+              {selectedOrder.prescription_url && (
+                <div className="p-4 rounded-2xl bg-white/[0.02] border border-[#B88A32]/30 space-y-2">
+                  <span className="text-[10px] text-[#B88A32] uppercase tracking-wider font-mono font-bold flex items-center gap-1.5">
+                    <Paperclip className="w-3.5 h-3.5" /> Attached Optical Prescription (InsForge Storage)
+                  </span>
+                  <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/10">
+                    <div className="min-w-0">
+                      <p className="text-xs font-mono font-semibold text-white truncate">
+                        {selectedOrder.prescription_name || "Prescription File"}
+                      </p>
+                      <p className="text-[10px] text-emerald-400 font-mono">
+                        Customer uploaded document for custom lens crafting
+                      </p>
+                    </div>
+                    <a
+                      href={selectedOrder.prescription_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1.5 rounded-lg bg-[#B88A32] hover:bg-[#A07828] text-white text-xs font-mono font-semibold inline-flex items-center gap-1.5 transition-colors shrink-0 shadow-sm"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>View File</span>
+                    </a>
+                  </div>
+                </div>
+              )}
 
               {/* Items Table Snapshot */}
               <div>

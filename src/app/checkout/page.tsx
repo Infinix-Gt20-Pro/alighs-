@@ -23,13 +23,19 @@ import {
   AlertCircle,
   Copy,
   ExternalLink,
-  PackageCheck
+  PackageCheck,
+  Upload,
+  FileText,
+  Paperclip,
+  X,
+  Eye
 } from "lucide-react";
 import { useCart, CartItem } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ThemeToggle from "@/components/ThemeToggle";
+import insforge from "@/lib/insforge";
 
 type Step = 1 | 2 | 3;
 type PaymentMethod = "COD" | "UPI" | "ONLINE";
@@ -76,6 +82,45 @@ export default function CheckoutPage() {
     navigator.clipboard.writeText(orderId);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Prescription file upload state
+  const [selectedPrescription, setSelectedPrescription] = useState<File | null>(null);
+  const [prescriptionPreviewUrl, setPrescriptionPreviewUrl] = useState<string | null>(null);
+  const [uploadingPrescription, setUploadingPrescription] = useState(false);
+  const [prescriptionError, setPrescriptionError] = useState<string | null>(null);
+  const [uploadedPrescription, setUploadedPrescription] = useState<{
+    url: string;
+    key: string;
+    name: string;
+  } | null>(null);
+
+  const handlePrescriptionSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      setPrescriptionError("Prescription file size exceeds 10MB limit.");
+      return;
+    }
+
+    setPrescriptionError(null);
+    setSelectedPrescription(file);
+
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = () => setPrescriptionPreviewUrl(reader.result as string);
+      reader.readAsDataURL(file);
+    } else {
+      setPrescriptionPreviewUrl(null);
+    }
+  };
+
+  const handleRemovePrescription = () => {
+    setSelectedPrescription(null);
+    setPrescriptionPreviewUrl(null);
+    setUploadedPrescription(null);
+    setPrescriptionError(null);
   };
 
   const [formData, setFormData] = useState({
@@ -140,6 +185,36 @@ export default function CheckoutPage() {
     const snapshotItems = [...items];
     const snapshotTotals = { subtotal, delivery, total };
 
+    // Upload prescription to InsForge Storage if selected and not yet uploaded
+    let presData = uploadedPrescription;
+    if (selectedPrescription && !presData) {
+      setUploadingPrescription(true);
+      try {
+        const { data: uploadRes, error: uploadErr } = await insforge.storage
+          .from("prescriptions")
+          .uploadAuto(selectedPrescription);
+
+        if (uploadErr || !uploadRes) {
+          console.error("Prescription upload error:", uploadErr);
+          throw new Error(uploadErr?.message || "Failed to upload optical prescription to storage.");
+        }
+
+        presData = {
+          url: uploadRes.url,
+          key: uploadRes.key,
+          name: selectedPrescription.name,
+        };
+        setUploadedPrescription(presData);
+      } catch (pErr: any) {
+        setPrescriptionError(pErr.message || "Failed to upload prescription. You can retry or proceed without attaching.");
+        setSubmitting(false);
+        setUploadingPrescription(false);
+        return;
+      } finally {
+        setUploadingPrescription(false);
+      }
+    }
+
     // --- CASE 1: Cash On Delivery (COD) ---
     if (paymentMethod === "COD") {
       try {
@@ -166,6 +241,9 @@ export default function CheckoutPage() {
             customerNotes: formData.customerNotes,
             shippingCharge: delivery,
             userId: user?.id || null,
+            prescriptionUrl: presData?.url || null,
+            prescriptionKey: presData?.key || null,
+            prescriptionName: presData?.name || null,
           })
         });
 
@@ -295,6 +373,9 @@ export default function CheckoutPage() {
                 customerNotes: formData.customerNotes,
                 shippingCharge: delivery,
                 userId: user?.id || null,
+                prescriptionUrl: presData?.url || null,
+                prescriptionKey: presData?.key || null,
+                prescriptionName: presData?.name || null,
               })
             });
 
@@ -626,6 +707,73 @@ export default function CheckoutPage() {
                             placeholder="e.g. Call before delivery, delicate frame packaging requested"
                             className="w-full bg-[#F4E9D5]/50 border border-[#B88A32]/25 rounded-xl px-4 py-3.5 text-[#2A2118] placeholder-[#8B7355]/70 focus:outline-none focus:border-[#B88A32] focus:ring-1 focus:ring-[#B88A32] transition-all text-sm"
                           />
+                        </div>
+
+                        {/* Optical Prescription / Lens Power Card Upload (Optional) */}
+                        <div className="space-y-2 md:col-span-2 pt-2">
+                          <label className="text-xs uppercase tracking-wider text-[#4A3928] font-mono font-semibold flex items-center justify-between">
+                            <span className="flex items-center gap-2">
+                              <Paperclip className="w-3.5 h-3.5 text-[#B88A32]" />
+                              Attach Optical Prescription / Eye Test Card (Optional)
+                            </span>
+                            <span className="text-[10px] text-[#8B7355] font-normal">PNG, JPG, PDF up to 10MB</span>
+                          </label>
+
+                          {!selectedPrescription ? (
+                            <label className="flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-dashed border-[#B88A32]/35 bg-[#F4E9D5]/30 hover:bg-[#F4E9D5]/60 cursor-pointer transition-all group">
+                              <input
+                                type="file"
+                                accept="image/*,.pdf"
+                                onChange={handlePrescriptionSelect}
+                                className="hidden"
+                              />
+                              <div className="w-10 h-10 rounded-xl bg-[#B88A32]/10 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+                                <Upload className="w-5 h-5 text-[#B88A32]" />
+                              </div>
+                              <p className="text-xs font-medium text-[#2A2118]">
+                                Click to browse or drop your doctor&apos;s eye prescription
+                              </p>
+                              <p className="text-[11px] text-[#8B7355] mt-0.5 font-mono">
+                                Dr. Sheeraz Ahmad will custom-craft your lenses to these exact power specs
+                              </p>
+                            </label>
+                          ) : (
+                            <div className="p-3.5 rounded-2xl bg-[#F4E9D5]/60 border border-[#B88A32]/30 flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-3 overflow-hidden">
+                                {prescriptionPreviewUrl ? (
+                                  <img
+                                    src={prescriptionPreviewUrl}
+                                    alt="Prescription preview"
+                                    className="w-12 h-12 object-cover rounded-xl border border-[#B88A32]/30 shrink-0"
+                                  />
+                                ) : (
+                                  <div className="w-12 h-12 rounded-xl bg-[#B88A32]/15 flex items-center justify-center shrink-0">
+                                    <FileText className="w-6 h-6 text-[#B88A32]" />
+                                  </div>
+                                )}
+                                <div className="min-w-0">
+                                  <p className="text-xs font-mono font-bold text-[#2A2118] truncate">
+                                    {selectedPrescription.name}
+                                  </p>
+                                  <p className="text-[10px] font-mono text-[#8B7355]">
+                                    {(selectedPrescription.size / 1024).toFixed(1)} KB • Ready to attach to order
+                                  </p>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={handleRemovePrescription}
+                                className="p-1.5 rounded-lg text-[#8B7355] hover:text-red-600 hover:bg-red-500/10 transition-colors shrink-0"
+                                title="Remove prescription"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          )}
+
+                          {prescriptionError && (
+                            <p className="text-xs text-red-600 font-mono mt-1">{prescriptionError}</p>
+                          )}
                         </div>
                       </div>
 
@@ -967,6 +1115,38 @@ export default function CheckoutPage() {
                             ₹{orderTotal.total}
                           </span>
                         </div>
+
+                        {uploadedPrescription && (
+                          <div className="col-span-1 sm:col-span-2 pt-3 border-t border-[#B88A32]/15">
+                            <span className="text-[#8B7355] block font-mono text-[11px] mb-1.5 uppercase tracking-wider">
+                              OPTICAL PRESCRIPTION ATTACHMENT
+                            </span>
+                            <div className="p-3 rounded-xl bg-[#FFF9EF] border border-[#B88A32]/25 flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-2.5 overflow-hidden">
+                                <div className="w-8 h-8 rounded-lg bg-[#B88A32]/10 border border-[#B88A32]/25 flex items-center justify-center flex-shrink-0 text-[#B88A32]">
+                                  <FileText className="w-4 h-4" />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-xs font-semibold text-[#2A2118] truncate">
+                                    {uploadedPrescription.name}
+                                  </p>
+                                  <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-mono">
+                                    Attached to Order (InsForge Storage)
+                                  </p>
+                                </div>
+                              </div>
+                              <a
+                                href={uploadedPrescription.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#B88A32] hover:bg-[#A07828] text-white text-xs font-mono font-medium transition-colors flex-shrink-0 shadow-sm"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                                <span>View</span>
+                              </a>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
 

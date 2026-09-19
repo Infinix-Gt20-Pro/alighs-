@@ -50,6 +50,9 @@ export async function POST(request: Request) {
       razorpayOrderId: body.razorpayOrderId || body.razorpay_order_id,
       razorpayPaymentId: body.razorpayPaymentId || body.razorpay_payment_id,
       userId: body.userId || null,
+      prescriptionUrl: body.prescriptionUrl || body.prescription_url || null,
+      prescriptionKey: body.prescriptionKey || body.prescription_key || null,
+      prescriptionName: body.prescriptionName || body.prescription_name || null,
     });
 
     return NextResponse.json(
@@ -66,6 +69,8 @@ export async function POST(request: Request) {
           payment_status: order.payment_status,
           order_status: order.order_status,
           customer_notes: order.customer_notes,
+          prescription_url: order.prescription_url || null,
+          prescription_name: order.prescription_name || null,
           created_at: order.created_at,
         },
         items,

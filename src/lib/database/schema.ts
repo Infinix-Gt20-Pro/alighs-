@@ -63,6 +63,9 @@ export interface Order {
   customer_notes?: string;
   razorpay_order_id?: string;
   razorpay_payment_id?: string;
+  prescription_url?: string;
+  prescription_key?: string;
+  prescription_name?: string;
   created_at: string;
   updated_at: string;
 }

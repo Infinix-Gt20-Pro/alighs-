@@ -18,12 +18,18 @@ import {
   Sparkles,
   ArrowRight,
   ArrowLeft,
-  LogIn
+  LogIn,
+  Upload,
+  FileText,
+  Paperclip,
+  X,
+  Eye
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
+import insforge from "@/lib/insforge";
 
 export default function AppointmentPage() {
   const { user, openAuthModal } = useAuth();
@@ -39,6 +45,45 @@ export default function AppointmentPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [appointmentId, setAppointmentId] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadedAttachment, setUploadedAttachment] = useState<{
+    url: string;
+    key: string;
+    name: string;
+    size: number;
+  } | null>(null);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate size (< 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError("File size exceeds 10MB limit.");
+      return;
+    }
+
+    setUploadError(null);
+    setSelectedFile(file);
+
+    // If image, create local preview
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = () => setFilePreviewUrl(reader.result as string);
+      reader.readAsDataURL(file);
+    } else {
+      setFilePreviewUrl(null);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setFilePreviewUrl(null);
+    setUploadError(null);
+  };
 
   useEffect(() => {
     if (user) {
@@ -81,6 +126,39 @@ export default function AppointmentPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setUploadError(null);
+
+    let attachmentData: { url: string; key: string; name: string; size: number } | null = null;
+
+    // 1. If file is selected, upload to InsForge Storage first
+    if (selectedFile) {
+      setUploadingFile(true);
+      try {
+        const { data: uploadRes, error: uploadErr } = await insforge.storage
+          .from("prescriptions")
+          .uploadAuto(selectedFile);
+
+        if (uploadErr || !uploadRes) {
+          console.error("Storage upload error:", uploadErr);
+          throw new Error(uploadErr?.message || "Failed to upload file to storage.");
+        }
+
+        attachmentData = {
+          url: uploadRes.url,
+          key: uploadRes.key,
+          name: selectedFile.name,
+          size: selectedFile.size,
+        };
+        setUploadedAttachment(attachmentData);
+      } catch (fErr: any) {
+        setUploadError(fErr.message || "File upload failed. You can retry or submit without file.");
+        setLoading(false);
+        setUploadingFile(false);
+        return;
+      } finally {
+        setUploadingFile(false);
+      }
+    }
 
     const payload = {
       userId: user?.id || null,
@@ -89,7 +167,11 @@ export default function AppointmentPage() {
       preferredDate: formData.date,
       preferredTime: formData.time,
       concern: formData.concern,
-      details: formData.details
+      details: formData.details,
+      attachmentUrl: attachmentData?.url || null,
+      attachmentKey: attachmentData?.key || null,
+      attachmentName: attachmentData?.name || null,
+      attachmentSize: attachmentData?.size || null,
     };
 
     let generatedId = `APT-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.floor(
@@ -407,6 +489,73 @@ export default function AppointmentPage() {
                         />
                       </div>
 
+                      {/* File Upload: Eye Prescription / Report */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-mono uppercase tracking-wider text-[#4A3928] font-semibold flex items-center justify-between">
+                          <span className="flex items-center gap-2">
+                            <Paperclip className="w-3.5 h-3.5 text-[#B88A32]" />
+                            Attach Prescription / Eye Test Report (Optional)
+                          </span>
+                          <span className="text-[10px] text-[#8B7355] font-normal">PNG, JPG, PDF up to 10MB</span>
+                        </label>
+
+                        {!selectedFile ? (
+                          <label className="flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-dashed border-[#B88A32]/35 bg-[#F4E9D5]/30 hover:bg-[#F4E9D5]/60 cursor-pointer transition-all group">
+                            <input
+                              type="file"
+                              accept="image/*,.pdf"
+                              onChange={handleFileSelect}
+                              className="hidden"
+                            />
+                            <div className="w-10 h-10 rounded-xl bg-[#B88A32]/10 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+                              <Upload className="w-5 h-5 text-[#B88A32]" />
+                            </div>
+                            <p className="text-xs font-medium text-[#2A2118]">
+                              Click to browse or drop your prescription file here
+                            </p>
+                            <p className="text-[11px] text-[#8B7355] mt-0.5 font-mono">
+                              Stored safely in Dr. Sheeraz&apos;s encrypted clinical archive
+                            </p>
+                          </label>
+                        ) : (
+                          <div className="p-3.5 rounded-2xl bg-[#F4E9D5]/60 border border-[#B88A32]/30 flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3 overflow-hidden">
+                              {filePreviewUrl ? (
+                                <img
+                                  src={filePreviewUrl}
+                                  alt="Prescription preview"
+                                  className="w-12 h-12 object-cover rounded-xl border border-[#B88A32]/30 shrink-0"
+                                />
+                              ) : (
+                                <div className="w-12 h-12 rounded-xl bg-[#B88A32]/15 flex items-center justify-center shrink-0">
+                                  <FileText className="w-6 h-6 text-[#B88A32]" />
+                                </div>
+                              )}
+                              <div className="min-w-0">
+                                <p className="text-xs font-mono font-bold text-[#2A2118] truncate">
+                                  {selectedFile.name}
+                                </p>
+                                <p className="text-[10px] font-mono text-[#8B7355]">
+                                  {(selectedFile.size / 1024).toFixed(1)} KB • Ready to attach
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={handleRemoveFile}
+                              className="p-1.5 rounded-lg text-[#8B7355] hover:text-red-600 hover:bg-red-500/10 transition-colors shrink-0"
+                              title="Remove attached file"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
+
+                        {uploadError && (
+                          <p className="text-xs text-red-600 font-mono mt-1">{uploadError}</p>
+                        )}
+                      </div>
+
                       {/* WhatsApp notification toggle */}
                       <div className="flex items-center gap-3 py-1">
                         <input
@@ -486,6 +635,24 @@ export default function AppointmentPage() {
                             {formData.concern}
                           </span>
                         </div>
+
+                        {uploadedAttachment && (
+                          <div className="pt-2 border-t border-[#B88A32]/10 flex items-center justify-between">
+                            <span className="text-[#8B7355] flex items-center gap-1.5">
+                              <Paperclip className="w-3 h-3 text-[#B88A32]" />
+                              Attached Rx:
+                            </span>
+                            <a
+                              href={uploadedAttachment.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[#B88A32] hover:underline font-mono text-[11px] truncate max-w-[180px] flex items-center gap-1 font-semibold"
+                            >
+                              <Eye className="w-3 h-3" />
+                              <span>{uploadedAttachment.name}</span>
+                            </a>
+                          </div>
+                        )}
                       </div>
 
                       <div className="pt-3 text-[#6B5740]">
@@ -504,6 +671,10 @@ export default function AppointmentPage() {
                       <button
                         onClick={() => {
                           setSuccess(false);
+                          setSelectedFile(null);
+                          setFilePreviewUrl(null);
+                          setUploadedAttachment(null);
+                          setUploadError(null);
                           setFormData((f) => ({
                             ...f,
                             date: "",

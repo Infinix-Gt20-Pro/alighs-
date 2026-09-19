@@ -35,6 +35,10 @@ export async function POST(request: Request) {
       concern: String(body.concern),
       details: body.details || '',
       status: 'confirmed',
+      attachment_url: body.attachmentUrl || null,
+      attachment_key: body.attachmentKey || null,
+      attachment_name: body.attachmentName || null,
+      attachment_size: body.attachmentSize || null,
       created_at: now,
       updated_at: now,
     };
@@ -57,6 +61,8 @@ export async function POST(request: Request) {
         preferredTime: newAppointment.preferred_time,
         concern: newAppointment.concern,
         details: newAppointment.details,
+        attachmentUrl: newAppointment.attachment_url,
+        attachmentName: newAppointment.attachment_name,
         status: newAppointment.status,
         createdAt: newAppointment.created_at,
       },
@@ -89,6 +95,9 @@ export async function GET() {
       details: a.details,
       status: a.status,
       createdAt: a.created_at,
+      attachmentUrl: a.attachment_url || null,
+      attachmentName: a.attachment_name || null,
+      attachmentSize: a.attachment_size || null,
     }));
 
     return NextResponse.json({

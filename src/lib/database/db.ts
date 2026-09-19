@@ -53,6 +53,9 @@ export interface CreateOrderInput {
   razorpayOrderId?: string;
   razorpayPaymentId?: string;
   userId?: string;
+  prescriptionUrl?: string;
+  prescriptionKey?: string;
+  prescriptionName?: string;
 }
 
 export async function createOrderTransaction(input: CreateOrderInput): Promise<{
@@ -94,6 +97,9 @@ export async function createOrderTransaction(input: CreateOrderInput): Promise<{
     razorpayOrderId: input.razorpayOrderId || null,
     razorpayPaymentId: input.razorpayPaymentId || null,
     userId: input.userId || null,
+    prescriptionUrl: input.prescriptionUrl || null,
+    prescriptionKey: input.prescriptionKey || null,
+    prescriptionName: input.prescriptionName || null,
   };
 
   // 3. Execute atomic transaction in PostgreSQL
@@ -127,6 +133,9 @@ export async function createOrderTransaction(input: CreateOrderInput): Promise<{
     customer_notes: rawOrder.customer_notes,
     razorpay_order_id: input.razorpayOrderId,
     razorpay_payment_id: input.razorpayPaymentId,
+    prescription_url: rawOrder.prescription_url || input.prescriptionUrl,
+    prescription_key: input.prescriptionKey,
+    prescription_name: rawOrder.prescription_name || input.prescriptionName,
     created_at: rawOrder.created_at,
     updated_at: rawOrder.created_at,
   };
@@ -378,6 +387,8 @@ export async function trackOrderCustomer(orderNumber: string, phone: string) {
     subtotal: order.subtotal,
     shipping_charge: order.shipping_charge,
     total_amount: order.total_amount,
+    prescription_url: order.prescription_url || null,
+    prescription_name: order.prescription_name || null,
     customer: {
       full_name: customer.full_name,
       masked_address: maskAddress(customer.address, customer.city, customer.pincode),

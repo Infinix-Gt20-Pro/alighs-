@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import FrameSilhouette from "@/components/FrameSilhouette";
-import { DEFAULT_PRODUCTS, ProductType, getFallbackProductBySlug } from "@/lib/products-data";
+import { ProductType, getFallbackProductBySlug, getFallbackProducts } from "@/lib/products-data";
 import ThemeToggle from "@/components/ThemeToggle";
 
 const COLOR_MAP: Record<string, string> = {
@@ -47,9 +47,11 @@ export default function ProductDetailClient() {
   const { addToCart } = useCart();
 
   const slug = Array.isArray(params?.slug) ? params.slug[0] : (params?.slug as string) || "";
-  const initialProduct = useMemo(() => getFallbackProductBySlug(slug), [slug]);
+  const initialProduct = useMemo(() => getFallbackProductBySlug(slug, true), [slug]);
 
-  const [product, setProduct] = useState<ProductType>(initialProduct);
+  const [product, setProduct] = useState<ProductType | null>(initialProduct);
+  const [isUnavailable, setIsUnavailable] = useState(false);
+  const [isLoading, setIsLoading] = useState(!initialProduct);
   const [selectedColorIdx, setSelectedColorIdx] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [lensType, setLensType] = useState("zero-power");
@@ -57,20 +59,44 @@ export default function ProductDetailClient() {
 
   useEffect(() => {
     if (!slug) return;
+    let isMounted = true;
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`/api/products/${slug}`);
+        setIsLoading(true);
+        const res = await fetch(`/api/products/${encodeURIComponent(slug)}`, { cache: "no-store" });
+        if (!isMounted) return;
         if (res.ok) {
           const data = await res.json();
-          if (data && data.name) {
+          if (data && data.name && (!data.status || data.status.toLowerCase() === "active")) {
             setProduct(data);
+            setIsUnavailable(false);
+          } else {
+            setProduct(null);
+            setIsUnavailable(true);
           }
+        } else {
+          setProduct(null);
+          setIsUnavailable(true);
         }
       } catch {
-        console.warn("Using local catalog data for:", slug);
+        if (isMounted) {
+          const fb = getFallbackProductBySlug(slug, true);
+          if (fb) {
+            setProduct(fb);
+            setIsUnavailable(false);
+          } else {
+            setProduct(null);
+            setIsUnavailable(true);
+          }
+        }
+      } finally {
+        if (isMounted) setIsLoading(false);
       }
     };
     fetchProduct();
+    return () => {
+      isMounted = false;
+    };
   }, [slug]);
 
   const colors = product?.colors || ["Black"];
@@ -82,6 +108,7 @@ export default function ProductDetailClient() {
     : 0;
 
   const handleAddToCart = () => {
+    if (!product) return;
     addToCart(
       {
         productId: product._id || product.slug,
@@ -101,11 +128,64 @@ export default function ProductDetailClient() {
   };
 
   const handleWhatsAppBuy = () => {
+    if (!product) return;
     const msg = `Hi Dr. Sheeraz & ALIGSWARE Team! I am interested in ordering the ${product.name} (Finish: ${activeColor}, Lens: ${lensType}, Qty: ${quantity}). Please guide me with power verification.`;
     window.open(`https://wa.me/917217371499?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
-  const relatedProducts = DEFAULT_PRODUCTS.filter((p) => p.slug !== product.slug).slice(0, 3);
+  const relatedProducts = useMemo(() => {
+    return getFallbackProducts({ onlyActive: true })
+      .filter((p) => p.slug !== product?.slug)
+      .slice(0, 3);
+  }, [product?.slug]);
+
+  if (!isLoading && (!product || isUnavailable)) {
+    return (
+      <main className="min-h-screen bg-[#F4E9D5] dark:bg-[#0A0A0E] text-[#2A2118] dark:text-[#F5EFE6] pt-32 pb-24 relative overflow-hidden transition-colors duration-300">
+        <div className="max-w-xl mx-auto px-4 sm:px-6 text-center pt-12">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-3xl bg-[#FFF9EF] dark:bg-[#161622] border border-[#B88A32]/30 dark:border-[#B88A32]/40 flex items-center justify-center shadow-lg mb-6">
+            <Sparkles className="w-8 h-8 text-[#B88A32] dark:text-[#D4AF62]" />
+          </div>
+          <span className="text-xs font-mono uppercase tracking-widest text-[#B88A32] dark:text-[#D4AF62] font-bold block mb-2">
+            Atelier Catalog Notice
+          </span>
+          <h1 className="text-2xl sm:text-3xl font-bold font-cinzel text-[#2A2118] dark:text-[#F5EFE6] mb-3">
+            Frame Currently Unavailable
+          </h1>
+          <p className="text-xs sm:text-sm font-mono text-[#6B5740] dark:text-[#A09383] mb-8 leading-relaxed">
+            This optical frame has been marked inactive by our atelier or is temporarily out of catalog. Please explore our active curated collection.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              href="/shop"
+              className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-[#B88A32] to-[#D4AF62] text-white font-mono text-xs font-bold uppercase tracking-wider shadow-md hover:brightness-105 transition-all flex items-center justify-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Active Frames</span>
+            </Link>
+            <Link
+              href="/"
+              className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-[#FFF9EF] dark:bg-[#161622] border border-[#B88A32]/30 text-xs font-mono font-bold text-[#2A2118] dark:text-[#F5EFE6] hover:bg-white dark:hover:bg-[#202030] transition-all"
+            >
+              Home
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (isLoading && !product) {
+    return (
+      <main className="min-h-screen bg-[#F4E9D5] dark:bg-[#0A0A0E] pt-32 pb-24 flex items-center justify-center">
+        <div className="text-center font-mono text-xs text-[#B88A32] animate-pulse">
+          Loading frame details...
+        </div>
+      </main>
+    );
+  }
+
+  if (!product) return null;
 
   return (
     <main className="min-h-screen bg-[#F4E9D5] dark:bg-[#0A0A0E] text-[#2A2118] dark:text-[#F5EFE6] pt-28 pb-24 relative overflow-hidden selection:bg-[#B88A32]/30 selection:text-[#2A2118] dark:selection:text-[#F5EFE6] transition-colors duration-300">

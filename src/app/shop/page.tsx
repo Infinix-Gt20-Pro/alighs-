@@ -1,14 +1,14 @@
 // src/app/shop/page.tsx
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProductCard from "@/components/ProductCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import CartDrawer from "@/components/CartDrawer";
-import { DEFAULT_PRODUCTS } from "@/lib/products-data";
+import { getFallbackProducts, ProductItem } from "@/lib/products-data";
 import { Search, Sparkles, SlidersHorizontal, RefreshCw, X, ShieldCheck, CheckCircle2 } from "lucide-react";
 
 import ThemeToggle from "@/components/ThemeToggle";
@@ -52,6 +52,10 @@ const SORT_OPTIONS = [
 ];
 
 export default function ShopPage() {
+  const [products, setProducts] = useState<ProductItem[]>(() =>
+    getFallbackProducts({ onlyActive: true })
+  );
+  const [isLoading, setIsLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeType, setActiveType] = useState("All Types");
   const [activeShape, setActiveShape] = useState("All Shapes");
@@ -59,35 +63,72 @@ export default function ShopPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState("popular");
 
+  const loadLiveProducts = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch("/api/products", { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          // Strictly ensure only active products are rendered
+          const activeOnly = data.filter(
+            (p: ProductItem) => !p.status || p.status.toLowerCase() === "active"
+          );
+          setProducts(activeOnly);
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to fetch live products catalog:", e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadLiveProducts();
+
+    const handleFocus = () => {
+      loadLiveProducts();
+    };
+
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("visibilitychange", handleFocus);
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("visibilitychange", handleFocus);
+    };
+  }, [loadLiveProducts]);
+
   const filteredProducts = useMemo(() => {
-    let list = [...DEFAULT_PRODUCTS];
+    // Strictly filter out any inactive or non-active products
+    let list = products.filter((p) => !p.status || p.status.toLowerCase() === "active");
 
     if (activeCategory !== "All") {
-      list = list.filter((p) => p.category === activeCategory);
+      list = list.filter((p) => p.category && p.category.toLowerCase() === activeCategory.toLowerCase());
     }
 
     if (activeType !== "All Types") {
       const ftKey = activeType.toLowerCase().replace(/\s+/g, "-");
-      list = list.filter((p) => p.frameType === ftKey);
+      list = list.filter((p) => p.frameType && p.frameType.toLowerCase() === ftKey);
     }
 
     if (activeShape !== "All Shapes") {
-      list = list.filter((p) => p.frameShape.toLowerCase() === activeShape.toLowerCase());
+      list = list.filter((p) => p.frameShape && p.frameShape.toLowerCase() === activeShape.toLowerCase());
     }
 
     if (activeBrand !== "All Brands") {
-      list = list.filter((p) => p.brandCollection.toLowerCase().includes(activeBrand.toLowerCase()));
+      list = list.filter((p) => p.brandCollection && p.brandCollection.toLowerCase().includes(activeBrand.toLowerCase()));
     }
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       list = list.filter(
         (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.brandCollection.toLowerCase().includes(q) ||
-          p.material.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q) ||
-          p.features.some((f) => f.toLowerCase().includes(q))
+          p.name?.toLowerCase().includes(q) ||
+          (p.brandCollection && p.brandCollection.toLowerCase().includes(q)) ||
+          (p.material && p.material.toLowerCase().includes(q)) ||
+          (p.description && p.description.toLowerCase().includes(q)) ||
+          (p.features && p.features.some((f) => f.toLowerCase().includes(q)))
       );
     }
 
@@ -102,7 +143,7 @@ export default function ShopPage() {
     }
 
     return list;
-  }, [activeCategory, activeType, activeShape, activeBrand, searchQuery, sortOption]);
+  }, [products, activeCategory, activeType, activeShape, activeBrand, searchQuery, sortOption]);
 
   const resetFilters = () => {
     setActiveCategory("All");
@@ -111,6 +152,7 @@ export default function ShopPage() {
     setActiveBrand("All Brands");
     setSearchQuery("");
     setSortOption("popular");
+    loadLiveProducts();
   };
 
   return (

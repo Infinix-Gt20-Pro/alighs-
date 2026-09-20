@@ -1,10 +1,10 @@
 // src/components/FeaturedShowcase.tsx
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { DEFAULT_PRODUCTS, ProductType } from "@/lib/products-data";
+import { getFallbackProducts, ProductType } from "@/lib/products-data";
 import { useCart } from "@/context/CartContext";
 import { ShoppingBag, ArrowRight, Sparkles, Check, Star, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { useDeviceTier } from "@/hooks/useDeviceTier";
@@ -12,12 +12,34 @@ import { useDeviceTier } from "@/hooks/useDeviceTier";
 export default function FeaturedShowcase() {
   const { addToCart } = useCart();
   const { tier } = useDeviceTier();
+  const [products, setProducts] = useState<ProductType[]>(() =>
+    getFallbackProducts({ onlyActive: true })
+  );
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [activeIndex, setActiveIndex] = useState(0);
   const [addedSlug, setAddedSlug] = useState<string | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const stageRef = useRef<HTMLDivElement>(null);
   const mouseTicking = useRef(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetch("/api/products", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (isMounted && Array.isArray(data)) {
+          setProducts(
+            data.filter(
+              (p: ProductType) => !p.status || p.status.toLowerCase() === "active"
+            )
+          );
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const filters = [
     { id: "all", label: "All Curations" },
@@ -27,11 +49,13 @@ export default function FeaturedShowcase() {
     { id: "titanium", label: "Air Titanium" },
   ];
 
-  const filteredProducts = DEFAULT_PRODUCTS.filter((product) => {
-    if (selectedFilter === "eyeglasses") return product.category === "eyeglasses";
-    if (selectedFilter === "computer-glasses") return product.category === "computer-glasses";
-    if (selectedFilter === "sunglasses") return product.category === "sunglasses";
-    if (selectedFilter === "titanium") return product.material.toLowerCase().includes("titanium");
+  const filteredProducts = products.filter((product) => {
+    if (product.status && product.status.toLowerCase() !== "active") return false;
+    const cat = product.category?.toLowerCase() || "";
+    if (selectedFilter === "eyeglasses") return cat === "eyeglasses";
+    if (selectedFilter === "computer-glasses") return cat === "computer-glasses";
+    if (selectedFilter === "sunglasses") return cat === "sunglasses";
+    if (selectedFilter === "titanium") return product.material && product.material.toLowerCase().includes("titanium");
     return true;
   }).slice(0, 8);
 

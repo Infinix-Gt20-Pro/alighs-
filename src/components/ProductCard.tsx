@@ -190,7 +190,7 @@ export default function ProductCard({ product }: ProductProps) {
               </h3>
             </Link>
             <div className="flex items-center gap-1 sm:gap-2 mt-0.5 text-[9px] sm:text-[11px] font-mono text-[#6B5740] dark:text-[#A09383]">
-              <span className="capitalize truncate">{product.category.replace("-", " ")}</span>
+              <span className="capitalize truncate">{product.category ? product.category.replace("-", " ") : "Eyeglasses"}</span>
               {product.caliber && <span className="hidden sm:inline">&bull; {product.caliber}</span>}
             </div>
           </div>

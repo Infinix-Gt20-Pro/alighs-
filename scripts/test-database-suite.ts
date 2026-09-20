@@ -26,26 +26,26 @@ async function runTests() {
   const validPins = ['786', '6396', '7217', '1499'];
   for (const pin of validPins) {
     const ok = await authenticateAdmin(pin);
-    if (!ok) throw new Error(`PIN "${pin}" should authenticate successfully.`);
+    if (!ok?.valid) throw new Error(`PIN "${pin}" should authenticate successfully.`);
   }
   const badAuth = await authenticateAdmin('wrong_passcode');
-  if (badAuth) throw new Error('Invalid passcode should not authenticate.');
+  if (badAuth?.valid) throw new Error('Invalid passcode should not authenticate.');
   console.log('✓ PIN shortcuts (786, 6396, 7217, 1499) and rejection of invalid passcodes passed.');
 
   // TEST 3: Admin Password Change Flow
   console.log('\n[TEST 3] Testing Admin Password Change...');
-  const defaultAuth = await authenticateAdmin('AligsWare@2026!');
-  if (!defaultAuth) throw new Error('Default admin password should authenticate.');
+  const defaultAuth = await authenticateAdmin('admin', 'AligsWare@2026!');
+  if (!defaultAuth?.valid) throw new Error('Default admin password should authenticate.');
 
   const changed = await changeAdminPassword('NewTestPassword123!');
   if (!changed) throw new Error('Password change returned false.');
-  const newAuth = await authenticateAdmin('NewTestPassword123!');
-  if (!newAuth) throw new Error('New password authentication failed.');
+  const newAuth = await authenticateAdmin('admin', 'NewTestPassword123!');
+  if (!newAuth?.valid) throw new Error('New password authentication failed.');
 
   // Restore default password
   await changeAdminPassword('AligsWare@2026!');
-  const restoredAuth = await authenticateAdmin('AligsWare@2026!');
-  if (!restoredAuth) throw new Error('Password restoration failed.');
+  const restoredAuth = await authenticateAdmin('admin', 'AligsWare@2026!');
+  if (!restoredAuth?.valid) throw new Error('Password restoration failed.');
   console.log('✓ Admin password change, verification, and restoration verified successfully.');
 
   // TEST 4: Order Transaction & Inventory Decrement
@@ -78,10 +78,12 @@ async function runTests() {
   if (!orderResult.order.order_number.startsWith('ALG-')) {
     throw new Error(`Order number format invalid: ${orderResult.order.order_number}`);
   }
-  if (testProduct.stock_quantity !== initialStock - 2) {
-    throw new Error(`Stock decrement failed. Expected ${initialStock - 2}, got ${testProduct.stock_quantity}`);
+  const freshDb = await getDatabase();
+  const updatedProduct = freshDb.products.find(p => p.id === testProduct.id);
+  if (!updatedProduct || updatedProduct.stock_quantity !== initialStock - 2) {
+    throw new Error(`Stock decrement failed. Expected ${initialStock - 2}, got ${updatedProduct?.stock_quantity}`);
   }
-  console.log(`✓ Order created: ${orderResult.order.order_number}, Stock safely decremented from ${initialStock} to ${testProduct.stock_quantity}.`);
+  console.log(`✓ Order created: ${orderResult.order.order_number}, Stock safely decremented from ${initialStock} to ${updatedProduct.stock_quantity}.`);
 
   // TEST 5: Order Detail Fetch & Audit Trail
   console.log('\n[TEST 5] Testing Order Detail Lookup with Snapshot & History...');

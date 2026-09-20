@@ -24,6 +24,7 @@ export interface ProductItem {
   colors: string[];
   features: string[];
   description: string;
+  status?: "active" | "inactive" | "out_of_stock" | string;
 }
 
 export const PRODUCTS: ProductItem[] = [
@@ -46,6 +47,7 @@ export const PRODUCTS: ProductItem[] = [
     frameWidth: "137 mm",
     gender: "Unisex",
     bestSeller: true,
+    status: "inactive",
     images: ["/images/products/lenskart-air-lenskart-air-switch-221174.jpg", "https://static5.lenskart.com/media/catalog/product/pro/1/thumbnail/1080x1080/9df78eab33525d08d6e5fb8d27136e95//l/i/green-black-full-rim-square-lenskart-air-switch-la-e17273-clip-on-eyeglasses_clip_on_images221174_dsc7890_03_04_2025.jpeg"],
     colors: ["Black", "Gunmetal Gray", "Champagne Gold"],
     features: ["2-in-1 Instant Magnetic Snap", "Polarized UV400 Sun Clip", "Precision Prescription Base"],
@@ -94,6 +96,7 @@ export const PRODUCTS: ProductItem[] = [
     frameWidth: "140 mm",
     gender: "Unisex",
     bestSeller: true,
+    status: "inactive",
     images: ["/images/products/lenskart-air-lenskart-air-switch-221176.jpg", "https://static5.lenskart.com/media/catalog/product/pro/1/thumbnail/1080x1080/9df78eab33525d08d6e5fb8d27136e95//l/i/lenskart-air-la-e17274-c2-eyeglasses__dsc7793_03_04_2025.jpg"],
     colors: ["Black", "Gunmetal Gray", "Champagne Gold"],
     features: ["2-in-1 Instant Magnetic Snap", "Polarized UV400 Sun Clip", "Precision Prescription Base"],
@@ -847,27 +850,131 @@ export const PRODUCTS: ProductItem[] = [
 
 export type ProductType = ProductItem;
 export const DEFAULT_PRODUCTS = PRODUCTS;
-export const getFallbackProductBySlug = (slug: string): ProductItem => {
-  return PRODUCTS.find((p) => p.slug === slug) || PRODUCTS[0];
+
+export const getFallbackProductBySlug = (
+  slug: string,
+  onlyActive = true
+): ProductItem | null => {
+  if (!slug) return null;
+  const cleanSlug = slug.toLowerCase().trim();
+  const found = PRODUCTS.find(
+    (p) =>
+      p.slug.toLowerCase() === cleanSlug ||
+      p.id.toLowerCase() === cleanSlug ||
+      p._id.toLowerCase() === cleanSlug ||
+      `alg-${p.id.toLowerCase()}` === cleanSlug
+  );
+
+  if (!found) return null;
+
+  if (onlyActive && found.status && found.status.toLowerCase() !== 'active') {
+    return null;
+  }
+
+  return found;
 };
 
-export const getFallbackProducts = (filter?: { category?: string; frameShape?: string; sort?: string }): ProductItem[] => {
-  let list = [...PRODUCTS];
-  if (filter?.category && filter.category !== "all" && filter.category !== "All") {
-    list = list.filter((p) => p.category === filter.category);
+export const getFallbackProducts = (filter?: {
+  category?: string;
+  frameShape?: string;
+  sort?: string;
+  onlyActive?: boolean;
+}): ProductItem[] => {
+  const onlyActive = filter?.onlyActive !== false;
+  let list = PRODUCTS.map((p) => ({ ...p }));
+
+  if (onlyActive) {
+    list = list.filter((p) => !p.status || p.status.toLowerCase() === 'active');
   }
-  if (filter?.frameShape && filter.frameShape !== "all" && filter.frameShape !== "All") {
-    list = list.filter((p) => p.frameShape === filter.frameShape);
+
+  if (filter?.category && filter.category !== 'all' && filter.category !== 'All') {
+    list = list.filter((p) => p.category.toLowerCase() === filter.category!.toLowerCase());
   }
-  if (filter?.sort === "price-asc" || filter?.sort === "price_asc") {
+  if (filter?.frameShape && filter.frameShape !== 'all' && filter.frameShape !== 'All') {
+    list = list.filter((p) => p.frameShape.toLowerCase() === filter.frameShape!.toLowerCase());
+  }
+  if (filter?.sort === 'price-asc' || filter?.sort === 'price_asc') {
     list.sort((a, b) => a.price - b.price);
-  } else if (filter?.sort === "price-desc" || filter?.sort === "price_desc") {
+  } else if (filter?.sort === 'price-desc' || filter?.sort === 'price_desc') {
     list.sort((a, b) => b.price - a.price);
-  } else if (filter?.sort === "popular") {
+  } else if (filter?.sort === 'popular') {
     list.sort((a, b) => (b.bestSeller ? 1 : 0) - (a.bestSeller ? 1 : 0));
+  } else if (filter?.sort === 'newest') {
+    list.reverse();
   }
+
   return list;
 };
+
+export function hydrateProduct(dbProd: any, catalogList: ProductItem[] = PRODUCTS): ProductItem {
+  const cleanId = String(dbProd.id || '').trim();
+  const cleanSku = String(dbProd.sku || '').trim();
+
+  // Find matching rich product in catalog by id, sku, or slug
+  const match = catalogList.find(
+    (p) =>
+      p.id === cleanId ||
+      p._id === cleanId ||
+      p.slug === cleanId ||
+      `ALG-${p.id}` === cleanSku ||
+      p.slug === cleanSku.toLowerCase() ||
+      p.id === cleanSku.replace(/^ALG-/, '')
+  );
+
+  const status = (dbProd.status || match?.status || 'active') as any;
+
+  if (match) {
+    return {
+      ...match,
+      name: dbProd.name || match.name,
+      price: dbProd.price !== undefined ? Number(dbProd.price) : match.price,
+      originalPrice:
+        dbProd.original_price !== undefined
+          ? Number(dbProd.original_price)
+          : (dbProd.originalPrice !== undefined ? Number(dbProd.originalPrice) : match.originalPrice),
+      description: dbProd.description || match.description,
+      status,
+      images:
+        dbProd.image_url && !match.images.includes(dbProd.image_url)
+          ? [dbProd.image_url, ...match.images]
+          : match.images,
+    };
+  }
+
+  // Fallback for custom frames created purely in DB
+  const rawPrice = Number(dbProd.price) || 2499;
+  const rawOrigPrice = Number(dbProd.original_price || dbProd.originalPrice) || rawPrice;
+  const rawCategory = (dbProd.category || 'eyeglasses').toLowerCase();
+  const validCat = ['eyeglasses', 'sunglasses', 'computer-glasses', 'reading-glasses', 'clip-on'].includes(rawCategory)
+    ? (rawCategory as any)
+    : 'eyeglasses';
+
+  return {
+    id: cleanId,
+    _id: cleanId,
+    name: dbProd.name || 'Alig’s Ware Atelier Frame',
+    slug: cleanSku ? cleanSku.toLowerCase() : `frame-${cleanId}`,
+    brandCollection: "Alig's Clinic Grade",
+    category: validCat,
+    frameShape: 'rectangle',
+    frameType: 'full-rim',
+    frameMaterial: 'TR90 Ultra-Flex / Beta-Titanium',
+    material: 'TR90 Ultra-Flex',
+    price: rawPrice,
+    originalPrice: rawOrigPrice,
+    rating: 4.8,
+    reviewCount: 120,
+    weight: '14g',
+    frameWidth: '138 mm',
+    gender: 'Unisex',
+    bestSeller: false,
+    images: [dbProd.image_url || '/images/clarity-showcase.jpg'],
+    colors: ['Black', 'Gunmetal Gray'],
+    features: ['420nm Blue-Cut Sapphire Coating', 'Ultra-Light Titanium Core', 'Anti-Glare Prescription Ready'],
+    description: dbProd.description || "Alig's Ware handcrafted luxury frame with precision optics.",
+    status,
+  };
+}
 
 export const LENSKART_CATEGORIES = [
   { id: "all", label: "All Curations", sub: "Complete Atelier" },

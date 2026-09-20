@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import insforge from '@/lib/insforge';
-import { getDatabase } from '@/lib/database/db';
+import {
+  getDatabase,
+  syncProductStatusToFallback,
+  syncAddProductToFallback,
+  syncDeleteProductFromFallback,
+} from '@/lib/database/db';
 import { Product } from '@/lib/database/schema';
 
 export async function GET() {
@@ -89,6 +94,9 @@ export async function POST(request: Request) {
       .from('products')
       .insert([newProduct]);
 
+    // Also sync into fallback json
+    await syncAddProductToFallback(newProduct);
+
     if (insError) {
       console.error('InsForge insert product error:', insError);
       return NextResponse.json(
@@ -162,12 +170,37 @@ export async function PUT(request: Request) {
       updates.status = status;
     }
 
-    // Persist directly into InsForge PostgreSQL database
-    const { data: updatedRecord, error: updateErr } = await insforge.database
+    const cleanId = String(id).trim();
+    let updatedRecord: any[] | null = null;
+    let updateErr: any = null;
+
+    // 1. Try matching id directly
+    const res1 = await insforge.database
       .from('products')
       .update(updates)
-      .eq('id', String(id))
+      .eq('id', cleanId)
       .select('*');
+
+    if (!res1.error && res1.data && res1.data.length > 0) {
+      updatedRecord = res1.data;
+    } else {
+      // 2. Try alternate forms (e.g. stripped ALG- or SKU match)
+      const altId = cleanId.startsWith('ALG-') ? cleanId.replace(/^ALG-/, '') : `ALG-${cleanId}`;
+      const res2 = await insforge.database
+        .from('products')
+        .update(updates)
+        .or(`id.eq.${altId},sku.eq.${cleanId},sku.eq.${altId}`)
+        .select('*');
+
+      if (!res2.error && res2.data && res2.data.length > 0) {
+        updatedRecord = res2.data;
+      } else {
+        updateErr = res1.error || res2.error;
+      }
+    }
+
+    // Also sync updates to fallback json
+    await syncProductStatusToFallback(cleanId, updates);
 
     if (updateErr) {
       console.error('InsForge update product error:', updateErr);
@@ -177,12 +210,12 @@ export async function PUT(request: Request) {
       );
     }
 
-    const finalProduct = updatedRecord && updatedRecord.length > 0 ? updatedRecord[0] : { id, ...updates };
+    const finalProduct = updatedRecord && updatedRecord.length > 0 ? updatedRecord[0] : { id: cleanId, ...updates };
 
     return NextResponse.json({ success: true, product: finalProduct });
   } catch (error: unknown) {
     console.error('Error updating product:', error);
-    const message = error instanceof Error ? error.message : 'Internal server error';
+    const message = error instanceof Error ? error.message : 'Failed to update product';
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
@@ -197,12 +230,17 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Product ID is required.' }, { status: 400 });
     }
 
+    const cleanId = String(id).trim();
+    const altId = cleanId.startsWith('ALG-') ? cleanId.replace(/^ALG-/, '') : `ALG-${cleanId}`;
+
     if (force) {
       // Permanent removal
       const { error: delErr } = await insforge.database
         .from('products')
         .delete()
-        .eq('id', String(id));
+        .or(`id.eq.${cleanId},id.eq.${altId},sku.eq.${cleanId}`);
+
+      await syncDeleteProductFromFallback(cleanId, true);
 
       if (delErr) {
         return NextResponse.json({ error: delErr.message }, { status: 500 });
@@ -221,7 +259,9 @@ export async function DELETE(request: Request) {
         status: 'inactive',
         updated_at: new Date().toISOString(),
       })
-      .eq('id', String(id));
+      .or(`id.eq.${cleanId},id.eq.${altId},sku.eq.${cleanId}`);
+
+    await syncDeleteProductFromFallback(cleanId, false);
 
     if (updateErr) {
       return NextResponse.json({ error: updateErr.message }, { status: 500 });

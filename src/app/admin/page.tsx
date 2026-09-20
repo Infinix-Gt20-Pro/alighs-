@@ -130,6 +130,29 @@ const ORDER_STATUSES = [
 
 const PAYMENT_STATUSES = ["Pending", "Paid", "Failed", "Refunded", "COD"];
 
+export const PRESET_PRODUCT_IMAGES = [
+  { label: "John Jacobs Rich Acetate Black", url: "/images/products/black-full-rim-square-john-jacobs-rich-acetate-jj-e70294-240027.jpg" },
+  { label: "John Jacobs Celestia Clubmaster", url: "/images/products/brown-full-rim-clubmaster-john-jacobs-celestia-jj-e70250-239316.jpg" },
+  { label: "Meller Lira Luxury Aviator", url: "/images/products/brown-black-full-rim-aviator-meller-lira-mel-s19440-245118.jpg" },
+  { label: "Meller Neo Polarized Square", url: "/images/products/brown-full-rim-square-meller-neo-mel-s19442-polariozed-245131.jpg" },
+  { label: "Vincent Chase Blue-Grey Square", url: "/images/products/blue-grey-full-rim-square-vincent-chase-polarized-non-metal-vc-s19091-241406.jpg" },
+  { label: "Vincent Chase Emerald Polarized", url: "/images/products/green-black-full-rim-square-vincent-chase-non-metal-vc-s19144-polarized-242632.jpg" },
+  { label: "Vincent Chase Signature Aviator", url: "/images/products/vincent-chase-vincent-chase-polarized-241102.jpg" },
+  { label: "Vincent Chase Jet Black 5147P", url: "/images/products/vincent-chase-vc-5147p-black-241838.jpg" },
+  { label: "Lenskart Air Pop Gradient Cat-Eye", url: "/images/products/gradient-transparent-dark-pink-to-clear-gunmental-full-rim-cat-eye-lenskart-air-air-pop-la-e17025-242248.jpg" },
+  { label: "Air Essentials Navy Blue Square", url: "/images/products/navy-full-rim-square-air-essentials-la-e15417-w-c14-208951.jpg" },
+  { label: "Amber Acetate Cat-Eye", url: "/images/products/orange-transparent-full-rim-cat-eye-vincent-chase-acetate-vc-e18772-238023.jpg" },
+  { label: "Dark Night Titanium Square", url: "/images/products/dark-night-full-rim-square-215922.jpg" },
+  { label: "Gold Rimless Sleek Steel", url: "/images/products/gold-rimless-rectangle-vincent-chase-sleek-steel-vc-e17135-c1-218257.jpg" },
+  { label: "Gunmetal Full Rim Round", url: "/images/products/gunmetal-full-rim-round-150798.jpg" },
+  { label: "Silver Rimless Titanium", url: "/images/products/silver-rimless-rectangle-owndays-titanium-od-e50030-c3-220623.jpg" },
+  { label: "Golden Cat-Eye Full Rim", url: "/images/products/golden-cat-eye-full-rim-139363.jpg" },
+  { label: "Brown Aviator Full Rim", url: "/images/products/brown-aviator-full-rim-147043.jpg" },
+  { label: "Lenskart Air Switch Clip-On", url: "/images/products/lenskart-air-lenskart-air-switch-221174.jpg" },
+  { label: "Matte Black Classics Rectangle", url: "/images/products/matte-black-full-rim-rectangle-lenskart-air-classics-la-e000635-229137.jpg" },
+  { label: "Atelier Clarity Showcase", url: "/images/clarity-showcase.jpg" },
+];
+
 export default function AdminDashboardPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [usernameInput, setUsernameInput] = useState("");
@@ -180,13 +203,37 @@ export default function AdminDashboardPage() {
 
   const [invSearch, setInvSearch] = useState("");
   const [invCategory, setInvCategory] = useState("All");
+  const [invStatusFilter, setInvStatusFilter] = useState("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const [newProdForm, setNewProdForm] = useState({
-    name: "", category: "Eyeglasses", price: 1999, original_price: 2999,
-    sku: "", stock_quantity: 20, image_url: "/logo.png",
-    description: "Atelier Handcrafted Luxury Titanium Frame."
+    name: "",
+    category: "Eyeglasses",
+    price: 2999,
+    original_price: 3999,
+    sku: "",
+    stock_quantity: 25,
+    image_url: "/images/clarity-showcase.jpg",
+    description: "Atelier Handcrafted Luxury Titanium Frame.",
+    status: "active" as "active" | "out_of_stock" | "inactive",
   });
   const [savingProduct, setSavingProduct] = useState(false);
+
+  // Edit Product Modal State
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<ProductRecord | null>(null);
+  const [editProdForm, setEditProdForm] = useState({
+    id: "",
+    name: "",
+    category: "Eyeglasses",
+    price: 2999,
+    original_price: 3999,
+    sku: "",
+    stock_quantity: 20,
+    image_url: "/images/clarity-showcase.jpg",
+    description: "",
+    status: "active" as "active" | "out_of_stock" | "inactive",
+  });
+  const [updatingProduct, setUpdatingProduct] = useState(false);
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [currentPw, setCurrentPw] = useState("");
@@ -485,8 +532,9 @@ export default function AdminDashboardPage() {
         showToast(`"${data.product.name}" added to catalog!`, "success");
         setNewProdForm({
           name: "", category: "Eyeglasses", price: 1999, original_price: 2999,
-          sku: "", stock_quantity: 20, image_url: "/logo.png",
-          description: "Atelier Handcrafted Luxury Titanium Frame."
+          sku: "", stock_quantity: 20, image_url: "/images/clarity-showcase.jpg",
+          description: "Atelier Handcrafted Luxury Titanium Frame.",
+          status: "active",
         });
       } else {
         const data = await res.json();
@@ -497,6 +545,52 @@ export default function AdminDashboardPage() {
       showToast("Network error creating frame", "error");
     } finally {
       setSavingProduct(false);
+    }
+  };
+
+  const handleOpenEditProduct = (p: ProductRecord) => {
+    setEditingProduct(p);
+    setEditProdForm({
+      id: String(p.id),
+      name: p.name || "",
+      category: p.category || "Eyeglasses",
+      price: p.price || 0,
+      original_price: p.original_price || p.price || 0,
+      sku: p.sku || "",
+      stock_quantity: p.stock_quantity ?? 0,
+      image_url: p.image_url || "/images/clarity-showcase.jpg",
+      description: p.description || "",
+      status: (p.status as any) || "active",
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editProdForm.id) return;
+    setUpdatingProduct(true);
+    try {
+      const res = await fetch("/api/admin/inventory", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editProdForm),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setProducts((prev) =>
+          prev.map((p) => (String(p.id) === String(editProdForm.id) ? { ...p, ...data.product } : p))
+        );
+        setShowEditModal(false);
+        showToast(`"${editProdForm.name}" updated successfully!`, "success");
+      } else {
+        const data = await res.json();
+        showToast(data.error || "Failed to update frame", "error");
+      }
+    } catch (e) {
+      console.error("Update product error:", e);
+      showToast("Network error updating frame", "error");
+    } finally {
+      setUpdatingProduct(false);
     }
   };
 
@@ -599,6 +693,10 @@ export default function AdminDashboardPage() {
         invCategory === "All" ||
         normalize(p.category) === normalize(invCategory);
 
+      const matchesStatus =
+        invStatusFilter === "all" ||
+        (p.status || "active").toLowerCase() === invStatusFilter.toLowerCase();
+
       const query = invSearch.toLowerCase().trim();
       const matchesSearch =
         !query ||
@@ -607,9 +705,9 @@ export default function AdminDashboardPage() {
         p.category.toLowerCase().includes(query) ||
         String(p.price).includes(query);
 
-      return matchesCat && matchesSearch;
+      return matchesCat && matchesStatus && matchesSearch;
     });
-  }, [products, invCategory, invSearch]);
+  }, [products, invCategory, invStatusFilter, invSearch]);
 
   const filteredCustomers = useMemo(() => {
     const q = customerSearch.toLowerCase().trim();
@@ -1364,8 +1462,8 @@ export default function AdminDashboardPage() {
         {activeTab === "inventory" && (
           <div className="space-y-6">
             <div className="bg-[#121218] border border-[#B88A32]/20 rounded-2xl p-4 sm:p-5 shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div className="flex flex-1 items-center gap-3 w-full sm:w-auto">
-                <div className="relative flex-1 max-w-sm">
+              <div className="flex flex-1 flex-wrap items-center gap-3 w-full sm:w-auto">
+                <div className="relative flex-1 min-w-[220px] max-w-sm">
                   <Search className="w-4 h-4 text-neutral-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
@@ -1396,6 +1494,21 @@ export default function AdminDashboardPage() {
                     );
                   })}
                 </select>
+
+                <select
+                  value={invStatusFilter}
+                  onChange={(e) => setInvStatusFilter(e.target.value)}
+                  className="bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-neutral-300 focus:outline-none focus:border-[#B88A32]"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="active">Active Only</option>
+                  <option value="out_of_stock">Out of Stock</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+
+                <span className="text-[11px] font-mono text-neutral-400 hidden xl:inline">
+                  Showing {filteredProducts.length} of {products.length} frames
+                </span>
               </div>
 
               <button
@@ -1424,9 +1537,29 @@ export default function AdminDashboardPage() {
                   <tbody className="divide-y divide-white/5 text-neutral-200">
                     {filteredProducts.map((p) => (
                       <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
-                        <td className="py-4 px-4">
-                          <div className="font-semibold text-white">{p.name}</div>
-                          <div className="text-[10px] text-neutral-500 line-clamp-1">{p.description}</div>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-xl bg-white/[0.03] border border-white/10 overflow-hidden shrink-0 flex items-center justify-center relative">
+                              {p.image_url ? (
+                                <img
+                                  src={p.image_url}
+                                  alt={p.name}
+                                  className="w-full h-full object-contain p-1"
+                                  onError={(e) => {
+                                    (e.target as HTMLElement).style.display = "none";
+                                  }}
+                                />
+                              ) : (
+                                <Package className="w-5 h-5 text-neutral-600" />
+                              )}
+                            </div>
+                            <div>
+                              <div className="font-semibold text-white hover:text-[#D4AF62] transition-colors">
+                                {p.name}
+                              </div>
+                              <div className="text-[10px] text-neutral-500 line-clamp-1 max-w-xs">{p.description}</div>
+                            </div>
+                          </div>
                         </td>
                         <td className="py-4 px-4 text-neutral-300 uppercase tracking-wider text-[11px]">
                           {p.category}
@@ -1503,14 +1636,22 @@ export default function AdminDashboardPage() {
                         <td className="py-4 px-4 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             <button
+                              onClick={() => handleOpenEditProduct(p)}
+                              className="p-1.5 rounded-lg bg-[#B88A32]/15 hover:bg-[#B88A32]/30 text-[#D4AF62] text-xs font-mono transition-colors flex items-center gap-1"
+                              title="Edit Frame Details"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">Edit</span>
+                            </button>
+                            <button
                               onClick={() => handleToggleProductStatus(p)}
-                              className="px-2.5 py-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-xs font-mono text-neutral-300"
+                              className="px-2 py-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-[11px] font-mono text-neutral-300"
                             >
                               {p.status === "active" ? "Deactivate" : "Activate"}
                             </button>
                             <button
                               onClick={() => handleDeleteProduct(p.id, p.name)}
-                              className="p-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-mono transition-colors"
+                              className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-mono transition-colors"
                               title="Deactivate Frame"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -2047,6 +2188,50 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div>
+                  <label className="text-[10px] uppercase text-neutral-400 block mb-1">Frame Image Preset or URL</label>
+                  <div className="flex gap-2 mb-2">
+                    <select
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          setNewProdForm({ ...newProdForm, image_url: e.target.value });
+                        }
+                      }}
+                      className="flex-1 bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32]"
+                    >
+                      <option value="">-- Choose from 20+ Atelier High-Res Presets --</option>
+                      {PRESET_PRODUCT_IMAGES.map((img) => (
+                        <option key={img.url} value={img.url}>
+                          {img.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      placeholder="/images/products/... or https://..."
+                      value={newProdForm.image_url}
+                      onChange={(e) => setNewProdForm({ ...newProdForm, image_url: e.target.value })}
+                      className="flex-1 bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32]"
+                    />
+                    <div className="w-12 h-10 rounded-lg bg-white/[0.05] border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                      {newProdForm.image_url ? (
+                        <img
+                          src={newProdForm.image_url}
+                          alt="Preview"
+                          className="w-full h-full object-contain p-0.5"
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = "none";
+                          }}
+                        />
+                      ) : (
+                        <Package className="w-4 h-4 text-neutral-500" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
                   <label className="text-[10px] uppercase text-neutral-400 block mb-1">Description</label>
                   <textarea
                     rows={2}
@@ -2063,6 +2248,190 @@ export default function AdminDashboardPage() {
                 >
                   {savingProduct ? <RefreshCw className="w-4 h-4 animate-spin" /> : "Save to Persistent Catalog"}
                 </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Edit Product Modal */}
+      <AnimatePresence>
+        {showEditModal && editingProduct && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-lg bg-[#121218] border border-[#B88A32]/30 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
+            >
+              <div className="flex justify-between items-center pb-3 border-b border-white/10">
+                <div>
+                  <h3 className="font-serif font-bold text-lg text-white">
+                    Edit Bespoke Frame Details
+                  </h3>
+                  <p className="text-[10px] text-neutral-400 font-mono">
+                    ID: {editProdForm.id} &bull; SKU: {editProdForm.sku || "N/A"}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="w-7 h-7 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white flex items-center justify-center"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handleUpdateProduct} className="space-y-3 text-xs font-mono">
+                <div>
+                  <label className="text-[10px] uppercase text-neutral-400 block mb-1">Frame Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editProdForm.name}
+                    onChange={(e) => setEditProdForm({ ...editProdForm, name: e.target.value })}
+                    className="w-full bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] uppercase text-neutral-400 block mb-1">Category</label>
+                    <select
+                      value={editProdForm.category}
+                      onChange={(e) => setEditProdForm({ ...editProdForm, category: e.target.value })}
+                      className="w-full bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32]"
+                    >
+                      {availableCategories.filter((c) => c !== "All").map((c) => {
+                        const label = c
+                          .split(/[-_]/)
+                          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                          .join(" ");
+                        return (
+                          <option key={c} value={c}>
+                            {label}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] uppercase text-neutral-400 block mb-1">Status</label>
+                    <select
+                      value={editProdForm.status}
+                      onChange={(e) => setEditProdForm({ ...editProdForm, status: e.target.value as any })}
+                      className="w-full bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32]"
+                    >
+                      <option value="active">Active (Available)</option>
+                      <option value="out_of_stock">Out of Stock</option>
+                      <option value="inactive">Inactive (Hidden)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-[10px] uppercase text-neutral-400 block mb-1">Price (₹) *</label>
+                    <input
+                      type="number"
+                      required
+                      value={editProdForm.price}
+                      onChange={(e) => setEditProdForm({ ...editProdForm, price: Number(e.target.value) })}
+                      className="w-full bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] uppercase text-neutral-400 block mb-1">Original (₹)</label>
+                    <input
+                      type="number"
+                      value={editProdForm.original_price}
+                      onChange={(e) => setEditProdForm({ ...editProdForm, original_price: Number(e.target.value) })}
+                      className="w-full bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] uppercase text-neutral-400 block mb-1">Stock Qty</label>
+                    <input
+                      type="number"
+                      value={editProdForm.stock_quantity}
+                      onChange={(e) => setEditProdForm({ ...editProdForm, stock_quantity: Number(e.target.value) })}
+                      className="w-full bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase text-neutral-400 block mb-1">Frame Image Preset or URL</label>
+                  <div className="flex gap-2 mb-2">
+                    <select
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          setEditProdForm({ ...editProdForm, image_url: e.target.value });
+                        }
+                      }}
+                      className="flex-1 bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32]"
+                    >
+                      <option value="">-- Pick from Preset Atelier Visuals --</option>
+                      {PRESET_PRODUCT_IMAGES.map((img) => (
+                        <option key={img.url} value={img.url}>
+                          {img.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      placeholder="Image URL"
+                      value={editProdForm.image_url}
+                      onChange={(e) => setEditProdForm({ ...editProdForm, image_url: e.target.value })}
+                      className="flex-1 bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32]"
+                    />
+                    <div className="w-12 h-10 rounded-lg bg-white/[0.05] border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                      {editProdForm.image_url ? (
+                        <img
+                          src={editProdForm.image_url}
+                          alt="Preview"
+                          className="w-full h-full object-contain p-0.5"
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = "none";
+                          }}
+                        />
+                      ) : (
+                        <Package className="w-4 h-4 text-neutral-500" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase text-neutral-400 block mb-1">Description</label>
+                  <textarea
+                    rows={2}
+                    value={editProdForm.description}
+                    onChange={(e) => setEditProdForm({ ...editProdForm, description: e.target.value })}
+                    className="w-full bg-[#0A0A0E] border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#B88A32]"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowEditModal(false)}
+                    className="flex-1 bg-white/[0.05] hover:bg-white/[0.1] text-neutral-300 py-3 rounded-xl font-semibold transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={updatingProduct}
+                    className="flex-[2] bg-[#B88A32] hover:bg-[#A07828] text-white py-3 rounded-xl font-semibold transition-all shadow-md shadow-[#B88A32]/20 flex items-center justify-center gap-2"
+                  >
+                    {updatingProduct ? <RefreshCw className="w-4 h-4 animate-spin" /> : "Save Changes"}
+                  </button>
+                </div>
               </form>
             </motion.div>
           </div>

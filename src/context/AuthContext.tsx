@@ -12,15 +12,21 @@ export interface AuthUser {
   phone?: string;
 }
 
+export type AuthModalTab = "signin" | "signup" | "forgot" | "verify";
+
 interface AuthContextType {
   user: AuthUser | null;
   isLoading: boolean;
   isAuthModalOpen: boolean;
-  authModalTab: "signin" | "signup";
-  openAuthModal: (tab?: "signin" | "signup") => void;
+  authModalTab: AuthModalTab;
+  openAuthModal: (tab?: AuthModalTab) => void;
   closeAuthModal: () => void;
-  signIn: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
-  signUp: (email: string, pass: string, name: string, phone?: string) => Promise<{ success: boolean; error?: string }>;
+  signIn: (email: string, pass: string) => Promise<{ success: boolean; error?: string; requireVerification?: boolean }>;
+  signUp: (email: string, pass: string, name: string, phone?: string) => Promise<{ success: boolean; error?: string; requireVerification?: boolean }>;
+  verifyEmail: (email: string, otp: string) => Promise<{ success: boolean; error?: string }>;
+  resendVerificationEmail: (email: string) => Promise<{ success: boolean; error?: string; message?: string }>;
+  sendResetPasswordEmail: (email: string) => Promise<{ success: boolean; error?: string; message?: string }>;
+  resetPassword: (email: string, code: string, newPass: string) => Promise<{ success: boolean; error?: string }>;
   signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -32,7 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalTab, setAuthModalTab] = useState<"signin" | "signup">("signin");
+  const [authModalTab, setAuthModalTab] = useState<AuthModalTab>("signin");
 
   const refreshUser = useCallback(async () => {
     try {
@@ -65,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [refreshUser]);
 
-  const openAuthModal = (tab: "signin" | "signup" = "signin") => {
+  const openAuthModal = (tab: AuthModalTab = "signin") => {
     setAuthModalTab(tab);
     setIsAuthModalOpen(true);
   };
@@ -82,7 +88,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (error || !data) {
-        return { success: false, error: error?.message || "Invalid email or password." };
+        const errMsg = error?.message || "Invalid email or password.";
+        const isVerificationRequired = errMsg.toLowerCase().includes("verification") || errMsg.toLowerCase().includes("verify");
+        return {
+          success: false,
+          error: isVerificationRequired ? "Email verification required. Please verify your email." : errMsg,
+          requireVerification: isVerificationRequired,
+        };
       }
 
       if (data.user) {
@@ -96,7 +108,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       closeAuthModal();
       return { success: true };
     } catch (err: any) {
-      return { success: false, error: err.message || "Failed to sign in." };
+      const errMsg = err?.message || "Failed to sign in.";
+      const isVerificationRequired = errMsg.toLowerCase().includes("verification") || errMsg.toLowerCase().includes("verify");
+      return {
+        success: false,
+        error: isVerificationRequired ? "Email verification required. Please verify your email." : errMsg,
+        requireVerification: isVerificationRequired,
+      };
     }
   };
 
@@ -110,6 +128,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error || !data) {
         return { success: false, error: error?.message || "Registration failed." };
+      }
+
+      if (data.requireEmailVerification) {
+        return { success: true, requireVerification: true };
       }
 
       if (data.user) {
@@ -146,6 +168,101 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { success: true };
     } catch (err: any) {
       return { success: false, error: err.message || "Registration failed." };
+    }
+  };
+
+  const verifyEmail = async (email: string, otp: string) => {
+    try {
+      const { data, error } = await insforge.auth.verifyEmail({
+        email: email.trim(),
+        otp: otp.trim(),
+      });
+
+      if (error || !data) {
+        return { success: false, error: error?.message || "Invalid or expired verification code." };
+      }
+
+      if (data.user) {
+        setUser({
+          id: data.user.id,
+          email: data.user.email || email,
+          name: (data.user as any).profile?.name || (data.user as any).name || email.split("@")[0],
+          role: (data.user as any).role || "customer",
+        });
+      }
+      closeAuthModal();
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message || "Verification failed." };
+    }
+  };
+
+  const resendVerificationEmail = async (email: string) => {
+    try {
+      const { data, error } = await insforge.auth.resendVerificationEmail({
+        email: email.trim(),
+      });
+
+      if (error) {
+        return { success: false, error: error.message || "Failed to resend verification code." };
+      }
+
+      return {
+        success: true,
+        message: data?.message || "Verification code sent to your email.",
+      };
+    } catch (err: any) {
+      return { success: false, error: err.message || "Failed to resend verification email." };
+    }
+  };
+
+  const sendResetPasswordEmail = async (email: string) => {
+    try {
+      const { data, error } = await insforge.auth.sendResetPasswordEmail({
+        email: email.trim(),
+      });
+
+      if (error) {
+        return { success: false, error: error.message || "Failed to send reset code. Please try again later." };
+      }
+
+      return {
+        success: true,
+        message: data?.message || "Password reset code sent to your email. Check your inbox and spam folder.",
+      };
+    } catch (err: any) {
+      return { success: false, error: err.message || "Failed to send reset email." };
+    }
+  };
+
+  const resetPassword = async (email: string, code: string, newPass: string) => {
+    try {
+      // Step 1: Exchange reset code for token
+      const exchangeRes = await insforge.auth.exchangeResetPasswordToken({
+        email: email.trim(),
+        code: code.trim(),
+      });
+
+      if (exchangeRes.error || !exchangeRes.data?.token) {
+        return {
+          success: false,
+          error: exchangeRes.error?.message || "Invalid or expired reset code. Please check and try again.",
+        };
+      }
+
+      // Step 2: Reset password with token
+      const resetRes = await insforge.auth.resetPassword({
+        newPassword: newPass,
+        otp: exchangeRes.data.token,
+      });
+
+      if (resetRes.error) {
+        return { success: false, error: resetRes.error.message || "Failed to reset password." };
+      }
+
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message || "Failed to reset password." };
     }
   };
 
@@ -190,6 +307,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         closeAuthModal,
         signIn,
         signUp,
+        verifyEmail,
+        resendVerificationEmail,
+        sendResetPasswordEmail,
+        resetPassword,
         signInWithGoogle,
         signOut,
         refreshUser,

@@ -12,6 +12,7 @@ import {
   updateAirtableRecordStock,
   AirtableConfig,
 } from '@/lib/airtable';
+import { verifyAdminRequest, unauthorizedAdminResponse } from '@/lib/auth/adminAuth';
 
 function maskKey(key?: string): string {
   if (!key) return '';
@@ -23,8 +24,13 @@ function maskKey(key?: string): string {
  * GET /api/inventory/airtable
  * Returns connection status and config metadata
  */
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const auth = verifyAdminRequest(request);
+    if (!auth.authorized) {
+      return unauthorizedAdminResponse(auth.error);
+    }
+
     const savedConfig = await dbGetAirtableConfig();
     const config = resolveAirtableConfig(savedConfig);
 
@@ -65,6 +71,11 @@ export async function GET() {
  */
 export async function POST(request: Request) {
   try {
+    const auth = verifyAdminRequest(request);
+    if (!auth.authorized) {
+      return unauthorizedAdminResponse(auth.error);
+    }
+
     const body = await request.json();
     const action = body.action || 'sync';
 

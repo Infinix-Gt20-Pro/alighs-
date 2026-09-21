@@ -368,6 +368,10 @@ export default function CheckoutPage() {
           receipt: `rcpt_${Date.now()}`,
           userId: user.id,
           userEmail: user.email,
+          items: items.map(it => ({
+            productId: getCleanProductId(it),
+            quantity: it.quantity
+          })),
           notes: {
             customer_name: formData.fullName,
             customer_phone: formData.phone,
@@ -387,7 +391,7 @@ export default function CheckoutPage() {
       const rzpOrderId = orderData.order_id;
 
       // Step 2: Configure and open Razorpay modal
-      const activeKey = orderData.key_id || (!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.startsWith('rzp_test_') ? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID : null) || "rzp_live_TdNncN01Vi6Vvg";
+      const activeKey = orderData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
       const options = {
         key: activeKey,
         amount: orderData.amount,

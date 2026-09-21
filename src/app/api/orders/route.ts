@@ -7,6 +7,7 @@ import {
   updatePaymentStatus,
 } from '@/lib/database/db';
 import { OrderStatus, PaymentStatus } from '@/lib/database/schema';
+import { verifyAdminRequest, unauthorizedAdminResponse } from '@/lib/auth/adminAuth';
 
 /**
  * POST /api/orders
@@ -107,6 +108,14 @@ export async function POST(request: Request) {
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
+    const auth = verifyAdminRequest(request);
+    const userId = searchParams.get('userId') || searchParams.get('user_id');
+
+    // If attempting to query the entire order database without a specific user, require admin auth
+    if (!userId && !auth.authorized) {
+      return unauthorizedAdminResponse('Unauthorized: Admin authorization required to view complete order registry.');
+    }
+
     const search = searchParams.get('search')?.toLowerCase() || '';
     const status = searchParams.get('status');
     const paymentStatus = searchParams.get('paymentStatus');
@@ -137,8 +146,6 @@ export async function GET(request: Request) {
         })),
       };
     });
-
-    const userId = searchParams.get('userId') || searchParams.get('user_id');
 
     // Filtering
     if (userId) {
@@ -186,6 +193,11 @@ export async function GET(request: Request) {
  */
 export async function PATCH(request: Request) {
   try {
+    const auth = verifyAdminRequest(request);
+    if (!auth.authorized) {
+      return unauthorizedAdminResponse('Unauthorized: Admin credentials required to modify order records.');
+    }
+
     const body = await request.json().catch(() => ({}));
     const orderNumber = body.orderNumber || body.orderId;
     const { orderStatus, paymentStatus, note } = body;

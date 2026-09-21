@@ -7,9 +7,14 @@ import {
   syncDeleteProductFromFallback,
 } from '@/lib/database/db';
 import { Product } from '@/lib/database/schema';
+import { verifyAdminRequest, unauthorizedAdminResponse } from '@/lib/auth/adminAuth';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const auth = verifyAdminRequest(request);
+    if (!auth.authorized) {
+      return unauthorizedAdminResponse(auth.error);
+    }
     // 1. Fetch directly from InsForge PostgreSQL for real-time accuracy
     const { data: dbProducts, error } = await insforge.database
       .from('products')
@@ -40,6 +45,11 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const auth = verifyAdminRequest(request);
+    if (!auth.authorized) {
+      return unauthorizedAdminResponse(auth.error);
+    }
+
     const body = await request.json().catch(() => ({}));
     const {
       name,
@@ -115,6 +125,11 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
+    const auth = verifyAdminRequest(request);
+    if (!auth.authorized) {
+      return unauthorizedAdminResponse(auth.error);
+    }
+
     const body = await request.json().catch(() => ({}));
     const {
       id,
@@ -222,6 +237,11 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const auth = verifyAdminRequest(request);
+    if (!auth.authorized) {
+      return unauthorizedAdminResponse(auth.error);
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     const force = searchParams.get('force') === 'true';

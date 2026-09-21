@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import insforge from '@/lib/insforge';
+import { verifyAdminRequest, unauthorizedAdminResponse } from '@/lib/auth/adminAuth';
 
 function generateAppointmentId() {
   const date = new Date();
@@ -74,8 +75,13 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const auth = verifyAdminRequest(request);
+    if (!auth.authorized) {
+      return unauthorizedAdminResponse(auth.error);
+    }
+
     const { data: appointments, error } = await insforge.database
       .from('appointments')
       .select('*')
@@ -112,6 +118,11 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   try {
+    const auth = verifyAdminRequest(request);
+    if (!auth.authorized) {
+      return unauthorizedAdminResponse(auth.error);
+    }
+
     const body = await request.json();
     const { appointmentId, status } = body;
 

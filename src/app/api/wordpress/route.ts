@@ -7,6 +7,7 @@ import {
   WordPressConfig,
 } from '@/lib/wordpress';
 import { dbSetInventory, dbGetInventory } from '@/lib/githubDb';
+import { verifyAdminRequest, unauthorizedAdminResponse } from '@/lib/auth/adminAuth';
 
 // In-memory / env fallback for WordPress config
 let memoryWpConfig: WordPressConfig = {
@@ -19,8 +20,13 @@ let memoryWpConfig: WordPressConfig = {
 /**
  * GET /api/wordpress — returns connection status
  */
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const auth = verifyAdminRequest(request);
+    if (!auth.authorized) {
+      return unauthorizedAdminResponse(auth.error);
+    }
+
     const isConfigured = Boolean(memoryWpConfig.siteUrl);
     let connectionOk = false;
     let siteName = '';
@@ -62,6 +68,11 @@ export async function GET() {
  */
 export async function POST(request: Request) {
   try {
+    const auth = verifyAdminRequest(request);
+    if (!auth.authorized) {
+      return unauthorizedAdminResponse(auth.error);
+    }
+
     const body = await request.json();
     const action = body.action || 'sync';
 

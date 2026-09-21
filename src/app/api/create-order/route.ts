@@ -1,105 +1,113 @@
 import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
-
-const LIVE_KEY_ID = 'rzp_live_TdNncN01Vi6Vvg';
-const LIVE_KEY_SECRET = 'GbLZfY1sCE3P1jj9yT6juJ2E';
+import insforge from '@/lib/insforge';
+import { getDatabase } from '@/lib/database/db';
 
 function getActiveCredentials() {
-  const envKey = process.env.RAZORPAY_KEY_ID;
-  const envSecret = process.env.RAZORPAY_KEY_SECRET;
+  const key_id = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+  const key_secret = process.env.RAZORPAY_KEY_SECRET;
 
-  // If Vercel env contains an outdated rzp_test_ key, prioritize active live key
-  if (!envKey || envKey.startsWith('rzp_test_')) {
-    return { key_id: LIVE_KEY_ID, key_secret: LIVE_KEY_SECRET };
+  if (!key_id || !key_secret) {
+    return null;
   }
 
-  return {
-    key_id: envKey,
-    key_secret: envSecret || LIVE_KEY_SECRET,
-  };
+  return { key_id, key_secret };
 }
 
 /**
  * GET /api/create-order
- * Diagnostic Health Check: Tests Razorpay connection and credentials
+ * Status check: reports whether the payment gateway is configured without exposing secrets or creating test orders
  */
 export async function GET() {
-  const { key_id, key_secret } = getActiveCredentials();
-
-  if (!key_id || !key_secret) {
+  const creds = getActiveCredentials();
+  if (!creds) {
     return NextResponse.json(
       {
         status: 'error',
         authenticated: false,
-        message: 'Razorpay credentials not configured in environment variables.',
-        env: {
-          has_RAZORPAY_KEY_ID: !!process.env.RAZORPAY_KEY_ID,
-          has_RAZORPAY_KEY_SECRET: !!process.env.RAZORPAY_KEY_SECRET,
-          has_NEXT_PUBLIC_RAZORPAY_KEY_ID: !!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        },
-        action: 'Add RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, and NEXT_PUBLIC_RAZORPAY_KEY_ID in Vercel Project Settings > Environment Variables.',
+        message: 'Payment gateway credentials not configured on server.',
       },
-      { status: 500 }
+      { status: 503 }
     );
   }
 
+  return NextResponse.json({
+    status: 'ok',
+    gateway: 'razorpay',
+    configured: true,
+  });
+}
+
+/**
+ * Helper to compute and verify order total from actual product database records
+ */
+async function computeServerTotal(
+  items: Array<{ productId: string; quantity: number }>
+): Promise<{ subtotal: number; shipping: number; totalPaise: number } | null> {
+  if (!items || items.length === 0) return null;
+
+  // 1. Fetch products from InsForge PostgreSQL, with fallback to local db
+  let products: Array<{ id: string; price: number; sku?: string }> = [];
   try {
-    const razorpay = new Razorpay({ key_id, key_secret });
-    const testOrder = await razorpay.orders.create({
-      amount: 100, // ₹1.00 test ping
-      currency: 'INR',
-      receipt: `diag_${Date.now()}`,
-    });
-
-    return NextResponse.json({
-      status: 'ok',
-      authenticated: true,
-      message: 'Razorpay API credentials are active and verified successfully!',
-      key_id_preview: `${key_id.slice(0, 12)}...`,
-      test_order_id: testOrder.id,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error: unknown) {
-    const err = error as { statusCode?: number; error?: { description?: string; code?: string }; message?: string };
-    const desc = err?.error?.description || err?.message || 'Unknown error';
-
-    return NextResponse.json(
-      {
-        status: 'error',
-        authenticated: false,
-        statusCode: err?.statusCode || 401,
-        code: err?.error?.code || 'AUTH_ERROR',
-        description: desc,
-        key_id_preview: `${key_id.slice(0, 12)}...`,
-        diagnosis:
-          desc === 'Authentication failed'
-            ? 'Razorpay rejected the Key ID or Secret. The credentials have either expired, been revoked, or regenerated in the Razorpay Dashboard.'
-            : desc,
-        action:
-          'Visit Razorpay Dashboard (https://dashboard.razorpay.com) > Account & Settings > API Keys, generate a fresh Key ID & Secret, and update .env.local and Vercel Environment Variables.',
-      },
-      { status: err?.statusCode || 401 }
-    );
+    const { data, error } = await insforge.database
+      .from('products')
+      .select('id, price, sku');
+    if (!error && data && data.length > 0) {
+      products = data;
+    }
+  } catch {
+    // fallback to local db
   }
+
+  if (products.length === 0) {
+    const fallbackDb = await getDatabase();
+    products = fallbackDb.products;
+  }
+
+  const productMap = new Map<string, number>();
+  for (const p of products) {
+    productMap.set(p.id, Number(p.price) || 0);
+    if (p.sku) productMap.set(p.sku, Number(p.price) || 0);
+  }
+
+  let subtotal = 0;
+  for (const item of items) {
+    const pId = String(item.productId || '').trim();
+    const cleanId = pId.replace(/^ALG-/, '');
+    const price = productMap.get(pId) ?? productMap.get(cleanId) ?? productMap.get(`ALG-${cleanId}`);
+
+    if (price === undefined) {
+      console.warn(`[create-order] Product ${pId} not found in catalog for price verification`);
+      return null;
+    }
+
+    const qty = Math.max(1, Number(item.quantity) || 1);
+    subtotal += price * qty;
+  }
+
+  const shipping = subtotal >= 1999 ? 0 : 199;
+  const totalPaise = Math.round((subtotal + shipping) * 100);
+
+  return { subtotal, shipping, totalPaise };
 }
 
 /**
  * POST /api/create-order
- * Creates an order in Razorpay
+ * Creates a verified order in Razorpay with server-side price validation
  */
 export async function POST(request: Request) {
   try {
-    const { key_id, key_secret } = getActiveCredentials();
-
-    if (!key_id || !key_secret) {
+    const creds = getActiveCredentials();
+    if (!creds) {
       return NextResponse.json(
-        { error: 'Razorpay credentials not configured on server. Please configure RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.' },
-        { status: 401 }
+        { error: 'Payment gateway is temporarily unavailable. Please try again later or choose COD.' },
+        { status: 503 }
       );
     }
 
     const body = await request.json().catch(() => ({}));
 
+    // Authentication verification
     const rawUserId = body.userId || body.user_id || body.notes?.user_id;
     const userId = typeof rawUserId === 'string' ? rawUserId.trim() : '';
     if (!userId) {
@@ -109,37 +117,56 @@ export async function POST(request: Request) {
       );
     }
 
-    const rawAmount = body.amount;
     const currency = body.currency || 'INR';
     const receipt = body.receipt || `rcpt_${Date.now()}`;
+    const items = Array.isArray(body.items) ? body.items : null;
+
+    let finalAmountPaise: number;
+
+    // Server-side Price Verification
+    if (items && items.length > 0) {
+      const serverCalc = await computeServerTotal(items);
+      if (serverCalc) {
+        // If client also supplied an amount, verify it matches
+        if (body.amount !== undefined && body.amount !== null) {
+          const clientAmount = Number(body.amount);
+          // Allow up to 100 paise (₹1) difference for rounding/shipping variations
+          if (Math.abs(clientAmount - serverCalc.totalPaise) > 100) {
+            console.error(`[Security Alert] Price tampering attempt detected for user ${userId}. Client claimed: ${clientAmount} paise, Server calculated: ${serverCalc.totalPaise} paise`);
+            return NextResponse.json(
+              { error: 'Price calculation mismatch. Please refresh your cart and try again.' },
+              { status: 400 }
+            );
+          }
+        }
+        finalAmountPaise = serverCalc.totalPaise;
+      } else {
+        finalAmountPaise = Number(body.amount);
+      }
+    } else {
+      finalAmountPaise = Number(body.amount);
+    }
+
+    if (isNaN(finalAmountPaise) || finalAmountPaise < 100) {
+      return NextResponse.json(
+        { error: 'Invalid order amount. Amount must be at least ₹1.00.' },
+        { status: 400 }
+      );
+    }
+
     const notes = {
       ...(body.notes || {}),
       user_id: userId,
+      verified_amount_paise: String(finalAmountPaise),
     };
 
-    if (rawAmount === undefined || rawAmount === null) {
-      return NextResponse.json(
-        { error: 'Amount is required' },
-        { status: 400 }
-      );
-    }
-
-    const amount = Number(rawAmount);
-
-    if (isNaN(amount) || amount < 100) {
-      return NextResponse.json(
-        { error: 'Amount must be at least 100 paise (₹1.00)' },
-        { status: 400 }
-      );
-    }
-
     const razorpay = new Razorpay({
-      key_id,
-      key_secret,
+      key_id: creds.key_id,
+      key_secret: creds.key_secret,
     });
 
     const order = await razorpay.orders.create({
-      amount: Math.round(amount),
+      amount: finalAmountPaise,
       currency,
       receipt: String(receipt).slice(0, 40),
       notes,
@@ -150,17 +177,13 @@ export async function POST(request: Request) {
       amount: order.amount,
       currency: order.currency,
       receipt: order.receipt,
-      key_id: key_id,
+      key_id: creds.key_id,
     });
   } catch (error: unknown) {
     console.error('Razorpay create-order error:', error);
     const err = error as { statusCode?: number; error?: { description?: string; code?: string }; message?: string };
     const statusCode = err?.statusCode || 500;
-    let message = err?.error?.description || err?.message || 'Failed to create Razorpay order';
-
-    if (statusCode === 401 || message === 'Authentication failed') {
-      message = 'Razorpay Authentication Failed: The API Key ID or Key Secret is invalid or expired. Please regenerate your API Keys in Razorpay Dashboard (Settings > API Keys) and update your settings.';
-    }
+    const message = err?.error?.description || err?.message || 'Failed to initialize payment order';
 
     return NextResponse.json({ error: message }, { status: statusCode });
   }

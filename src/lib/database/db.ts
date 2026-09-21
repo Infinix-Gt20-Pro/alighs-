@@ -617,8 +617,13 @@ export async function authenticateAdmin(
     return { valid: false };
   }
 
-  // Check executive PIN shortcuts (e.g. 786, 6396, 7217, 1499)
-  if (['786', '6396', '7217', '1499'].includes(cleanPass) || ['786', '6396', '7217', '1499'].includes(cleanUser)) {
+  // Check executive PIN shortcuts from environment variable
+  const configuredPins = (process.env.ADMIN_PIN || '786,6396,7217,1499')
+    .split(',')
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  if (configuredPins.includes(cleanPass) || configuredPins.includes(cleanUser)) {
     return { valid: true, role: 'superadmin', user: { id: 'admin-default-1', username: 'admin' } };
   }
 

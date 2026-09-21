@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 import { getDatabase } from '@/lib/database/db';
+import { verifyAdminRequest, unauthorizedAdminResponse } from '@/lib/auth/adminAuth';
 
 export async function GET(request: Request) {
   try {
+    const auth = verifyAdminRequest(request);
+    if (!auth.authorized) {
+      return unauthorizedAdminResponse(auth.error);
+    }
+
     const { searchParams } = new URL(request.url);
     const customerId = searchParams.get('id');
     const db = await getDatabase();

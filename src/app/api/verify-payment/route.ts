@@ -3,14 +3,9 @@ import crypto from 'crypto';
 import insforge from '@/lib/insforge';
 import { updateOrderStatus, updatePaymentStatus } from '@/lib/database/db';
 
-const LIVE_KEY_SECRET = 'GbLZfY1sCE3P1jj9yT6juJ2E';
-
 export async function POST(request: Request) {
   try {
-    const envKey = process.env.RAZORPAY_KEY_ID;
-    const key_secret = (!envKey || envKey.startsWith('rzp_test_'))
-      ? LIVE_KEY_SECRET
-      : (process.env.RAZORPAY_KEY_SECRET || LIVE_KEY_SECRET);
+    const key_secret = process.env.RAZORPAY_KEY_SECRET;
 
     if (!key_secret) {
       return NextResponse.json(

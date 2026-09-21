@@ -241,6 +241,21 @@ export default function AdminDashboardPage() {
   const [confirmPw, setConfirmPw] = useState("");
   const [pwMsg, setPwMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
+  const adminFetch = useCallback(async (url: string, init?: RequestInit) => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("aligs_admin_session_token") : "";
+    const headers = new Headers(init?.headers || {});
+    if (token && !headers.has("Authorization")) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+    const res = await fetch(url, { ...init, headers });
+    if (res.status === 401) {
+      setIsAuthenticated(false);
+      localStorage.removeItem("aligs_admin_session_token");
+      localStorage.removeItem("aligs_admin_role");
+    }
+    return res;
+  }, []);
+
   useEffect(() => {
     const token = localStorage.getItem("aligs_admin_session_token");
     if (token && token.startsWith("adm_")) {
@@ -296,7 +311,7 @@ export default function AdminDashboardPage() {
       return;
     }
     try {
-      const res = await fetch("/api/admin/auth", {
+      const res = await adminFetch("/api/admin/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "change-password", password: currentPw, newPassword: newPw })
@@ -323,12 +338,19 @@ export default function AdminDashboardPage() {
     setLoading(true);
     try {
       const [resOrders, resAnalytics, resCust, resInv, resApts] = await Promise.all([
-        fetch("/api/orders?sort=newest"),
-        fetch("/api/admin/analytics"),
-        fetch("/api/admin/customers"),
-        fetch("/api/admin/inventory"),
-        fetch("/api/appointments")
+        adminFetch("/api/orders?sort=newest"),
+        adminFetch("/api/admin/analytics"),
+        adminFetch("/api/admin/customers"),
+        adminFetch("/api/admin/inventory"),
+        adminFetch("/api/appointments")
       ]);
+
+      if (resOrders.status === 401 || resAnalytics.status === 401 || resCust.status === 401) {
+        setIsAuthenticated(false);
+        localStorage.removeItem("aligs_admin_session_token");
+        localStorage.removeItem("aligs_admin_role");
+        return;
+      }
 
       if (resOrders.ok) { const d = await resOrders.json(); setOrders(d.orders || []); }
       if (resAnalytics.ok) { const d = await resAnalytics.json(); setAnalytics(d.analytics || null); }
@@ -340,7 +362,7 @@ export default function AdminDashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [adminFetch]);
 
   useEffect(() => {
     if (isAuthenticated) fetchAllData();
@@ -359,7 +381,7 @@ export default function AdminDashboardPage() {
       setSelectedOrder(null);
     }
     try {
-      const res = await fetch(`/api/orders/${encodeURIComponent(orderNum)}`);
+      const res = await adminFetch(`/api/orders/${encodeURIComponent(orderNum)}`);
       if (res.ok) {
         const data = await res.json();
         setSelectedOrder(data.order);
@@ -375,7 +397,7 @@ export default function AdminDashboardPage() {
     if (!selectedOrder) return;
     setUpdatingStatus(true);
     try {
-      const res = await fetch("/api/orders", {
+      const res = await adminFetch("/api/orders", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -411,7 +433,7 @@ export default function AdminDashboardPage() {
       setSelectedCustomer(null);
     }
     try {
-      const res = await fetch(`/api/admin/customers?id=${encodeURIComponent(custId)}`);
+      const res = await adminFetch(`/api/admin/customers?id=${encodeURIComponent(custId)}`);
       if (res.ok) {
         const data = await res.json();
         setSelectedCustomer(data.customer);
@@ -424,7 +446,7 @@ export default function AdminDashboardPage() {
   const handleStockUpdate = async (productId: string, newStock: number) => {
     const stock = Math.max(0, newStock);
     try {
-      const res = await fetch("/api/admin/inventory", {
+      const res = await adminFetch("/api/admin/inventory", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: productId, stock_quantity: stock })
@@ -453,7 +475,7 @@ export default function AdminDashboardPage() {
       return;
     }
     try {
-      const res = await fetch("/api/admin/inventory", {
+      const res = await adminFetch("/api/admin/inventory", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: productId, price: newPrice })
@@ -475,7 +497,7 @@ export default function AdminDashboardPage() {
   const handleToggleProductStatus = async (product: ProductRecord) => {
     const nextStatus = product.status === "active" ? "inactive" : "active";
     try {
-      const res = await fetch("/api/admin/inventory", {
+      const res = await adminFetch("/api/admin/inventory", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: product.id, status: nextStatus })
@@ -499,7 +521,7 @@ export default function AdminDashboardPage() {
       return;
     }
     try {
-      const res = await fetch(`/api/admin/inventory?id=${encodeURIComponent(productId)}`, {
+      const res = await adminFetch(`/api/admin/inventory?id=${encodeURIComponent(productId)}`, {
         method: "DELETE",
       });
       if (res.ok) {
@@ -520,7 +542,7 @@ export default function AdminDashboardPage() {
     e.preventDefault();
     setSavingProduct(true);
     try {
-      const res = await fetch("/api/admin/inventory", {
+      const res = await adminFetch("/api/admin/inventory", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newProdForm)
@@ -570,7 +592,7 @@ export default function AdminDashboardPage() {
     if (!editProdForm.id) return;
     setUpdatingProduct(true);
     try {
-      const res = await fetch("/api/admin/inventory", {
+      const res = await adminFetch("/api/admin/inventory", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editProdForm),
@@ -596,7 +618,7 @@ export default function AdminDashboardPage() {
 
   const handleUpdateAptStatus = async (appointmentId: string, status: string) => {
     try {
-      const res = await fetch("/api/appointments", {
+      const res = await adminFetch("/api/appointments", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ appointmentId, status })

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { authenticateAdmin, changeAdminPassword } from '@/lib/database/db';
+import { signAdminToken, verifyAdminRequest } from '@/lib/auth/adminAuth';
 
 export async function POST(request: Request) {
   try {
@@ -22,16 +23,27 @@ export async function POST(request: Request) {
         );
       }
 
+      const role = authResult.role || 'superadmin';
+      const token = signAdminToken({ role, username: userKey });
+
       return NextResponse.json({
         success: true,
         message: 'Admin authenticated successfully',
-        role: authResult.role || 'superadmin',
-        token: `adm_${Date.now()}_${authResult.role}`,
+        role,
+        token,
       });
     }
 
     if (action === 'change-password') {
-      const userKey = String(username || 'admin').trim();
+      const auth = verifyAdminRequest(request);
+      if (!auth.authorized) {
+        return NextResponse.json(
+          { error: 'Unauthorized: Admin session required to change password.' },
+          { status: 401 }
+        );
+      }
+
+      const userKey = auth.username || String(username || 'admin').trim();
       if (!password || !newPassword) {
         return NextResponse.json(
           { error: 'Current password and new password are required.' },

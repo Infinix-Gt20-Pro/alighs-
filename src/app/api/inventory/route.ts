@@ -6,6 +6,7 @@ import {
   dbUpdateInventoryStock,
   type InventoryItem,
 } from '@/lib/githubDb';
+import { verifyAdminRequest, unauthorizedAdminResponse } from '@/lib/auth/adminAuth';
 
 function generateId() {
   return `INV-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -26,6 +27,11 @@ export async function GET() {
 /** POST /api/inventory — add a new inventory item */
 export async function POST(request: Request) {
   try {
+    const auth = verifyAdminRequest(request);
+    if (!auth.authorized) {
+      return unauthorizedAdminResponse(auth.error);
+    }
+
     const body = await request.json();
     if (!body.name || !body.category || body.price == null || body.stock == null) {
       return NextResponse.json({ error: 'name, category, price, stock are required' }, { status: 400 });
@@ -55,6 +61,11 @@ export async function POST(request: Request) {
 /** PATCH /api/inventory — update stock or full item */
 export async function PATCH(request: Request) {
   try {
+    const auth = verifyAdminRequest(request);
+    if (!auth.authorized) {
+      return unauthorizedAdminResponse(auth.error);
+    }
+
     const body = await request.json();
     const { id } = body;
     if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
@@ -91,6 +102,11 @@ export async function PATCH(request: Request) {
 /** DELETE /api/inventory — delete an item by id */
 export async function DELETE(request: Request) {
   try {
+    const auth = verifyAdminRequest(request);
+    if (!auth.authorized) {
+      return unauthorizedAdminResponse(auth.error);
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });

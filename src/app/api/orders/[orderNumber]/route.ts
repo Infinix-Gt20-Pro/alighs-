@@ -1,5 +1,6 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getOrderWithDetails } from '@/lib/database/db';
+import { verifyAdminRequest, unauthorizedAdminResponse } from '@/lib/auth/adminAuth';
 
 export async function GET(
   request: Request,
@@ -14,6 +15,20 @@ export async function GET(
     const order = await getOrderWithDetails(orderNumber);
     if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    }
+
+    // Access control: Allow authorized admin OR customer with verified phone number
+    const auth = verifyAdminRequest(request);
+    if (!auth.authorized) {
+      const { searchParams } = new URL(request.url);
+      const queryPhone = searchParams.get('phone')?.replace(/\D/g, '') || '';
+      const orderPhone = (order.customer?.phone || '').replace(/\D/g, '');
+
+      if (!queryPhone || !orderPhone || !orderPhone.endsWith(queryPhone.slice(-10))) {
+        return unauthorizedAdminResponse(
+          'Unauthorized: Admin authentication or matching registered phone number required to view order details.'
+        );
+      }
     }
 
     return NextResponse.json({ success: true, order });

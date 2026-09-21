@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -22,9 +23,12 @@ import {
 import { useAuth, AuthModalTab } from "@/context/AuthContext";
 
 export default function AuthModal() {
+  const router = useRouter();
   const {
     isAuthModalOpen,
     authModalTab,
+    authModalReason,
+    authModalRedirect,
     closeAuthModal,
     openAuthModal,
     signIn,
@@ -90,7 +94,8 @@ export default function AuthModal() {
   const handleGoogleSignIn = async () => {
     resetFeedback();
     setGoogleLoading(true);
-    const res = await signInWithGoogle();
+    const target = authModalRedirect || (authModalReason ? "/checkout" : undefined);
+    const res = await signInWithGoogle(target);
     if (!res.success) {
       setErrorMsg(res.error || "Google sign in failed.");
       setGoogleLoading(false);
@@ -110,6 +115,13 @@ export default function AuthModal() {
         if (res.requireVerification) {
           setRequiresVerificationPrompt(true);
         }
+      } else {
+        const target = authModalRedirect || (authModalReason ? "/checkout" : null);
+        if (target && typeof window !== "undefined") {
+          if (window.location.pathname !== target) {
+            router.push(target);
+          }
+        }
       }
     } else if (authModalTab === "signup") {
       if (!fullName.trim()) {
@@ -123,7 +135,14 @@ export default function AuthModal() {
       } else if (res.requireVerification) {
         setSuccessMsg("Account created! A 6-digit verification code has been sent to your email.");
         setResendCooldown(60);
-        openAuthModal("verify");
+        openAuthModal("verify", authModalReason || undefined, authModalRedirect || undefined);
+      } else {
+        const target = authModalRedirect || (authModalReason ? "/checkout" : null);
+        if (target && typeof window !== "undefined") {
+          if (window.location.pathname !== target) {
+            router.push(target);
+          }
+        }
       }
     }
     setLoading(false);
@@ -143,6 +162,13 @@ export default function AuthModal() {
     const res = await verifyEmail(email, otpCode);
     if (!res.success) {
       setErrorMsg(res.error || "Invalid or expired verification code.");
+    } else {
+      const target = authModalRedirect || (authModalReason ? "/checkout" : null);
+      if (target && typeof window !== "undefined") {
+        if (window.location.pathname !== target) {
+          router.push(target);
+        }
+      }
     }
     setLoading(false);
   };
@@ -282,6 +308,21 @@ export default function AuthModal() {
               {authModalTab === "verify" && "Enter the 6-digit security code sent to your email address."}
             </p>
           </div>
+
+          {/* Mandatory Order Requirement Banner */}
+          {authModalReason && (
+            <div className="mb-5 p-3.5 rounded-xl bg-[#B88A32]/15 dark:bg-[#B88A32]/25 border border-[#B88A32]/40 text-xs flex items-start gap-2.5 shadow-sm">
+              <ShieldCheck className="w-4 h-4 text-[#B88A32] dark:text-[#D4AF62] shrink-0 mt-0.5" />
+              <div>
+                <span className="font-mono uppercase tracking-wider text-[#B88A32] dark:text-[#D4AF62] font-bold text-[10px] block">
+                  Compulsory Order Requirement
+                </span>
+                <p className="text-[#5C4935] dark:text-[#E8D2A8] font-sans mt-0.5 leading-relaxed font-medium">
+                  {authModalReason}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Tabs for Sign In & Register */}
           {(authModalTab === "signin" || authModalTab === "signup") && (
@@ -469,13 +510,13 @@ export default function AuthModal() {
                 type="button"
                 disabled={loading || googleLoading}
                 onClick={handleGoogleSignIn}
-                className="btn-secondary rounded-full w-full py-3 text-xs flex items-center justify-center gap-3 disabled:opacity-50"
+                className="btn-secondary rounded-full w-full py-3 px-4 text-xs flex items-center justify-center gap-3 disabled:opacity-50"
               >
                 {googleLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin text-[#B88A32]" />
                 ) : (
                   <>
-                    <svg className="w-4 h-4" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                       <path
                         fill="#4285F4"
                         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -493,9 +534,16 @@ export default function AuthModal() {
                         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                       />
                     </svg>
-                    <span className="font-mono text-xs tracking-wider uppercase font-semibold">
-                      Continue with Google
-                    </span>
+                    <div className="text-left sm:text-center">
+                      <span className="font-mono text-xs tracking-wider uppercase font-semibold block">
+                        Continue with Google
+                      </span>
+                      {authModalReason && (
+                        <span className="block text-[10px] font-mono text-[#8B7355] dark:text-[#8E8272] -mt-0.5 font-normal">
+                          Link with existing account on your phone
+                        </span>
+                      )}
+                    </div>
                   </>
                 )}
               </button>

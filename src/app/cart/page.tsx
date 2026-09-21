@@ -5,11 +5,13 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, ArrowLeft, ShieldCheck, Sparkles } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 export default function CartPage() {
   const { items, updateQuantity, removeFromCart, cartTotal, cartCount } = useCart();
+  const { user, openAuthModal } = useAuth();
   
   const subtotal = cartTotal;
   const delivery = subtotal >= 1999 || subtotal === 0 ? 0 : 99;
@@ -222,7 +224,27 @@ export default function CartPage() {
                     </div>
                   </div>
 
-                  <Link href="/checkout" className="block mb-3">
+                  {!user && (
+                    <div className="mb-3 p-2.5 rounded-xl bg-[#B88A32]/10 border border-[#B88A32]/25 text-center text-xs font-mono text-[#B88A32] flex items-center justify-center gap-1.5">
+                      <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                      <span>Login compulsory before placing frame order</span>
+                    </div>
+                  )}
+
+                  <Link
+                    href="/checkout"
+                    onClick={(e) => {
+                      if (!user) {
+                        e.preventDefault();
+                        openAuthModal(
+                          "signin",
+                          "Login is compulsory to order any frame. Please sign in or continue with your phone's Google account to proceed.",
+                          "/checkout"
+                        );
+                      }
+                    }}
+                    className="block mb-3"
+                  >
                     <motion.button
                       whileHover={{ scale: 1.01 }}
                       whileTap={{ scale: 0.99 }}

@@ -19,7 +19,9 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthModalOpen: boolean;
   authModalTab: AuthModalTab;
-  openAuthModal: (tab?: AuthModalTab) => void;
+  authModalReason: string | null;
+  authModalRedirect: string | null;
+  openAuthModal: (tab?: AuthModalTab, reason?: string, redirectPath?: string) => void;
   closeAuthModal: () => void;
   signIn: (email: string, pass: string) => Promise<{ success: boolean; error?: string; requireVerification?: boolean }>;
   signUp: (email: string, pass: string, name: string, phone?: string) => Promise<{ success: boolean; error?: string; requireVerification?: boolean }>;
@@ -27,7 +29,7 @@ interface AuthContextType {
   resendVerificationEmail: (email: string) => Promise<{ success: boolean; error?: string; message?: string }>;
   sendResetPasswordEmail: (email: string) => Promise<{ success: boolean; error?: string; message?: string }>;
   resetPassword: (email: string, code: string, newPass: string) => Promise<{ success: boolean; error?: string }>;
-  signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
+  signInWithGoogle: (redirectPath?: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -39,18 +41,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<AuthModalTab>("signin");
+  const [authModalReason, setAuthModalReason] = useState<string | null>(null);
+  const [authModalRedirect, setAuthModalRedirect] = useState<string | null>(null);
 
   const refreshUser = useCallback(async () => {
     try {
       const { data, error } = await insforge.auth.getCurrentUser();
       if (!error && data?.user) {
         const u = data.user;
+        const meta = (u as any).user_metadata || (u as any).metadata || {};
+        const prof = (u as any).profile || {};
         setUser({
           id: u.id,
           email: u.email || "",
-          name: (u as any).profile?.name || (u as any).name || u.email?.split("@")[0] || "Client",
+          name: prof.name || (u as any).name || meta.full_name || meta.name || u.email?.split("@")[0] || "Client",
           role: (u as any).role || "customer",
+          phone: prof.phone || (u as any).phone || meta.phone || "",
         });
+
+        // Clean up mobile PKCE verifier backup after successful authentication
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.removeItem("insforge_pkce_verifier");
+            const postLoginRedirect = localStorage.getItem("aligsware_post_login_redirect");
+            if (postLoginRedirect) {
+              localStorage.removeItem("aligsware_post_login_redirect");
+              if (window.location.pathname !== postLoginRedirect) {
+                window.location.href = postLoginRedirect;
+              }
+            }
+          } catch {
+            // ignore
+          }
+        }
       } else {
         setUser(null);
       }
@@ -71,14 +94,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [refreshUser]);
 
-  const openAuthModal = (tab: AuthModalTab = "signin") => {
+  const openAuthModal = (tab: AuthModalTab = "signin", reason?: string, redirectPath?: string) => {
     setAuthModalTab(tab);
+    setAuthModalReason(reason || null);
+    setAuthModalRedirect(redirectPath || (reason ? "/checkout" : null));
     setIsAuthModalOpen(true);
   };
 
   const closeAuthModal = () => {
     setIsAuthModalOpen(false);
+    setAuthModalReason(null);
+    setAuthModalRedirect(null);
   };
+
 
   const signIn = async (email: string, pass: string) => {
     try {
@@ -266,15 +294,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = async (customRedirect?: string) => {
     try {
-      const redirectUrl = typeof window !== "undefined" ? window.location.origin : "";
+      let targetPath = customRedirect || authModalRedirect || (authModalReason ? "/checkout" : undefined);
+      if (!targetPath && typeof window !== "undefined") {
+        const p = window.location.pathname;
+        targetPath = p === "/cart" || p === "/checkout" ? "/checkout" : p;
+      }
+      targetPath = targetPath || "/checkout";
+
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("aligsware_post_login_redirect", targetPath);
+        } catch {
+          // ignore
+        }
+      }
+
+      const redirectUrl = typeof window !== "undefined"
+        ? `${window.location.origin}${targetPath}`
+        : "";
+
       const { data, error } = await insforge.auth.signInWithOAuth("google", {
-        redirectTo: redirectUrl,
+        redirectTo: redirectUrl || (typeof window !== "undefined" ? window.location.origin : ""),
+        skipBrowserRedirect: true,
+        additionalParams: {
+          prompt: "select_account",
+        },
       });
 
       if (error) {
         return { success: false, error: error.message || "Failed to initialize Google Sign In." };
+      }
+
+      // Persist PKCE verifier to localStorage as a safety net for mobile browsers
+      if (typeof window !== "undefined") {
+        try {
+          const pkceKey = "insforge_pkce_verifier";
+          const verifier = data?.codeVerifier || sessionStorage.getItem(pkceKey);
+          if (verifier) {
+            localStorage.setItem(pkceKey, verifier);
+            sessionStorage.setItem(pkceKey, verifier);
+          }
+        } catch {
+          // ignore
+        }
       }
 
       if (data?.url && typeof window !== "undefined") {
@@ -303,6 +367,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         isAuthModalOpen,
         authModalTab,
+        authModalReason,
+        authModalRedirect,
         openAuthModal,
         closeAuthModal,
         signIn,

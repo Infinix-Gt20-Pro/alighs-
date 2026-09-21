@@ -5,9 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ShoppingBag, Trash2, Plus, Minus, ArrowRight, ShieldCheck, Truck } from "lucide-react";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, cartTotal, updateQuantity, removeFromCart } = useCart();
+  const { user, openAuthModal } = useAuth();
 
   const freeShippingThreshold = 1999;
   const isFreeShipping = cartTotal >= freeShippingThreshold;
@@ -192,9 +194,27 @@ export default function CartDrawer() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-2.5 pt-2">
+                  {!user && (
+                    <div className="flex items-center justify-center gap-1.5 text-[11px] font-mono text-[#B88A32] dark:text-[#D4AF62] bg-[#B88A32]/10 py-1.5 px-3 rounded-xl border border-[#B88A32]/20 text-center">
+                      <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                      <span>Login compulsory before placing frame order</span>
+                    </div>
+                  )}
+
                   <Link
                     href="/checkout"
-                    onClick={closeCart}
+                    onClick={(e) => {
+                      if (!user) {
+                        e.preventDefault();
+                        openAuthModal(
+                          "signin",
+                          "Login is compulsory to order any frame. Please sign in or continue with your phone's Google account to proceed.",
+                          "/checkout"
+                        );
+                        return;
+                      }
+                      closeCart();
+                    }}
                     className="btn-primary w-full py-3.5 rounded-full text-xs flex items-center justify-center gap-2"
                   >
                     <span>Proceed to Secure Checkout</span>

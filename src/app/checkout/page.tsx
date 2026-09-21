@@ -76,7 +76,8 @@ const getCleanProductId = (it: { productId?: string; id?: string; color?: string
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, cartTotal, clearCart } = useCart();
-  const { user, openAuthModal } = useAuth();
+  const { user, isLoading: authLoading, openAuthModal, signInWithGoogle } = useAuth();
+  const [googleAuthLoading, setGoogleAuthLoading] = useState(false);
   const [step, setStep] = useState<Step>(1);
   const [direction, setDirection] = useState(1);
   const [submitting, setSubmitting] = useState(false);
@@ -87,6 +88,16 @@ export default function CheckoutPage() {
   const [razorpayPaymentId, setRazorpayPaymentId] = useState<string>("");
   const [paymentStatus, setPaymentStatus] = useState<"pending" | "paid">("pending");
   const [copied, setCopied] = useState(false);
+
+  const handleGoogleLogin = async () => {
+    setPaymentError(null);
+    setGoogleAuthLoading(true);
+    const res = await signInWithGoogle("/checkout");
+    if (!res.success) {
+      setPaymentError(res.error || "Google Sign-In was interrupted. Please try again.");
+      setGoogleAuthLoading(false);
+    }
+  };
 
   const handleCopyOrderId = () => {
     if (!orderId) return;
@@ -153,6 +164,20 @@ export default function CheckoutPage() {
 
   // Prevent accessing checkout if cart is empty and not on confirmation step
   useEffect(() => {
+    // Check localStorage as well to prevent premature redirect before React context hydration
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("alighs-ware-cart");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return;
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
     if (items.length === 0 && step !== 3 && orderedItems.length === 0) {
       router.push("/cart");
     }
@@ -164,9 +189,37 @@ export default function CheckoutPage() {
       setFormData((prev) => ({
         ...prev,
         fullName: prev.fullName || user.name || "",
-        email: prev.email || user.email || "",
+        email: user.email || prev.email || "",
         phone: prev.phone || user.phone || "",
       }));
+
+      // Query database for previously stored customer address
+      const loadProfile = async () => {
+        try {
+          const { data } = await insforge.database
+            .from("customers")
+            .select("*")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(1);
+
+          if (data && data.length > 0) {
+            const cust = data[0];
+            setFormData((prev) => ({
+              ...prev,
+              fullName: prev.fullName || cust.full_name || user.name || "",
+              phone: prev.phone || cust.phone || "",
+              address: prev.address || cust.address || "",
+              city: prev.city || cust.city || "",
+              state: prev.state || cust.state || "Uttar Pradesh",
+              pincode: prev.pincode || cust.pincode || "",
+            }));
+          }
+        } catch {
+          // non-blocking
+        }
+      };
+      loadProfile();
     }
   }, [user]);
 
@@ -186,10 +239,19 @@ export default function CheckoutPage() {
 
   const handleDeliverySubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      openAuthModal("signin", "Login is compulsory to complete your frame order. Please sign in or continue with Google.", "/checkout");
+      return;
+    }
     nextStep();
   };
 
   const handlePlaceOrder = async () => {
+    if (!user) {
+      setPaymentError("User authentication required. Please sign in or continue with Google to place your order.");
+      openAuthModal("signin", "Login is compulsory to complete your frame order.", "/checkout");
+      return;
+    }
     setPaymentError(null);
     setSubmitting(true);
 
@@ -236,7 +298,7 @@ export default function CheckoutPage() {
             customer: {
               fullName: formData.fullName,
               phone: formData.phone,
-              email: formData.email,
+              email: (formData.email || user.email || "").trim(),
               address: formData.address,
               city: formData.city,
               state: formData.state || "Uttar Pradesh",
@@ -251,7 +313,8 @@ export default function CheckoutPage() {
             paymentStatus: "Pending",
             customerNotes: formData.customerNotes,
             shippingCharge: delivery,
-            userId: user?.id || null,
+            userId: user.id,
+            userEmail: user.email,
             prescriptionUrl: presData?.url || null,
             prescriptionKey: presData?.key || null,
             prescriptionName: presData?.name || null,
@@ -295,10 +358,14 @@ export default function CheckoutPage() {
           amount: Math.round(total * 100), // in paise (min 100)
           currency: "INR",
           receipt: `rcpt_${Date.now()}`,
+          userId: user.id,
+          userEmail: user.email,
           notes: {
             customer_name: formData.fullName,
             customer_phone: formData.phone,
             customer_city: formData.city,
+            customer_email: user.email || formData.email,
+            user_id: user.id,
             cart_count: String(items.length)
           }
         })
@@ -366,7 +433,7 @@ export default function CheckoutPage() {
                 customer: {
                   fullName: formData.fullName,
                   phone: formData.phone,
-                  email: formData.email,
+                  email: (formData.email || user.email || "").trim(),
                   address: formData.address,
                   city: formData.city,
                   state: formData.state || "Uttar Pradesh",
@@ -383,7 +450,8 @@ export default function CheckoutPage() {
                 razorpayOrderId: response.razorpay_order_id,
                 customerNotes: formData.customerNotes,
                 shippingCharge: delivery,
-                userId: user?.id || null,
+                userId: user.id,
+                userEmail: user.email,
                 prescriptionUrl: presData?.url || null,
                 prescriptionKey: presData?.key || null,
                 prescriptionName: presData?.name || null,
@@ -558,40 +626,148 @@ export default function CheckoutPage() {
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   className="w-full"
                 >
-                  <div className="p-8 md:p-10 rounded-3xl border border-[#B88A32]/25 bg-[#FFF9EF] shadow-xl shadow-[#2A2118]/5">
-                    <div className="flex items-center justify-between mb-8 pb-4 border-b border-[#B88A32]/15">
-                      <div>
-                        <h2 className="text-2xl font-serif font-bold text-[#2A2118] flex items-center gap-3">
-                          <MapPin className="text-[#B88A32] w-6 h-6" /> Shipping & Contact Details
-                        </h2>
-                        <p className="text-sm text-[#6B5740] mt-1">
-                          Where should Dr. Sheeraz Ahmad dispatch your curated eyewear package?
-                        </p>
-                      </div>
-                      <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-[#B88A32] bg-[#B88A32]/10 border border-[#B88A32]/20 px-3 py-1.5 rounded-full font-semibold">
-                        <ShieldCheck className="w-4 h-4" /> Pan-India Insured Dispatch
-                      </div>
+                  {authLoading ? (
+                    <div className="p-12 text-center rounded-3xl border border-[#B88A32]/25 bg-[#FFF9EF] dark:bg-[#121218] shadow-xl shadow-[#2A2118]/5">
+                      <Loader2 className="w-8 h-8 animate-spin text-[#B88A32] mx-auto mb-3" />
+                      <p className="font-mono text-xs text-[#8B7355] dark:text-[#A09383] uppercase tracking-wider">
+                        Verifying atelier authentication status...
+                      </p>
                     </div>
+                  ) : !user ? (
+                    <div className="p-8 md:p-12 rounded-3xl border border-[#B88A32]/35 bg-[#FFF9EF] dark:bg-[#121218] shadow-2xl shadow-[#2A2118]/10 text-center relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-[#B88A32]/10 rounded-full blur-3xl pointer-events-none" />
 
-                    {!user ? (
-                      <div className="mb-6 p-4 rounded-2xl bg-[#B88A32]/10 border border-[#B88A32]/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-                        <span className="text-[#6B5740] font-sans">
-                          <strong>Returning Atelier Patron?</strong> Sign in with email or Google to autofill your shipping profile and link this order to your account.
-                        </span>
+                      <div className="w-16 h-16 rounded-3xl bg-[#B88A32]/15 dark:bg-[#B88A32]/20 border border-[#B88A32]/30 flex items-center justify-center mx-auto mb-5 shadow-inner">
+                        <ShieldCheck className="w-8 h-8 text-[#B88A32] dark:text-[#D4AF62]" />
+                      </div>
+
+                      <span className="text-xs font-mono tracking-[0.25em] text-[#B88A32] uppercase font-bold">
+                        ALIG&apos;S WARE ATELIER
+                      </span>
+                      <h2 className="text-2xl sm:text-3xl font-cinzel font-black tracking-wide text-[#2A2118] dark:text-[#F5EFE6] mt-2 mb-3">
+                        Client Login Compulsory
+                      </h2>
+                      <p className="text-sm text-[#5C4935] dark:text-[#C4B59E] max-w-lg mx-auto mb-8 font-sans leading-relaxed">
+                        In accordance with our bespoke optical craftsmanship standards, login is mandatory to order any frame. This links your frame purchase to your personal account for warranty verification, optical prescription records, and real-time courier tracking.
+                      </p>
+
+                      {paymentError && (
+                        <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-800 dark:text-red-300 flex items-start gap-3 text-xs leading-relaxed max-w-md mx-auto text-left animate-in fade-in duration-200">
+                          <AlertCircle className="w-5 h-5 shrink-0 text-red-600 dark:text-red-400 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="font-bold text-sm mb-0.5 text-red-900 dark:text-red-200">
+                              Authentication Notice
+                            </p>
+                            <p>{paymentError}</p>
+                          </div>
+                          <button
+                            onClick={() => setPaymentError(null)}
+                            className="text-red-600 dark:text-red-400 hover:opacity-75 font-mono text-sm px-1.5"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Primary 1-Click Action: Google */}
+                      <div className="max-w-md mx-auto space-y-3.5 mb-8">
                         <button
                           type="button"
-                          onClick={() => openAuthModal("signin")}
-                          className="shrink-0 px-4 py-2 rounded-xl bg-[#B88A32] text-white font-mono text-xs font-bold tracking-wider uppercase hover:bg-[#A07828] transition-colors"
+                          disabled={googleAuthLoading}
+                          onClick={handleGoogleLogin}
+                          className="w-full py-4 px-6 rounded-2xl bg-white dark:bg-[#1A1A24] border-2 border-[#B88A32]/40 hover:border-[#B88A32] text-[#2A2118] dark:text-[#F5EFE6] shadow-md hover:shadow-xl transition-all flex items-center justify-center gap-3 group active:scale-[0.99] disabled:opacity-60"
                         >
-                          Sign In / Register
+                          {googleAuthLoading ? (
+                            <Loader2 className="w-5 h-5 animate-spin text-[#B88A32]" />
+                          ) : (
+                            <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                              <path
+                                fill="#4285F4"
+                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                              />
+                              <path
+                                fill="#34A853"
+                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                              />
+                              <path
+                                fill="#FBBC05"
+                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                              />
+                              <path
+                                fill="#EA4335"
+                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                              />
+                            </svg>
+                          )}
+                          <div className="text-left">
+                            <span className="font-bold text-sm tracking-wide block">
+                              {googleAuthLoading ? "Connecting with Google..." : "Continue with Google"}
+                            </span>
+                            <span className="text-[11px] font-mono text-[#8B7355] dark:text-[#8E8272] block">
+                              Link with existing account on your phone
+                            </span>
+                          </div>
                         </button>
+
+                        <div className="relative flex py-2 items-center">
+                          <div className="flex-grow border-t border-[#B88A32]/25"></div>
+                          <span className="flex-shrink mx-3 text-[11px] font-mono uppercase tracking-widest text-[#8B7355] dark:text-[#8E8272]">
+                            Or Use Email Credentials
+                          </span>
+                          <div className="flex-grow border-t border-[#B88A32]/25"></div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <button
+                            type="button"
+                            onClick={() => openAuthModal("signin", "Login is compulsory to complete your frame order.")}
+                            className="py-3 px-4 rounded-xl bg-[#B88A32] hover:bg-[#A07828] text-white text-xs font-mono font-bold tracking-wider uppercase transition-all shadow-md shadow-[#B88A32]/20"
+                          >
+                            Sign In with Email
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => openAuthModal("signup", "Create an account to complete your frame order.")}
+                            className="py-3 px-4 rounded-xl bg-[#F4E9D5] dark:bg-[#1C1C2A] hover:bg-[#E8D2A8] text-[#2A2118] dark:text-[#F5EFE6] border border-[#B88A32]/30 text-xs font-mono font-bold tracking-wider uppercase transition-all"
+                          >
+                            Register New Account
+                          </button>
+                        </div>
                       </div>
-                    ) : (
-                      <div className="mb-6 p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center gap-2.5 text-xs text-emerald-800 dark:text-emerald-400 font-medium">
-                        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span>Signed in as <strong>{user.name || user.email}</strong>. This order will be linked to your atelier account.</span>
+
+                      {/* Cart preservation badge */}
+                      <div className="p-4 rounded-2xl bg-[#F4E9D5]/60 dark:bg-[#1A1A24]/70 border border-[#B88A32]/20 max-w-md mx-auto text-xs text-[#6B5740] dark:text-[#C4B59E] flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-left">
+                          <ShoppingBag className="w-4 h-4 text-[#B88A32] shrink-0" />
+                          <span>Your bag ({items.length} {items.length === 1 ? "design" : "designs"}) is preserved</span>
+                        </div>
+                        <span className="font-mono font-bold text-[#B88A32] dark:text-[#D4AF62]">
+                          Total: ₹{total}
+                        </span>
                       </div>
-                    )}
+                    </div>
+                  ) : (
+                    <div className="p-8 md:p-10 rounded-3xl border border-[#B88A32]/25 bg-[#FFF9EF] shadow-xl shadow-[#2A2118]/5">
+                      <div className="flex items-center justify-between mb-8 pb-4 border-b border-[#B88A32]/15">
+                        <div>
+                          <h2 className="text-2xl font-serif font-bold text-[#2A2118] flex items-center gap-3">
+                            <MapPin className="text-[#B88A32] w-6 h-6" /> Shipping & Contact Details
+                          </h2>
+                          <p className="text-sm text-[#6B5740] mt-1">
+                            Where should Dr. Sheeraz Ahmad dispatch your curated eyewear package?
+                          </p>
+                        </div>
+                        <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-[#B88A32] bg-[#B88A32]/10 border border-[#B88A32]/20 px-3 py-1.5 rounded-full font-semibold">
+                          <ShieldCheck className="w-4 h-4" /> Pan-India Insured Dispatch
+                        </div>
+                      </div>
+
+                      <div className="mb-6 p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-between flex-wrap gap-2 text-xs text-emerald-800 dark:text-emerald-400 font-medium">
+                        <div className="flex items-center gap-2.5">
+                          <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>Signed in as <strong>{user.name || user.email}</strong> ({user.email}). Frame order will be officially registered to your account.</span>
+                        </div>
+                      </div>
 
                     <form onSubmit={handleDeliverySubmit} className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -808,6 +984,7 @@ export default function CheckoutPage() {
                       </div>
                     </form>
                   </div>
+                  )}
                 </motion.div>
               )}
 

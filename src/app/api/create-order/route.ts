@@ -99,10 +99,23 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json().catch(() => ({}));
+
+    const rawUserId = body.userId || body.user_id || body.notes?.user_id;
+    const userId = typeof rawUserId === 'string' ? rawUserId.trim() : '';
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'User authentication required. Please log in before initiating payment.' },
+        { status: 401 }
+      );
+    }
+
     const rawAmount = body.amount;
     const currency = body.currency || 'INR';
     const receipt = body.receipt || `rcpt_${Date.now()}`;
-    const notes = body.notes || {};
+    const notes = {
+      ...(body.notes || {}),
+      user_id: userId,
+    };
 
     if (rawAmount === undefined || rawAmount === null) {
       return NextResponse.json(

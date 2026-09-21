@@ -22,6 +22,15 @@ export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
 
+    const rawUserId = body.userId || body.user_id;
+    const userId = typeof rawUserId === 'string' ? rawUserId.trim() : '';
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'User authentication required. Please log in before placing an order.' },
+        { status: 401 }
+      );
+    }
+
     if (!body.customer || !body.items || body.items.length === 0) {
       return NextResponse.json(
         { error: 'Customer details and order items are required.' },
@@ -33,7 +42,7 @@ export async function POST(request: Request) {
       customer: {
         fullName: body.customer.fullName || body.customer.name,
         phone: body.customer.phone,
-        email: body.customer.email,
+        email: (body.customer.email || body.userEmail || body.user_email || '').trim(),
         address: body.customer.address,
         city: body.customer.city,
         state: body.customer.state || 'Uttar Pradesh',
@@ -55,7 +64,7 @@ export async function POST(request: Request) {
       customerNotes: body.customerNotes || body.notes,
       razorpayOrderId: body.razorpayOrderId || body.razorpay_order_id,
       razorpayPaymentId: body.razorpayPaymentId || body.razorpay_payment_id,
-      userId: body.userId || null,
+      userId: userId,
       prescriptionUrl: body.prescriptionUrl || body.prescription_url || null,
       prescriptionKey: body.prescriptionKey || body.prescription_key || null,
       prescriptionName: body.prescriptionName || body.prescription_name || null,

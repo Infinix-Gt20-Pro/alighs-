@@ -74,6 +74,15 @@ export default function AuthModal() {
     return () => clearInterval(timer);
   }, [resendCooldown]);
 
+  // Reset Google loading state when user returns focus to this tab
+  useEffect(() => {
+    const handleReFocus = () => {
+      setGoogleLoading(false);
+    };
+    window.addEventListener("focus", handleReFocus);
+    return () => window.removeEventListener("focus", handleReFocus);
+  }, []);
+
   if (!isAuthModalOpen) return null;
 
   const resetFeedback = () => {

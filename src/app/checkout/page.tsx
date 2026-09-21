@@ -99,6 +99,14 @@ export default function CheckoutPage() {
     }
   };
 
+  useEffect(() => {
+    const handleReFocus = () => {
+      setGoogleAuthLoading(false);
+    };
+    window.addEventListener("focus", handleReFocus);
+    return () => window.removeEventListener("focus", handleReFocus);
+  }, []);
+
   const handleCopyOrderId = () => {
     if (!orderId) return;
     navigator.clipboard.writeText(orderId);

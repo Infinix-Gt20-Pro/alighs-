@@ -93,8 +93,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = insforge.auth.onAuthStateChange(() => {
       refreshUser();
     });
+
+    // Auto-refresh when user completes OAuth in external Chrome Custom Tab and switches back
+    const handleVisibilityOrFocus = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        refreshUser();
+      }
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("focus", handleVisibilityOrFocus);
+      document.addEventListener("visibilitychange", handleVisibilityOrFocus);
+    }
+
     return () => {
       if (typeof unsubscribe === "function") unsubscribe();
+      if (typeof window !== "undefined") {
+        window.removeEventListener("focus", handleVisibilityOrFocus);
+        document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
+      }
     };
   }, [refreshUser]);
 
@@ -358,7 +374,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (data?.url && typeof window !== "undefined") {
-        window.location.href = data.url;
+        const isStandalone = (
+          window.matchMedia("(display-mode: standalone)").matches ||
+          (window.navigator as any).standalone === true ||
+          document.referrer.includes("android-app://")
+        );
+        const isAndroid = /android/i.test(navigator.userAgent);
+
+        if (isStandalone || isAndroid) {
+          // On mobile Android / standalone PWA:
+          // Launch in external system browser (Chrome Custom Tab) so that the user's
+          // existing Google accounts registered on the phone are immediately recognized
+          // without asking them to re-type their email or credentials.
+          let launched = false;
+          try {
+            const externalWindow = window.open(data.url, "_blank", "noopener,noreferrer");
+            if (externalWindow && !externalWindow.closed) {
+              launched = true;
+            }
+          } catch {
+            launched = false;
+          }
+
+          if (!launched) {
+            try {
+              const anchor = document.createElement("a");
+              anchor.href = data.url;
+              anchor.target = "_blank";
+              anchor.rel = "noopener noreferrer";
+              document.body.appendChild(anchor);
+              anchor.click();
+              setTimeout(() => {
+                try {
+                  document.body.removeChild(anchor);
+                } catch {
+                  // ignore
+                }
+              }, 1000);
+              launched = true;
+            } catch {
+              launched = false;
+            }
+          }
+
+          if (!launched) {
+            window.location.href = data.url;
+          }
+        } else {
+          window.location.href = data.url;
+        }
       }
       return { success: true };
     } catch (err: any) {

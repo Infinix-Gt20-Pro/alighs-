@@ -102,7 +102,7 @@ export default function HeroSection() {
           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FFF9EF] dark:bg-[#161622] border border-[#B88A32]/25 dark:border-[#D4AF62]/30 shadow-sm mb-4"
         >
           <Sparkles className="w-3.5 h-3.5 text-[#B88A32] dark:text-[#D4AF62]" />
-          <span className="text-xs font-mono tracking-[0.24em] text-[#4A3928] dark:text-[#D4AF62] uppercase font-bold">
+          <span className="text-xs font-mono tracking-[0.24em] text-[#5C4935] dark:text-[#D4AF62] uppercase font-bold">
             ALIG&apos;S WARE &bull; FIROZABAD
           </span>
         </motion.div>
@@ -112,7 +112,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.1 }}
-          className="font-cinzel text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-[0.06em] text-[#2A2118] dark:text-[#F5EFE6] leading-[0.94] uppercase drop-shadow-sm"
+          className="font-cinzel text-3xl sm:text-5xl font-black tracking-[0.06em] text-[#2A2118] dark:text-[#F5EFE6] leading-[0.94] uppercase drop-shadow-sm"
         >
           SCULPTED<br />
           <span className="inline-block mt-1 sm:mt-2 text-transparent bg-clip-text bg-gradient-to-r from-[#2A2118] via-[#B88A32] to-[#2A2118] dark:from-[#F5EFE6] dark:via-[#D4AF62] dark:to-[#F5EFE6]">
@@ -125,7 +125,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2 }}
-          className="font-cormorant italic text-lg sm:text-2xl md:text-3xl text-[#4A3928] dark:text-[#B8ADA0] tracking-wide mt-2 sm:mt-3"
+          className="font-cormorant italic text-lg sm:text-2xl md:text-3xl text-[#5C4935] dark:text-[#C4B59E] tracking-wide mt-2 sm:mt-3"
         >
           Firozabad &bull; Precision Eyewear
         </motion.p>
@@ -178,7 +178,7 @@ export default function HeroSection() {
               <span className="text-xs font-mono tracking-[0.18em] font-bold text-[#B88A32] dark:text-[#D4AF62]">
                 Beta Titanium
               </span>
-              <span className="text-xs font-mono text-[#4A3928] dark:text-[#D1C7BA] font-medium">
+              <span className="text-xs font-mono text-[#5C4935] dark:text-[#C4B59E] font-medium">
                 Japanese Memory Flex
               </span>
             </div>
@@ -203,7 +203,7 @@ export default function HeroSection() {
               <span className="text-xs font-mono tracking-[0.18em] font-bold text-[#B88A32] dark:text-[#D4AF62]">
                 Precision Fit
               </span>
-              <span className="text-xs font-mono text-[#4A3928] dark:text-[#D1C7BA] font-medium">
+              <span className="text-xs font-mono text-[#5C4935] dark:text-[#C4B59E] font-medium">
                 Contoured Silicone Pads
               </span>
             </div>
@@ -219,7 +219,7 @@ export default function HeroSection() {
               <span className="text-xs font-mono tracking-[0.18em] font-bold text-[#B88A32] dark:text-[#D4AF62]">
                 Optical Clarity
               </span>
-              <span className="text-xs font-mono text-[#4A3928] dark:text-[#D1C7BA] font-medium">
+              <span className="text-xs font-mono text-[#5C4935] dark:text-[#C4B59E] font-medium">
                 420nm Sapphire Crystal
               </span>
             </div>
@@ -228,7 +228,7 @@ export default function HeroSection() {
 
         {/* 360° Drag Inspection Floating Control Pill */}
         <div className="absolute bottom-2 z-20 pointer-events-auto">
-          <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FFF9EF]/95 dark:bg-[#161622]/95 backdrop-blur-md border border-[#B88A32]/35 dark:border-[#D4AF62]/35 shadow-sm text-xs font-mono text-[#4A3928] dark:text-[#D4AF62]">
+          <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FFF9EF]/95 dark:bg-[#161622]/95 backdrop-blur-md border border-[#B88A32]/35 dark:border-[#D4AF62]/35 shadow-sm text-xs font-mono text-[#5C4935] dark:text-[#D4AF62]">
             <Compass className="w-3.5 h-3.5 text-[#B88A32] dark:text-[#D4AF62] animate-spin" style={{ animationDuration: "12s" }} />
             <span className="font-semibold text-xs tracking-wider">
               360&deg; Drag to Inspect
@@ -248,7 +248,7 @@ export default function HeroSection() {
 
       {/* BOTTOM: SCROLL PROMPT */}
       <div className="relative z-20 w-full max-w-3xl mx-auto flex flex-col items-center text-center mt-3 sm:mt-5">
-        <div className="flex items-center justify-center gap-1.5 text-xs font-mono tracking-[0.2em] text-[#6B5740] dark:text-[#B8ADA0] uppercase font-bold">
+        <div className="flex items-center justify-center gap-1.5 text-xs font-mono tracking-[0.2em] text-[#8B7355] dark:text-[#8E8272] uppercase font-bold">
           <span className="text-sm animate-bounce">&darr;</span>
           <span>Scroll to Inspect</span>
         </div>

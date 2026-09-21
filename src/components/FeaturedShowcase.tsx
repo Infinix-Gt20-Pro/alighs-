@@ -31,7 +31,7 @@ export default function FeaturedShowcase() {
   // Touch and Drag Gesture State
   const [dragOffset, setDragOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [cardSpacing, setCardSpacing] = useState(300);
+  const [cardSpacing, setCardSpacing] = useState(380);
 
   const stageRef = useRef<HTMLDivElement>(null);
   const dragStartPos = useRef({ x: 0, y: 0, time: 0 });
@@ -94,11 +94,11 @@ export default function FeaturedShowcase() {
     const updateSpacing = () => {
       if (typeof window === "undefined") return;
       if (window.innerWidth < 640) {
-        setCardSpacing(260);
-      } else if (window.innerWidth < 1024) {
         setCardSpacing(290);
+      } else if (window.innerWidth < 1024) {
+        setCardSpacing(340);
       } else {
-        setCardSpacing(320);
+        setCardSpacing(380);
       }
     };
     updateSpacing();
@@ -483,31 +483,31 @@ export default function FeaturedShowcase() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-gradient-to-br from-[#E8D2A8]/30 via-[#D4AF62]/15 to-transparent rounded-full blur-[140px] pointer-events-none -z-10" />
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 gap-4 border-b border-[#B88A32]/20 dark:border-[#B88A32]/30 pb-5 sm:pb-7">
+      <div className="flex flex-col items-start mb-8 sm:mb-12 gap-5 border-b border-[#B88A32]/20 dark:border-[#B88A32]/30 pb-5 sm:pb-7">
         <div>
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FFF9EF] dark:bg-[#161622] border border-[#B88A32]/30 dark:border-[#D4AF62]/40 text-xs font-mono tracking-[0.24em] text-[#B88A32] dark:text-[#D4AF62] uppercase font-bold mb-2.5 sm:mb-3 shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-[#B88A32] dark:text-[#D4AF62]" />
             <span>3D ATELIER GALLERY</span>
           </div>
-          <h2 className="font-cinzel text-2xl sm:text-4xl md:text-5xl font-bold tracking-[0.08em] text-[#2A2118] dark:text-[#F5EFE6]">
+          <h2 className="font-cinzel text-2xl sm:text-3xl md:text-5xl font-bold tracking-[0.08em] text-[#2A2118] dark:text-[#F5EFE6]">
             Architectural Eyewear Collection
           </h2>
-          <p className="text-[#4A3928] dark:text-[#B8ADA0] mt-1.5 sm:mt-2.5 max-w-xl text-xs sm:text-base font-cormorant italic leading-relaxed">
+          <p className="text-[#5C4935] dark:text-[#C4B59E] mt-1.5 sm:mt-2.5 max-w-xl text-xs sm:text-base font-cormorant italic leading-relaxed">
             Calibrated for facial ergonomics, optical clarity, and timeless Firozabad luxury.
           </p>
         </div>
 
-        {/* Filter Chips */}
-        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto max-w-full py-1 scrollbar-none">
+        {/* Filter Chips - Grouped directly below heading and description */}
+        <div className="flex items-center flex-wrap gap-1.5 sm:gap-2 max-w-full py-1">
           {filters.map((f) => (
             <button
               key={f.id}
               onClick={() => handleFilterChange(f.id)}
-              className={`cursor-pointer px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-mono uppercase tracking-wider transition-all duration-300 shrink-0 ${
+              className={
                 selectedFilter === f.id
-                  ? "bg-gradient-to-r from-[#B88A32] to-[#D4AF62] text-white font-semibold shadow-[0_4px_15px_rgba(184,138,50,0.35)]"
-                  : "bg-[#FFF9EF] dark:bg-[#161622] text-[#4A3928] dark:text-[#B8ADA0] hover:text-[#2A2118] dark:hover:text-[#F5EFE6] border border-[#B88A32]/25 dark:border-[#B88A32]/30 hover:bg-[#F4E9D5] dark:hover:bg-[#1E1E2A]"
-              }`}
+                  ? "btn-primary !py-1.5 !px-3.5 sm:!py-2 sm:!px-4 shrink-0"
+                  : "btn-secondary !py-1.5 !px-3.5 sm:!py-2 sm:!px-4 shrink-0"
+              }
             >
               {f.label}
             </button>
@@ -558,20 +558,20 @@ export default function FeaturedShowcase() {
 
             if (absPos <= 1) {
               xOffset = pos * cardSpacing;
-              scale = 1.0 - absPos * 0.15;
-              opacity = 1.0 - absPos * 0.35;
+              scale = 1.0 - absPos * 0.22;
+              opacity = 1.0 - absPos * 0.55;
               rotateY = -pos * 16 + (1 - absPos) * (tier !== "LOW" ? mousePos.x * 8 : 0);
             } else if (absPos <= 2) {
               const norm = absPos - 1;
               xOffset = sign * (cardSpacing + norm * 180);
-              scale = 0.85 - norm * 0.13;
-              opacity = Math.max(0.15, 0.65 - norm * 0.35);
+              scale = Math.max(0.6, 0.78 - norm * 0.14);
+              opacity = Math.max(0.12, 0.45 - norm * 0.25);
               rotateY = -sign * (16 + norm * 9);
             } else {
               const extra = absPos - 2;
               xOffset = sign * (cardSpacing + 180 + extra * 160);
-              scale = Math.max(0.5, 0.72 - extra * 0.15);
-              opacity = Math.max(0, 0.30 - extra * 0.30);
+              scale = Math.max(0.45, 0.64 - extra * 0.15);
+              opacity = Math.max(0, 0.20 - extra * 0.20);
               rotateY = -sign * (25 + Math.min(5, extra * 5));
             }
 
@@ -622,7 +622,7 @@ export default function FeaturedShowcase() {
               >
                 {/* Header Badge Row */}
                 <div className="flex items-center justify-between mb-3 gap-2">
-                  <span className="text-xs font-mono font-bold text-[#6B5740] dark:text-[#C4B59E] uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#F4E9D5] dark:bg-[#1A1A26] border border-[#B88A32]/20 dark:border-[#B88A32]/30 truncate">
+                  <span className="text-xs font-mono font-bold text-[#5C4935] dark:text-[#C4B59E] uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#F4E9D5] dark:bg-[#1A1A26] border border-[#B88A32]/20 dark:border-[#B88A32]/30 truncate">
                     {product.material.toUpperCase()}
                   </span>
 
@@ -669,7 +669,7 @@ export default function FeaturedShowcase() {
                         ₹{product.price}
                       </span>
                       {product.originalPrice && (
-                        <span className="text-xs text-[#6B5740] dark:text-[#A09383] line-through font-mono ml-1.5">
+                        <span className="text-xs text-[#8B7355] dark:text-[#8E8272] line-through font-mono ml-1.5">
                           ₹{product.originalPrice}
                         </span>
                       )}
@@ -678,7 +678,7 @@ export default function FeaturedShowcase() {
 
                   {/* Description with fluid opacity and fixed dimensional layout stability */}
                   <p
-                    className="text-xs text-[#4A3928] dark:text-[#D5C7B5] mt-1.5 line-clamp-2 leading-relaxed font-cormorant italic transition-opacity duration-200"
+                    className="text-xs text-[#5C4935] dark:text-[#C4B59E] mt-1.5 line-clamp-2 leading-relaxed font-cormorant italic transition-opacity duration-200"
                     style={{
                       opacity: Math.max(0, Math.min(1, 1 - absPos * 1.8)),
                     }}
@@ -689,7 +689,7 @@ export default function FeaturedShowcase() {
                   {/* Finish Swatches & Specs */}
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#B88A32]/15 dark:border-[#B88A32]/25">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-mono text-[#6B5740] dark:text-[#A09383] mr-1">Finishes:</span>
+                      <span className="text-xs font-mono text-[#8B7355] dark:text-[#8E8272] mr-1">Finishes:</span>
                       {product.colors.slice(0, 3).map((col) => (
                         <span
                           key={col}
@@ -708,7 +708,7 @@ export default function FeaturedShowcase() {
                       ))}
                     </div>
 
-                    <span className="text-xs font-mono text-[#6B5740] dark:text-[#C4B59E] uppercase font-bold">
+                    <span className="text-xs font-mono text-[#5C4935] dark:text-[#C4B59E] uppercase font-bold">
                       {product.weight || "14g"} &bull; {product.frameWidth || "Medium"}
                     </span>
                   </div>
@@ -724,7 +724,7 @@ export default function FeaturedShowcase() {
                     <Link
                       href={`/shop/${product.slug}`}
                       draggable={false}
-                      className="cursor-pointer py-2.5 px-3 rounded-full bg-[#F4E9D5] dark:bg-[#1A1A26] hover:bg-white dark:hover:bg-[#242436] border border-[#B88A32]/30 dark:border-[#B88A32]/40 text-xs font-mono font-bold uppercase tracking-wider text-[#2A2118] dark:text-[#F5EFE6] text-center transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95 select-none"
+                      className="btn-secondary rounded-full py-2.5 px-3 text-xs flex items-center justify-center gap-1.5 select-none"
                     >
                       <Eye className="w-3.5 h-3.5 text-[#B88A32] dark:text-[#D4AF62]" />
                       <span>Specs</span>
@@ -733,7 +733,7 @@ export default function FeaturedShowcase() {
                     <button
                       type="button"
                       onClick={() => handleQuickAdd(product)}
-                      className="btn-primary py-2.5 px-3 text-xs flex items-center justify-center gap-1.5 select-none"
+                      className="btn-primary rounded-full py-2.5 px-3 text-xs flex items-center justify-center gap-1.5 select-none"
                     >
                       {addedSlug === product.slug ? (
                         <>
@@ -761,7 +761,7 @@ export default function FeaturedShowcase() {
           type="button"
           onClick={prevCard}
           aria-label="Previous Frame"
-          className="cursor-pointer p-2.5 rounded-full bg-[#FFF9EF] dark:bg-[#161622] hover:bg-white dark:hover:bg-[#1E1E2C] border border-[#B88A32]/30 dark:border-[#D4AF62]/40 text-[#2A2118] dark:text-[#F5EFE6] hover:text-[#B88A32] dark:hover:text-[#D4AF62] shadow-sm hover:scale-105 active:scale-95 transition-all"
+          className="btn-secondary !p-2.5 rounded-full shadow-sm hover:scale-105 active:scale-95 transition-all"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -777,7 +777,7 @@ export default function FeaturedShowcase() {
           type="button"
           onClick={nextCard}
           aria-label="Next Frame"
-          className="cursor-pointer p-2.5 rounded-full bg-[#FFF9EF] dark:bg-[#161622] hover:bg-white dark:hover:bg-[#1E1E2C] border border-[#B88A32]/30 dark:border-[#D4AF62]/40 text-[#2A2118] dark:text-[#F5EFE6] hover:text-[#B88A32] dark:hover:text-[#D4AF62] shadow-sm hover:scale-105 active:scale-95 transition-all"
+          className="btn-secondary !p-2.5 rounded-full shadow-sm hover:scale-105 active:scale-95 transition-all"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
@@ -787,7 +787,7 @@ export default function FeaturedShowcase() {
       <div className="text-center mt-12">
         <Link
           href="/shop"
-          className="cursor-pointer inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-[#FFF9EF] dark:bg-[#14141C] hover:bg-white dark:hover:bg-[#1A1A26] border border-[#B88A32]/35 dark:border-[#B88A32]/45 text-[#2A2118] dark:text-[#F5EFE6] font-bold text-xs font-mono tracking-[0.18em] uppercase hover:shadow-[0_4px_25px_rgba(184,138,50,0.25)] hover:scale-105 transition-all duration-300"
+          className="btn-secondary rounded-full inline-flex items-center gap-3 px-8 py-3.5 text-xs font-mono tracking-[0.18em] uppercase shadow-sm hover:scale-105 transition-all duration-300"
         >
           <span>Explore Full 40+ Architectural Catalog</span>
           <ArrowRight className="w-4 h-4 text-[#B88A32] dark:text-[#D4AF62]" />

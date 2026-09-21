@@ -76,7 +76,7 @@ export default function Navbar() {
           
           {/* BRAND LOGO & TITLE: ALIG'S WARE */}
           <Link href="/" className="cursor-pointer flex items-center gap-2.5 sm:gap-3 group">
-            <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden border border-[#B88A32]/40 bg-[#2A2118] dark:bg-[#121218] shadow-[0_0_15px_rgba(184,138,50,0.25)] group-hover:scale-105 transition-transform duration-300 shrink-0">
+            <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-lg overflow-hidden border border-[#B88A32]/40 bg-[#2A2118] dark:bg-[#121218] shadow-[0_0_15px_rgba(184,138,50,0.25)] group-hover:scale-105 transition-transform duration-300 shrink-0">
               <Image
                 src="/images/aligsware-logo.png"
                 alt="ALIG'S WARE"
@@ -90,7 +90,7 @@ export default function Navbar() {
               <span className="font-cinzel text-base sm:text-lg font-black tracking-[0.16em] uppercase text-[#2A2118] dark:text-[#F5EFE6] group-hover:text-[#B88A32] dark:group-hover:text-[#D4AF62] transition-colors leading-tight">
                 ALIG&apos;S WARE
               </span>
-              <span className="hidden sm:inline text-xs font-mono text-[#4A3928] dark:text-[#B8ADA0] tracking-[0.15em] uppercase">
+              <span className="hidden sm:inline text-xs font-mono text-[#5C4935] dark:text-[#C4B59E] tracking-wider">
                 Firozabad &bull; Precision Eyewear
               </span>
             </div>
@@ -107,7 +107,7 @@ export default function Navbar() {
                   className={`cursor-pointer px-4 py-1.5 rounded-full text-xs font-cinzel font-bold tracking-[0.14em] uppercase transition-all duration-200 ${
                     isActive
                       ? "bg-[#B88A32]/15 dark:bg-[#D4AF62]/20 text-[#2A2118] dark:text-[#F5EFE6] shadow-sm"
-                      : "text-[#4A3928] dark:text-[#B8ADA0] hover:text-[#B88A32] dark:hover:text-[#D4AF62] hover:bg-[#F4E9D5]/60 dark:hover:bg-[#1E1E28]"
+                      : "text-[#5C4935] dark:text-[#C4B59E] hover:text-[#B88A32] dark:hover:text-[#D4AF62] hover:bg-[#F4E9D5]/60 dark:hover:bg-[#1E1E28]"
                   }`}
                 >
                   {link.name}
@@ -139,7 +139,7 @@ export default function Navbar() {
                   type="button"
                   onClick={() => openAuthModal("signin")}
                   aria-label="Client Sign In"
-                  className="cursor-pointer p-2 rounded-full bg-[#FFF9EF] dark:bg-[#161622] hover:bg-[#F4E9D5] dark:hover:bg-[#1E1E2C] border border-[#B88A32]/25 dark:border-[#D4AF62]/35 text-[#2A2118] dark:text-[#F5EFE6] hover:text-[#B88A32] dark:hover:text-[#D4AF62] transition-all duration-200 shadow-sm flex items-center gap-1.5 px-3"
+                  className="btn-secondary !py-1.5 !px-3 rounded-full shadow-sm flex items-center gap-1.5"
                 >
                   <User className="w-4 h-4 text-[#B88A32] dark:text-[#D4AF62]" />
                   <span className="text-xs font-mono tracking-wider font-bold uppercase">SIGN IN</span>
@@ -160,7 +160,7 @@ export default function Navbar() {
                       <div className="text-xs font-bold font-cinzel text-[#2A2118] dark:text-[#F5EFE6] truncate">
                         {user.name || "Valued Client"}
                       </div>
-                      <div className="text-xs font-mono text-[#6B5740] dark:text-[#A89F91] truncate">
+                      <div className="text-xs font-mono text-[#8B7355] dark:text-[#8E8272] truncate">
                         {user.email}
                       </div>
                     </div>
@@ -168,7 +168,7 @@ export default function Navbar() {
                     <Link
                       href="/track-order"
                       onClick={() => setIsAccountMenuOpen(false)}
-                      className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-[#2A2118] dark:text-[#F5EFE6] hover:bg-[#F4E9D5]/70 dark:hover:bg-[#1A1A24] transition-colors"
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[#2A2118] dark:text-[#F5EFE6] hover:bg-[#F4E9D5]/70 dark:hover:bg-[#1A1A24] transition-colors"
                     >
                       <PackageCheck className="w-3.5 h-3.5 text-[#B88A32]" />
                       <span>Track My Orders</span>
@@ -177,7 +177,7 @@ export default function Navbar() {
                     <Link
                       href="/appointment"
                       onClick={() => setIsAccountMenuOpen(false)}
-                      className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-[#2A2118] dark:text-[#F5EFE6] hover:bg-[#F4E9D5]/70 dark:hover:bg-[#1A1A24] transition-colors"
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[#2A2118] dark:text-[#F5EFE6] hover:bg-[#F4E9D5]/70 dark:hover:bg-[#1A1A24] transition-colors"
                     >
                       <Calendar className="w-3.5 h-3.5 text-[#B88A32]" />
                       <span>Booked Consultations</span>
@@ -189,7 +189,7 @@ export default function Navbar() {
                         setIsAccountMenuOpen(false);
                         signOut();
                       }}
-                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-red-600 dark:text-red-400 hover:bg-red-500/10 transition-colors text-left mt-1 border-t border-[#B88A32]/10"
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-red-500 hover:bg-red-500/10 transition-colors text-left mt-1 border-t border-[#B88A32]/10"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       <span>Sign Out</span>
@@ -213,7 +213,7 @@ export default function Navbar() {
               type="button"
               onClick={openCart}
               aria-label="Open Shopping Bag"
-              className="cursor-pointer relative hidden md:inline-flex p-2 rounded-full bg-[#FFF9EF] dark:bg-[#161622] hover:bg-[#F4E9D5] dark:hover:bg-[#1E1E2C] border border-[#B88A32]/25 dark:border-[#D4AF62]/35 text-[#2A2118] dark:text-[#F5EFE6] hover:text-[#B88A32] dark:hover:text-[#D4AF62] transition-all duration-200 shadow-sm"
+              className="btn-secondary !p-2 rounded-full relative hidden md:inline-flex shadow-sm"
             >
               <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-[#2A2118] dark:text-[#F5EFE6]" />
               {cartCount > 0 && (
@@ -232,7 +232,7 @@ export default function Navbar() {
               type="button"
               onClick={() => setIsMobileMenuOpen(true)}
               aria-label="Open Navigation Menu"
-              className="cursor-pointer p-2 rounded-xl text-[#2A2118] dark:text-[#F5EFE6] hover:text-[#B88A32] dark:hover:text-[#D4AF62] transition-colors md:hidden relative"
+              className="cursor-pointer p-2 rounded-lg text-[#2A2118] dark:text-[#F5EFE6] hover:text-[#B88A32] dark:hover:text-[#D4AF62] transition-colors md:hidden relative"
             >
               <Menu className="w-6 h-6" />
               {cartCount > 0 && (
@@ -272,14 +272,14 @@ export default function Navbar() {
                     <span className="font-cinzel text-base font-black tracking-[0.14em] text-[#2A2118] dark:text-[#F5EFE6]">
                       ALIG&apos;S WARE
                     </span>
-                    <span className="text-xs font-mono text-[#4A3928] dark:text-[#B8ADA0] tracking-[0.15em] uppercase">
+                    <span className="text-xs font-mono text-[#5C4935] dark:text-[#C4B59E] tracking-wider">
                       Precision Eyewear
                     </span>
                   </div>
                   <button
                     type="button"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-2 text-[#4A3928] dark:text-[#B8ADA0] hover:text-[#2A2118] dark:hover:text-[#F5EFE6] rounded-full hover:bg-[#F4E9D5] dark:hover:bg-[#1A1A24] transition-colors"
+                    className="p-2 text-[#5C4935] dark:text-[#C4B59E] hover:text-[#2A2118] dark:hover:text-[#F5EFE6] rounded-full hover:bg-[#F4E9D5] dark:hover:bg-[#1A1A24] transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -297,7 +297,7 @@ export default function Navbar() {
                           <span className="text-xs font-bold font-cinzel text-[#2A2118] dark:text-[#F5EFE6] truncate max-w-[120px]">
                             {user.name}
                           </span>
-                          <span className="text-xs font-mono text-[#6B5740] dark:text-[#A89F91]">
+                          <span className="text-xs font-mono text-[#8B7355] dark:text-[#8E8272]">
                             Client Account
                           </span>
                         </div>
@@ -385,7 +385,7 @@ export default function Navbar() {
                   Book Try-On
                 </Link>
 
-                <div className="text-center text-xs text-[#6B5740] dark:text-[#A89F91] font-mono uppercase tracking-widest pt-1">
+                <div className="text-center text-xs text-[#8B7355] dark:text-[#8E8272] font-mono tracking-wider pt-1">
                   Firozabad, UP &bull; +91 72173 71499
                 </div>
               </div>

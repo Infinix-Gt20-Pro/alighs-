@@ -51,7 +51,7 @@ export default function ThemeToggle({
         </div>
 
         {/* Mini Pill Switch */}
-        <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FFF9EF] dark:bg-[#121218] border border-[#B88A32]/30 text-[10px] tracking-wider text-[#B88A32] dark:text-[#D4AF62]">
+        <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FFF9EF] dark:bg-[#121218] border border-[#B88A32]/30 text-xs tracking-wider text-[#B88A32] dark:text-[#D4AF62]">
           <span className={!isDark ? "font-black underline decoration-[#B88A32]" : "opacity-60"}>
             LIGHT
           </span>
@@ -86,7 +86,7 @@ export default function ThemeToggle({
           ) : (
             <Sun className="w-4 h-4 text-[#B88A32] transition-transform duration-300 group-hover:rotate-45" />
           )}
-          <span className="text-[11px] font-mono tracking-[0.18em] uppercase font-bold text-[#4A3928] dark:text-[#D4AF62]">
+          <span className="text-xs font-mono tracking-[0.18em] uppercase font-bold text-[#5C4935] dark:text-[#D4AF62]">
             {isDark ? "OBSIDIAN" : "IVORY"}
           </span>
         </div>
@@ -102,7 +102,7 @@ export default function ThemeToggle({
       type="button"
       onClick={toggleTheme}
       aria-label={`Switch to ${isDark ? "Warm Ivory" : "Obsidian Dark"} theme`}
-      className={`cursor-pointer relative p-2.5 rounded-full bg-[#FFF9EF] dark:bg-[#161622] hover:bg-[#F4E9D5] dark:hover:bg-[#1E1E2C] border border-[#B88A32]/25 dark:border-[#D4AF62]/35 text-[#2A2118] dark:text-[#F5EFE6] hover:text-[#B88A32] dark:hover:text-[#D4AF62] transition-all duration-200 shadow-sm group ${className}`}
+      className={`btn-secondary !p-2.5 rounded-full relative ${className}`}
       title={`Current: ${isDark ? "Obsidian Dark" : "Warm Ivory"} (Click to switch)`}
     >
       {/* Animated icon morph */}

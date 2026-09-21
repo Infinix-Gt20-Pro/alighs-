@@ -26,7 +26,7 @@ export default function DoctorSection() {
       desc: "Custom pupillary distance (PD) calibration for zero slippage.",
     },
     {
-      icon: <ShieldCheck className="w-6 h-6 text-[#4A3928]" />,
+      icon: <ShieldCheck className="w-6 h-6 text-[#5C4935] dark:text-[#C4B59E]" />,
       title: "Lens Coating Consultation",
       desc: "Specialized advice for 420nm blue-cut, progressive & polarized optics.",
     },
@@ -53,11 +53,11 @@ export default function DoctorSection() {
             <span>Optometric Heritage</span>
           </div>
 
-          <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold text-[#2A2118] dark:text-[#F5EFE6] font-cinzel tracking-[0.06em] mb-3 sm:mb-4 drop-shadow-sm">
+          <h2 className="text-3xl sm:text-5xl font-bold text-[#2A2118] dark:text-[#F5EFE6] font-cinzel tracking-[0.06em] mb-3 sm:mb-4 drop-shadow-sm">
             The Clinical Side
           </h2>
 
-          <p className="text-sm sm:text-lg text-[#4A3928] dark:text-[#D5C7B5] font-cormorant italic max-w-2xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-lg text-[#5C4935] dark:text-[#C4B59E] font-cormorant italic max-w-2xl mx-auto leading-relaxed">
             Where Japanese Beta-Titanium design meets clinical optometry certified by Aligarh Muslim University.
           </p>
         </motion.div>
@@ -90,24 +90,24 @@ export default function DoctorSection() {
                 </p>
 
                 <div className="flex flex-wrap justify-center sm:justify-start gap-2">
-                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold text-[#2A2118] dark:text-[#EAE0D5] bg-[#F4E9D5] dark:bg-[#1C1C2A] border border-[#B88A32]/30 dark:border-[#B88A32]/40">
+                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold text-[#2A2118] dark:text-[#F5EFE6] bg-[#F4E9D5] dark:bg-[#1C1C2A] border border-[#B88A32]/30 dark:border-[#B88A32]/40">
                     AMU Optometry
                   </span>
-                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold text-[#2A2118] dark:text-[#EAE0D5] bg-[#F4E9D5] dark:bg-[#1C1C2A] border border-[#B88A32]/30 dark:border-[#B88A32]/40">
+                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold text-[#2A2118] dark:text-[#F5EFE6] bg-[#F4E9D5] dark:bg-[#1C1C2A] border border-[#B88A32]/30 dark:border-[#B88A32]/40">
                     MBBS
                   </span>
-                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold text-[#2A2118] dark:text-[#EAE0D5] bg-[#F4E9D5] dark:bg-[#1C1C2A] border border-[#B88A32]/30 dark:border-[#B88A32]/40">
+                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold text-[#2A2118] dark:text-[#F5EFE6] bg-[#F4E9D5] dark:bg-[#1C1C2A] border border-[#B88A32]/30 dark:border-[#B88A32]/40">
                     DOMS
                   </span>
                 </div>
               </div>
             </div>
 
-            <p className="text-xs sm:text-sm text-[#4A3928] dark:text-[#D5C7B5] leading-relaxed mb-6 flex-1">
+            <p className="text-xs sm:text-sm text-[#5C4935] dark:text-[#C4B59E] leading-relaxed mb-6 flex-1">
               With extensive clinical experience at Aligarh Muslim University (AMU), Dr. Sheeraz Ahmad personally inspects and calibrates every ALIG&apos;S WARE frame. We bridge Firozabad&apos;s celebrated artisanal glassmaking heritage with strict optical diagnostic standards.
             </p>
 
-            <div className="flex items-center gap-3 text-xs sm:text-sm text-[#4A3928] dark:text-[#D5C7B5] mb-6 p-4 rounded-2xl bg-[#F4E9D5]/80 dark:bg-[#161622] border border-[#B88A32]/25 dark:border-[#B88A32]/35">
+            <div className="flex items-center gap-3 text-xs sm:text-sm text-[#5C4935] dark:text-[#C4B59E] mb-6 p-4 rounded-2xl bg-[#F4E9D5]/80 dark:bg-[#161622] border border-[#B88A32]/25 dark:border-[#B88A32]/35">
               <MapPin className="w-5 h-5 text-[#B88A32] dark:text-[#D4AF62] shrink-0" />
               <span className="font-mono text-xs text-[#2A2118] dark:text-[#F5EFE6]">
                 ALIG&apos;S WARE Flagship Clinic, Firozabad, Uttar Pradesh
@@ -154,7 +154,7 @@ export default function DoctorSection() {
                   <h4 className="font-cinzel text-base sm:text-lg font-bold text-[#2A2118] dark:text-[#F5EFE6] mb-1.5">
                     {service.title}
                   </h4>
-                  <p className="text-xs text-[#4A3928] dark:text-[#D5C7B5] leading-relaxed">
+                  <p className="text-xs text-[#5C4935] dark:text-[#C4B59E] leading-relaxed">
                     {service.desc}
                   </p>
                 </div>
@@ -163,7 +163,7 @@ export default function DoctorSection() {
 
             <Link
               href="/appointment"
-              className="btn-primary inline-flex items-center justify-center w-full py-4 rounded-full text-center font-bold text-sm tracking-wide transition-all shadow-[0_6px_25px_rgba(184,138,50,0.35)] active:scale-98"
+              className="btn-primary inline-flex items-center justify-center w-full py-4 rounded-full text-center font-bold text-sm normal-case tracking-normal transition-all shadow-[0_6px_25px_rgba(184,138,50,0.35)] active:scale-98"
             >
               Book Ophthalmic Consultation
             </Link>

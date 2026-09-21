@@ -68,7 +68,7 @@ export default function Preloader({ onComplete, isLoading = true }: PreloaderPro
             opacity: 0,
             transition: { duration: 0.35, ease: "easeOut" },
           }}
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#FFFDF5] text-[#3C2415] selection:bg-none"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#FFFDF5] text-[#2A2118] selection:bg-none"
         >
           {/* Warm Champagne Radial Glow */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-gradient-to-tr from-[#C6A463]/15 via-[#E2C485]/10 to-transparent rounded-full blur-3xl pointer-events-none" />
@@ -80,11 +80,11 @@ export default function Preloader({ onComplete, isLoading = true }: PreloaderPro
             transition={{ duration: 0.6, ease: "easeOut" }}
             className="flex flex-col items-center mb-6 z-10 text-center px-4"
           >
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FAF7F0] border border-[#C6A463]/25 text-[11px] font-mono text-[#C6A463] uppercase tracking-[0.2em] mb-3 shadow-sm">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FAF7F0] border border-[#C6A463]/25 text-xs font-mono text-[#B88A32] uppercase tracking-[0.2em] mb-3 shadow-sm">
               <span>FIROZABAD &bull; EST. QUALITY</span>
             </div>
-            <h2 className="text-3xl sm:text-5xl font-cinzel font-bold tracking-[0.14em] text-[#3C2415] uppercase">
-              ALIGS<span className="font-light text-[#C6A463]">WARE</span>
+            <h2 className="text-3xl sm:text-5xl font-cinzel font-bold tracking-[0.14em] text-[#2A2118] uppercase">
+              ALIGS<span className="font-light text-[#B88A32]">WARE</span>
             </h2>
             <p className="text-xs font-mono tracking-[0.32em] text-[#8B7355] uppercase mt-2">
               Sculpted Vision &bull; 3D Studio
@@ -134,7 +134,7 @@ export default function Preloader({ onComplete, isLoading = true }: PreloaderPro
             </div>
 
             {/* Digital Percentage */}
-            <div className="text-3xl font-light tracking-tight font-mono text-[#3C2415]">
+            <div className="text-3xl font-light tracking-tight font-mono text-[#2A2118]">
               {progress}
               <span className="text-sm text-[#8B7355] ml-1">%</span>
             </div>
@@ -149,7 +149,7 @@ export default function Preloader({ onComplete, isLoading = true }: PreloaderPro
               />
             </div>
 
-            <p className="text-[11px] text-[#8B7355] font-mono mt-1">
+            <p className="text-xs text-[#8B7355] font-mono mt-1">
               {progress < 40 && "Loading optical refraction..."}
               {progress >= 40 && progress < 80 && "Aligning titanium reflections..."}
               {progress >= 80 && progress < 100 && "Readying luxury campaign..."}

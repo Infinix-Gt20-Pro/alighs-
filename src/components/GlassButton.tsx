@@ -18,15 +18,15 @@ export default function GlassButton({
   ...props
 }: GlassButtonProps) {
   const sizeClasses = {
-    sm: "px-3 py-1.5 text-xs rounded-xl gap-1.5",
-    md: "px-5 py-2.5 text-sm rounded-xl gap-2",
-    lg: "px-6 py-3.5 text-base rounded-2xl gap-2.5",
+    sm: "px-3 py-1.5 text-xs rounded-full gap-1.5",
+    md: "px-5 py-2.5 text-sm rounded-full gap-2",
+    lg: "px-6 py-3.5 text-base rounded-full gap-2.5",
   };
 
   const variantClasses = {
     default: "bg-white/[0.07] hover:bg-white/[0.12] border-white/10 hover:border-white/25 text-white",
     primary: "bg-gradient-to-r from-blue-500/20 to-purple-500/20 hover:from-blue-500/30 hover:to-purple-500/30 border-blue-400/30 hover:border-blue-400/50 text-white shadow-[0_0_20px_rgba(59,130,246,0.25)]",
-    subtle: "bg-transparent hover:bg-white/[0.05] border-transparent hover:border-white/10 text-neutral-300 hover:text-white",
+    subtle: "bg-transparent hover:bg-white/[0.05] border-transparent hover:border-white/10 text-[#C4B59E] hover:text-white",
   };
 
   return (

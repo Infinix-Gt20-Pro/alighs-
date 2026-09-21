@@ -81,7 +81,15 @@ async function computeServerTotal(
   for (const item of items) {
     const pId = String(item.productId || '').trim();
     const cleanId = pId.replace(/^ALG-/, '');
-    const price = productMap.get(pId) ?? productMap.get(cleanId) ?? productMap.get(`ALG-${cleanId}`);
+    const baseWithoutColor = pId.replace(/-[A-Za-z0-9_]+$/, '');
+    const baseCleanWithoutColor = cleanId.replace(/-[A-Za-z0-9_]+$/, '');
+    const price =
+      productMap.get(pId) ??
+      productMap.get(cleanId) ??
+      productMap.get(`ALG-${cleanId}`) ??
+      productMap.get(baseWithoutColor) ??
+      productMap.get(baseCleanWithoutColor) ??
+      productMap.get(`ALG-${baseCleanWithoutColor}`);
 
     if (price === undefined) {
       console.warn(`[create-order] Product ${pId} not found in catalog for price verification`);
@@ -92,7 +100,7 @@ async function computeServerTotal(
     subtotal += price * qty;
   }
 
-  const shipping = subtotal >= 1999 ? 0 : 199;
+  const shipping = (subtotal >= 1999 || subtotal === 0) ? 0 : 99;
   const totalPaise = Math.round((subtotal + shipping) * 100);
 
   return { subtotal, shipping, totalPaise };
@@ -137,16 +145,27 @@ export async function POST(request: Request) {
         // If client also supplied an amount, verify it matches
         if (body.amount !== undefined && body.amount !== null) {
           const clientAmount = Number(body.amount);
-          // Allow up to 100 paise (₹1) difference for rounding/shipping variations
-          if (Math.abs(clientAmount - serverCalc.totalPaise) > 100) {
-            console.error(`[Security Alert] Price tampering attempt detected for user ${userId}. Client claimed: ${clientAmount} paise, Server calculated: ${serverCalc.totalPaise} paise`);
+          // Allow subtotal + 99 delivery, or subtotal with free delivery (tolerance 100 paise)
+          const validTotals = [
+            serverCalc.totalPaise,
+            Math.round((serverCalc.subtotal + 99) * 100),
+            Math.round(serverCalc.subtotal * 100),
+          ];
+
+          const isMatch = validTotals.some((vt) => Math.abs(clientAmount - vt) <= 100);
+          if (!isMatch) {
+            console.error(
+              `[Security Alert] Price tampering attempt detected for user ${userId}. Client claimed: ${clientAmount} paise, Server calculated: ${serverCalc.totalPaise} paise`
+            );
             return NextResponse.json(
               { error: 'Price calculation mismatch. Please refresh your cart and try again.' },
               { status: 400 }
             );
           }
+          finalAmountPaise = clientAmount;
+        } else {
+          finalAmountPaise = serverCalc.totalPaise;
         }
-        finalAmountPaise = serverCalc.totalPaise;
       } else {
         finalAmountPaise = Number(body.amount);
       }

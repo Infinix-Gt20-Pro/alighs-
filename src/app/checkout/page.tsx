@@ -391,7 +391,7 @@ export default function CheckoutPage() {
       const rzpOrderId = orderData.order_id;
 
       // Step 2: Configure and open Razorpay modal
-      const activeKey = orderData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+      const activeKey = orderData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_live_TdNncN01Vi6Vvg";
       const options = {
         key: activeKey,
         amount: orderData.amount,

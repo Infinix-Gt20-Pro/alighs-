@@ -60,9 +60,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
 
         // Clean up mobile PKCE verifier backup after successful authentication
+        // Also persist email for future Google login_hint (so user doesn't type it again)
         if (typeof window !== "undefined") {
           try {
             localStorage.removeItem("insforge_pkce_verifier");
+            if (u.email) {
+              localStorage.setItem("aligsware_last_google_email", u.email);
+            }
             const postLoginRedirect = localStorage.getItem("aligsware_post_login_redirect");
             if (postLoginRedirect) {
               localStorage.removeItem("aligsware_post_login_redirect");
@@ -315,12 +319,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         ? `${window.location.origin}${targetPath}`
         : "";
 
+      // Build OAuth params — no forced prompt so Google uses device accounts natively on mobile
+      // If user logged in before, pass login_hint so Google pre-fills their email
+      const oauthParams: Record<string, string> = {};
+      if (typeof window !== "undefined") {
+        try {
+          const lastEmail = localStorage.getItem("aligsware_last_google_email");
+          if (lastEmail) {
+            oauthParams.login_hint = lastEmail;
+          }
+        } catch {
+          // ignore
+        }
+      }
+
       const { data, error } = await insforge.auth.signInWithOAuth("google", {
         redirectTo: redirectUrl || (typeof window !== "undefined" ? window.location.origin : ""),
         skipBrowserRedirect: true,
-        additionalParams: {
-          prompt: "select_account",
-        },
+        ...(Object.keys(oauthParams).length > 0 ? { additionalParams: oauthParams } : {}),
       });
 
       if (error) {

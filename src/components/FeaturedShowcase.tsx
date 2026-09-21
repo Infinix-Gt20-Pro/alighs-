@@ -73,9 +73,9 @@ export default function FeaturedShowcase() {
 
   const filters = [
     { id: "all", label: "All Curations" },
-    { id: "eyeglasses", label: "👓 Eyeglasses" },
-    { id: "computer-glasses", label: "💻 Computer (BLU)" },
-    { id: "sunglasses", label: "🕶️ Polarized Sun" },
+    { id: "eyeglasses", label: "Eyeglasses" },
+    { id: "computer-glasses", label: "Computer (BLU)" },
+    { id: "sunglasses", label: "Polarized Sun" },
     { id: "titanium", label: "Air Titanium" },
   ];
 
@@ -485,7 +485,7 @@ export default function FeaturedShowcase() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 gap-4 border-b border-[#B88A32]/20 dark:border-[#B88A32]/30 pb-5 sm:pb-7">
         <div>
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FFF9EF] dark:bg-[#161622] border border-[#B88A32]/30 dark:border-[#D4AF62]/40 text-[10px] sm:text-xs font-mono tracking-[0.26em] text-[#B88A32] dark:text-[#D4AF62] uppercase font-bold mb-2.5 sm:mb-3 shadow-sm">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FFF9EF] dark:bg-[#161622] border border-[#B88A32]/30 dark:border-[#D4AF62]/40 text-xs font-mono tracking-[0.24em] text-[#B88A32] dark:text-[#D4AF62] uppercase font-bold mb-2.5 sm:mb-3 shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-[#B88A32] dark:text-[#D4AF62]" />
             <span>3D ATELIER GALLERY</span>
           </div>
@@ -503,7 +503,7 @@ export default function FeaturedShowcase() {
             <button
               key={f.id}
               onClick={() => handleFilterChange(f.id)}
-              className={`cursor-pointer px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-mono uppercase tracking-wider transition-all duration-300 shrink-0 ${
+              className={`cursor-pointer px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-mono uppercase tracking-wider transition-all duration-300 shrink-0 ${
                 selectedFilter === f.id
                   ? "bg-gradient-to-r from-[#B88A32] to-[#D4AF62] text-white font-semibold shadow-[0_4px_15px_rgba(184,138,50,0.35)]"
                   : "bg-[#FFF9EF] dark:bg-[#161622] text-[#4A3928] dark:text-[#B8ADA0] hover:text-[#2A2118] dark:hover:text-[#F5EFE6] border border-[#B88A32]/25 dark:border-[#B88A32]/30 hover:bg-[#F4E9D5] dark:hover:bg-[#1E1E2A]"
@@ -531,34 +531,11 @@ export default function FeaturedShowcase() {
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchCancel}
         onClickCapture={handleStageClickCapture}
-        className={`relative w-full min-h-[520px] sm:min-h-[580px] flex items-center justify-center py-6 sm:py-10 touch-pan-y select-none outline-none focus-visible:ring-1 focus-visible:ring-[#B88A32]/40 rounded-3xl transition-cursor duration-150 ${
+        className={`relative w-full min-h-[520px] sm:min-h-[580px] flex items-center justify-center py-6 sm:py-10 touch-pan-y select-none outline-none focus-visible:ring-1 focus-visible:ring-[#B88A32]/40 rounded-2xl transition-cursor duration-150 ${
           isDragging ? "cursor-grabbing" : "cursor-grab"
         }`}
         style={{ perspective: "1200px", touchAction: "pan-y" }}
       >
-        {/* Navigation Arrows */}
-        <button
-          type="button"
-          onClick={prevCard}
-          onMouseDown={(e) => e.stopPropagation()}
-          onTouchStart={(e) => e.stopPropagation()}
-          aria-label="Previous Frame"
-          className="cursor-pointer absolute left-2 sm:left-4 z-50 p-3 rounded-full bg-[#FFF9EF]/90 dark:bg-[#161622]/90 hover:bg-white dark:hover:bg-[#1E1E2C] border border-[#B88A32]/30 dark:border-[#D4AF62]/40 text-[#2A2118] dark:text-[#F5EFE6] hover:text-[#B88A32] dark:hover:text-[#D4AF62] shadow-[0_8px_25px_rgba(42,33,24,0.08)] dark:shadow-[0_8px_25px_rgba(0,0,0,0.5)] transition-all duration-200 active:scale-95"
-        >
-          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
-        </button>
-
-        <button
-          type="button"
-          onClick={nextCard}
-          onMouseDown={(e) => e.stopPropagation()}
-          onTouchStart={(e) => e.stopPropagation()}
-          aria-label="Next Frame"
-          className="cursor-pointer absolute right-2 sm:right-4 z-50 p-3 rounded-full bg-[#FFF9EF]/90 dark:bg-[#161622]/90 hover:bg-white dark:hover:bg-[#1E1E2C] border border-[#B88A32]/30 dark:border-[#D4AF62]/40 text-[#2A2118] dark:text-[#F5EFE6] hover:text-[#B88A32] dark:hover:text-[#D4AF62] shadow-[0_8px_25px_rgba(42,33,24,0.08)] dark:shadow-[0_8px_25px_rgba(0,0,0,0.5)] transition-all duration-200 active:scale-95"
-        >
-          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
-        </button>
-
         {/* Floating Perspective Cards Stack */}
         <div className="relative w-full max-w-4xl h-[480px] sm:h-[530px] flex items-center justify-center pointer-events-none">
           {filteredProducts.map((product, idx) => {
@@ -627,7 +604,7 @@ export default function FeaturedShowcase() {
                   damping: isDragging ? 42 : 26,
                   mass: isDragging ? 0.6 : 1,
                 }}
-                className={`absolute pointer-events-auto w-[300px] sm:w-[400px] md:w-[460px] p-5 sm:p-7 rounded-3xl bg-[#FFF9EF] dark:bg-[#12121A] border transition-[border-color,box-shadow,background-color] duration-300 select-none ${
+                className={`absolute pointer-events-auto w-[300px] sm:w-[400px] md:w-[460px] p-5 sm:p-7 rounded-2xl bg-[#FFF9EF] dark:bg-[#12121A] border transition-[border-color,box-shadow,background-color] duration-300 select-none ${
                   isDragging
                     ? "cursor-grabbing"
                     : absPos < 0.5
@@ -645,12 +622,12 @@ export default function FeaturedShowcase() {
               >
                 {/* Header Badge Row */}
                 <div className="flex items-center justify-between mb-3 gap-2">
-                  <span className="text-[9px] sm:text-[10px] font-mono font-bold text-[#8B7355] dark:text-[#C4B59E] uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#F4E9D5] dark:bg-[#1A1A26] border border-[#B88A32]/20 dark:border-[#B88A32]/30 truncate">
+                  <span className="text-xs font-mono font-bold text-[#6B5740] dark:text-[#C4B59E] uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#F4E9D5] dark:bg-[#1A1A26] border border-[#B88A32]/20 dark:border-[#B88A32]/30 truncate">
                     {product.material.toUpperCase()}
                   </span>
 
                   {product.bestSeller && (
-                    <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-mono text-[#B88A32] dark:text-[#D4AF62] uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#B88A32]/15 dark:bg-[#B88A32]/25 border border-[#B88A32]/30 font-bold shrink-0">
+                    <span className="inline-flex items-center gap-1 text-xs font-mono text-[#B88A32] dark:text-[#D4AF62] uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#B88A32]/15 dark:bg-[#B88A32]/25 border border-[#B88A32]/30 font-bold shrink-0">
                       <Star className="w-3 h-3 fill-[#B88A32] text-[#B88A32] dark:fill-[#D4AF62] dark:text-[#D4AF62]" />
                       <span>BESTSELLER</span>
                     </span>
@@ -692,7 +669,7 @@ export default function FeaturedShowcase() {
                         ₹{product.price}
                       </span>
                       {product.originalPrice && (
-                        <span className="text-[10px] sm:text-xs text-[#8B7355] dark:text-[#A09383] line-through font-mono ml-1.5">
+                        <span className="text-xs text-[#6B5740] dark:text-[#A09383] line-through font-mono ml-1.5">
                           ₹{product.originalPrice}
                         </span>
                       )}
@@ -712,7 +689,7 @@ export default function FeaturedShowcase() {
                   {/* Finish Swatches & Specs */}
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#B88A32]/15 dark:border-[#B88A32]/25">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-mono text-[#6B5740] dark:text-[#A09383] mr-1">Finishes:</span>
+                      <span className="text-xs font-mono text-[#6B5740] dark:text-[#A09383] mr-1">Finishes:</span>
                       {product.colors.slice(0, 3).map((col) => (
                         <span
                           key={col}
@@ -731,7 +708,7 @@ export default function FeaturedShowcase() {
                       ))}
                     </div>
 
-                    <span className="text-[10px] font-mono text-[#8B7355] dark:text-[#C4B59E] uppercase font-bold">
+                    <span className="text-xs font-mono text-[#6B5740] dark:text-[#C4B59E] uppercase font-bold">
                       {product.weight || "14g"} &bull; {product.frameWidth || "Medium"}
                     </span>
                   </div>
@@ -747,7 +724,7 @@ export default function FeaturedShowcase() {
                     <Link
                       href={`/shop/${product.slug}`}
                       draggable={false}
-                      className="cursor-pointer py-2.5 px-3 rounded-xl bg-[#F4E9D5] dark:bg-[#1A1A26] hover:bg-white dark:hover:bg-[#242436] border border-[#B88A32]/30 dark:border-[#B88A32]/40 text-xs font-mono font-bold uppercase tracking-wider text-[#2A2118] dark:text-[#F5EFE6] text-center transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95 select-none"
+                      className="cursor-pointer py-2.5 px-3 rounded-full bg-[#F4E9D5] dark:bg-[#1A1A26] hover:bg-white dark:hover:bg-[#242436] border border-[#B88A32]/30 dark:border-[#B88A32]/40 text-xs font-mono font-bold uppercase tracking-wider text-[#2A2118] dark:text-[#F5EFE6] text-center transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95 select-none"
                     >
                       <Eye className="w-3.5 h-3.5 text-[#B88A32] dark:text-[#D4AF62]" />
                       <span>Specs</span>
@@ -756,7 +733,7 @@ export default function FeaturedShowcase() {
                     <button
                       type="button"
                       onClick={() => handleQuickAdd(product)}
-                      className="cursor-pointer py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#B88A32] to-[#D4AF62] hover:brightness-105 text-white text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-[0_4px_15px_rgba(184,138,50,0.3)] active:scale-95 select-none"
+                      className="btn-primary py-2.5 px-3 text-xs flex items-center justify-center gap-1.5 select-none"
                     >
                       {addedSlug === product.slug ? (
                         <>
@@ -778,40 +755,32 @@ export default function FeaturedShowcase() {
         </div>
       </div>
 
-      {/* Carousel Pagination & Indicator */}
-      <div className="flex flex-col items-center justify-center mt-4 gap-3">
-        <div className="flex items-center gap-1.5">
-          {filteredProducts.map((_, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => {
-                setActiveIndex(idx);
-                setDragOffset(0);
-                dragOffsetRef.current = 0;
-              }}
-              aria-label={`Go to frame ${idx + 1}`}
-              className={`cursor-pointer transition-all duration-300 rounded-full ${
-                activeIndex === idx
-                  ? "w-8 h-2 bg-[#B88A32]"
-                  : "w-2 h-2 bg-[#B88A32]/30 hover:bg-[#B88A32]/60"
-              }`}
-            />
-          ))}
+      {/* Streamlined Carousel Navigation Controls */}
+      <div className="flex items-center justify-center gap-4 mt-6">
+        <button
+          type="button"
+          onClick={prevCard}
+          aria-label="Previous Frame"
+          className="cursor-pointer p-2.5 rounded-full bg-[#FFF9EF] dark:bg-[#161622] hover:bg-white dark:hover:bg-[#1E1E2C] border border-[#B88A32]/30 dark:border-[#D4AF62]/40 text-[#2A2118] dark:text-[#F5EFE6] hover:text-[#B88A32] dark:hover:text-[#D4AF62] shadow-sm hover:scale-105 active:scale-95 transition-all"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+
+        <div className="px-5 py-2 rounded-full bg-[#FFF9EF]/90 dark:bg-[#161622]/90 border border-[#B88A32]/25 dark:border-[#D4AF62]/30 text-xs font-mono text-[#2A2118] dark:text-[#F5EFE6] tracking-widest uppercase font-bold shadow-sm">
+          <span className="text-[#B88A32] dark:text-[#D4AF62] font-black">
+            {String(activeIndex + 1).padStart(2, "0")}
+          </span>{" "}
+          / {String(filteredProducts.length).padStart(2, "0")} Atelier Frames
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-mono text-[#6B5740] dark:text-[#A09383] tracking-widest uppercase font-bold">
-          <span>
-            {String(activeIndex + 1).padStart(2, "0")} / {String(filteredProducts.length).padStart(2, "0")} ATELIER FRAMES
-          </span>
-          <span className="text-[#B88A32]/40 dark:text-[#D4AF62]/40">&bull;</span>
-          <span className="text-[11px] text-[#B88A32] dark:text-[#D4AF62] font-semibold flex items-center gap-1.5">
-            <span className="inline-block animate-pulse">&larr;</span>
-            <span className="sm:inline hidden">Swipe or Drag to slide</span>
-            <span className="sm:hidden inline">Swipe to slide</span>
-            <span className="inline-block animate-pulse">&rarr;</span>
-          </span>
-        </div>
+        <button
+          type="button"
+          onClick={nextCard}
+          aria-label="Next Frame"
+          className="cursor-pointer p-2.5 rounded-full bg-[#FFF9EF] dark:bg-[#161622] hover:bg-white dark:hover:bg-[#1E1E2C] border border-[#B88A32]/30 dark:border-[#D4AF62]/40 text-[#2A2118] dark:text-[#F5EFE6] hover:text-[#B88A32] dark:hover:text-[#D4AF62] shadow-sm hover:scale-105 active:scale-95 transition-all"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
       </div>
 
       {/* Bottom CTA to Shop */}

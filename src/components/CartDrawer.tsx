@@ -51,7 +51,7 @@ export default function CartDrawer() {
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-[#2A2118] dark:text-[#F5EFE6] font-cinzel">Your Shopping Bag</h2>
-                  <span className="text-[11px] font-mono text-[#6B5740] dark:text-[#A09383]">
+                  <span className="text-xs font-mono text-[#6B5740] dark:text-[#A09383]">
                     {items.length} {items.length === 1 ? "design selected" : "designs selected"}
                   </span>
                 </div>
@@ -123,8 +123,8 @@ export default function CartDrawer() {
                     <div className="flex-1 min-w-0">
                       <h4 className="text-sm font-bold text-[#2A2118] dark:text-[#F5EFE6] font-cinzel truncate">{item.name}</h4>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[11px] font-mono text-[#6B5740] dark:text-[#A09383]">{item.color}</span>
-                        <span className="text-[10px] text-[#B88A32]">&bull;</span>
+                        <span className="text-xs font-mono text-[#6B5740] dark:text-[#A09383]">{item.color}</span>
+                        <span className="text-xs text-[#B88A32]">&bull;</span>
                         <span className="text-xs font-mono font-bold text-[#B88A32] dark:text-[#D4AF62]">₹{item.price}</span>
                       </div>
 
@@ -211,7 +211,7 @@ export default function CartDrawer() {
                   </a>
                 </div>
 
-                <div className="flex items-center justify-center gap-2 text-[10px] font-mono text-[#8B7355] dark:text-[#A09383] pt-1">
+                <div className="flex items-center justify-center gap-2 text-xs font-mono text-[#8B7355] dark:text-[#A09383] pt-1">
                   <ShieldCheck className="w-3.5 h-3.5 text-[#B88A32] dark:text-[#D4AF62]" />
                   <span>100% Genuine Optical Precision &bull; 7-Day Easy Exchange</span>
                 </div>

@@ -90,7 +90,7 @@ export default function Navbar() {
               <span className="font-cinzel text-base sm:text-lg font-black tracking-[0.16em] uppercase text-[#2A2118] dark:text-[#F5EFE6] group-hover:text-[#B88A32] dark:group-hover:text-[#D4AF62] transition-colors leading-tight">
                 ALIG&apos;S WARE
               </span>
-              <span className="hidden sm:inline text-[9px] font-mono text-[#4A3928] dark:text-[#B8ADA0] tracking-[0.2em] uppercase">
+              <span className="hidden sm:inline text-xs font-mono text-[#4A3928] dark:text-[#B8ADA0] tracking-[0.15em] uppercase">
                 Firozabad &bull; Precision Eyewear
               </span>
             </div>
@@ -116,7 +116,7 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* RIGHT ACTION: Desktop (Theme + Account + BOOK TRY-ON + Bag) vs Mobile */}
+          {/* RIGHT ACTION: Desktop (Theme + Account + Book Try-On + Bag) vs Mobile */}
           <div className="flex items-center gap-2 sm:gap-2.5">
             {/* Desktop Only: Theme Toggle Switcher */}
             <ThemeToggle variant="navbar" className="hidden md:inline-flex" />
@@ -130,7 +130,7 @@ export default function Navbar() {
                   aria-label="User Account Menu"
                   className="cursor-pointer w-9 h-9 rounded-full bg-gradient-to-br from-[#B88A32] to-[#7A5A1A] p-0.5 shadow-sm hover:scale-105 transition-transform"
                 >
-                  <div className="w-full h-full rounded-full bg-[#2A2118] dark:bg-[#121218] flex items-center justify-center text-[11px] font-mono font-bold text-[#D4AF62]">
+                  <div className="w-full h-full rounded-full bg-[#2A2118] dark:bg-[#121218] flex items-center justify-center text-xs font-mono font-bold text-[#D4AF62]">
                     {getInitials(user.name, user.email)}
                   </div>
                 </button>
@@ -142,7 +142,7 @@ export default function Navbar() {
                   className="cursor-pointer p-2 rounded-full bg-[#FFF9EF] dark:bg-[#161622] hover:bg-[#F4E9D5] dark:hover:bg-[#1E1E2C] border border-[#B88A32]/25 dark:border-[#D4AF62]/35 text-[#2A2118] dark:text-[#F5EFE6] hover:text-[#B88A32] dark:hover:text-[#D4AF62] transition-all duration-200 shadow-sm flex items-center gap-1.5 px-3"
                 >
                   <User className="w-4 h-4 text-[#B88A32] dark:text-[#D4AF62]" />
-                  <span className="text-[10px] font-mono tracking-wider font-bold uppercase">SIGN IN</span>
+                  <span className="text-xs font-mono tracking-wider font-bold uppercase">SIGN IN</span>
                 </button>
               )}
 
@@ -160,7 +160,7 @@ export default function Navbar() {
                       <div className="text-xs font-bold font-cinzel text-[#2A2118] dark:text-[#F5EFE6] truncate">
                         {user.name || "Valued Client"}
                       </div>
-                      <div className="text-[10px] font-mono text-[#6B5740] dark:text-[#A89F91] truncate">
+                      <div className="text-xs font-mono text-[#6B5740] dark:text-[#A89F91] truncate">
                         {user.email}
                       </div>
                     </div>
@@ -199,13 +199,13 @@ export default function Navbar() {
               </AnimatePresence>
             </div>
 
-            {/* Desktop Only: BOOK TRY-ON */}
+            {/* Desktop Only: Book Try-On */}
             <Link
               href="/appointment"
-              className="cursor-pointer hidden md:inline-flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-[#B88A32] via-[#D4AF62] to-[#B88A32] hover:brightness-105 text-white font-bold text-xs font-mono tracking-[0.14em] uppercase shadow-[0_4px_20px_rgba(184,138,50,0.35)] transition-all duration-300 active:scale-95"
+              className="btn-primary py-2 px-5 text-xs hidden md:inline-flex"
             >
-              <Calendar className="w-3.5 h-3.5 text-white" />
-              <span>BOOK TRY-ON</span>
+              <Calendar className="w-3.5 h-3.5" />
+              <span>Book Try-On</span>
             </Link>
 
             {/* Desktop Only: Shopping Bag Icon Button */}
@@ -220,7 +220,7 @@ export default function Navbar() {
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-[#B88A32] to-[#D4AF62] rounded-full text-[10px] font-black font-mono flex items-center justify-center text-white shadow-sm"
+                  className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-[#B88A32] to-[#D4AF62] rounded-full text-xs font-black font-mono flex items-center justify-center text-white shadow-sm"
                 >
                   {cartCount}
                 </motion.span>
@@ -272,7 +272,7 @@ export default function Navbar() {
                     <span className="font-cinzel text-base font-black tracking-[0.14em] text-[#2A2118] dark:text-[#F5EFE6]">
                       ALIG&apos;S WARE
                     </span>
-                    <span className="text-[9px] font-mono text-[#4A3928] dark:text-[#B8ADA0] tracking-[0.18em] uppercase">
+                    <span className="text-xs font-mono text-[#4A3928] dark:text-[#B8ADA0] tracking-[0.15em] uppercase">
                       Precision Eyewear
                     </span>
                   </div>
@@ -297,7 +297,7 @@ export default function Navbar() {
                           <span className="text-xs font-bold font-cinzel text-[#2A2118] dark:text-[#F5EFE6] truncate max-w-[120px]">
                             {user.name}
                           </span>
-                          <span className="text-[9px] font-mono text-[#6B5740] dark:text-[#A89F91]">
+                          <span className="text-xs font-mono text-[#6B5740] dark:text-[#A89F91]">
                             Client Account
                           </span>
                         </div>
@@ -320,10 +320,10 @@ export default function Navbar() {
                         setIsMobileMenuOpen(false);
                         openAuthModal("signin");
                       }}
-                      className="w-full py-2 px-3 rounded-xl bg-[#B88A32] text-white text-xs font-mono font-bold tracking-wider uppercase flex items-center justify-center gap-2"
+                      className="btn-primary w-full py-2.5 px-3 text-xs"
                     >
                       <User className="w-4 h-4" />
-                      <span>SIGN IN / REGISTER</span>
+                      <span>Sign In / Register</span>
                     </button>
                   )}
                 </div>
@@ -372,7 +372,7 @@ export default function Navbar() {
                     <ShoppingBag className="w-4 h-4 text-[#B88A32] dark:text-[#D4AF62]" />
                     <span>SHOPPING BAG</span>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#B88A32] text-white text-[10px] font-bold">
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#B88A32] text-white text-xs font-bold">
                     {cartCount}
                   </span>
                 </button>
@@ -380,12 +380,12 @@ export default function Navbar() {
                 <Link
                   href="/appointment"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full text-center py-3.5 rounded-full bg-gradient-to-r from-[#B88A32] via-[#D4AF62] to-[#B88A32] text-white font-bold text-xs font-mono tracking-[0.16em] uppercase shadow-[0_4px_20px_rgba(184,138,50,0.35)] active:scale-[0.98] transition-all"
+                  className="btn-primary w-full py-3.5 text-xs text-center justify-center shadow-[0_4px_20px_rgba(184,138,50,0.35)]"
                 >
-                  BOOK TRY-ON
+                  Book Try-On
                 </Link>
 
-                <div className="text-center text-[10px] text-[#6B5740] dark:text-[#A89F91] font-mono uppercase tracking-widest pt-1">
+                <div className="text-center text-xs text-[#6B5740] dark:text-[#A89F91] font-mono uppercase tracking-widest pt-1">
                   Firozabad, UP &bull; +91 72173 71499
                 </div>
               </div>

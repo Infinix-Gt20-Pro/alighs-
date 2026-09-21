@@ -4,7 +4,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { MessageCircle, ShoppingBag, Check, Star, ArrowRight, ShieldCheck } from "lucide-react";
+import { MessageCircle, ShoppingBag, Check, Star } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import FrameSilhouette from "./FrameSilhouette";
 
@@ -109,23 +109,23 @@ export default function ProductCard({ product }: ProductProps) {
     <motion.div
       whileHover={{ y: -4 }}
       transition={{ duration: 0.25 }}
-      className="group relative flex flex-col justify-between rounded-2xl sm:rounded-3xl bg-[#FFF9EF] dark:bg-[#12121A] border border-[#B88A32]/20 dark:border-[#B88A32]/30 hover:border-[#B88A32]/50 dark:hover:border-[#B88A32]/60 p-2.5 sm:p-6 transition-all duration-300 hover:shadow-[0_15px_40px_rgba(42,33,24,0.1)] dark:hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]"
+      className="group relative flex flex-col justify-between rounded-2xl bg-[#FFF9EF] dark:bg-[#12121A] border border-[#B88A32]/20 dark:border-[#B88A32]/30 hover:border-[#B88A32]/50 dark:hover:border-[#B88A32]/60 p-3 sm:p-6 transition-all duration-300 hover:shadow-[0_15px_40px_rgba(42,33,24,0.1)] dark:hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]"
     >
       {/* Badges Bar */}
       <div className="flex items-center justify-between z-10 mb-1.5 sm:mb-2 gap-1">
         <div className="flex items-center gap-1 flex-wrap">
-          <span className="text-[8px] sm:text-[10px] font-mono text-[#6B5740] dark:text-[#A09383] uppercase tracking-wider px-1.5 sm:px-2.5 py-0.5 rounded-full bg-[#F4E9D5] dark:bg-[#1A1A26] border border-[#B88A32]/20 dark:border-[#B88A32]/30 truncate max-w-[70px] sm:max-w-none">
+          <span className="text-xs font-mono text-[#6B5740] dark:text-[#A09383] uppercase tracking-wider px-2 sm:px-2.5 py-0.5 rounded-full bg-[#F4E9D5] dark:bg-[#1A1A26] border border-[#B88A32]/20 dark:border-[#B88A32]/30 truncate max-w-[80px] sm:max-w-none">
             {product.frameType?.replace("-", " ") || "Full Rim"}
           </span>
           {product.brandCollection && (
-            <span className="text-[10px] font-mono text-[#B88A32] dark:text-[#D4AF62] uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#B88A32]/15 dark:bg-[#B88A32]/25 border border-[#B88A32]/25 hidden md:inline-block font-bold">
+            <span className="text-xs font-mono text-[#B88A32] dark:text-[#D4AF62] uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#B88A32]/15 dark:bg-[#B88A32]/25 border border-[#B88A32]/25 hidden md:inline-block font-bold">
               {product.brandCollection}
             </span>
           )}
         </div>
 
         {product.bestSeller && (
-          <span className="inline-flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-[10px] font-mono text-[#B88A32] dark:text-[#D4AF62] uppercase tracking-wider px-1.5 sm:px-2.5 py-0.5 rounded-full bg-[#B88A32]/15 dark:bg-[#B88A32]/25 border border-[#B88A32]/30 shrink-0 font-bold">
+          <span className="inline-flex items-center gap-0.5 sm:gap-1 text-xs font-mono text-[#B88A32] dark:text-[#D4AF62] uppercase tracking-wider px-2 sm:px-2.5 py-0.5 rounded-full bg-[#B88A32]/15 dark:bg-[#B88A32]/25 border border-[#B88A32]/30 shrink-0 font-bold">
             <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-[#B88A32] text-[#B88A32] dark:fill-[#D4AF62] dark:text-[#D4AF62]" />
             <span className="hidden sm:inline">Top Seller</span>
             <span className="sm:hidden">Top</span>
@@ -138,7 +138,7 @@ export default function ProductCard({ product }: ProductProps) {
         href={`/shop/${product.slug}`}
         className="block relative my-1.5 sm:my-4 text-center group-hover:scale-105 transition-transform duration-500"
       >
-        <div className="w-full h-24 sm:h-52 rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#F4E9D5]/90 via-[#FFF9EF] to-[#E8D2A8]/40 dark:from-[#181824] dark:via-[#14141E] dark:to-[#0F0F16] border border-[#B88A32]/15 dark:border-[#B88A32]/30 flex flex-col items-center justify-center relative overflow-hidden p-1.5 sm:p-3">
+        <div className="w-full h-24 sm:h-52 rounded-2xl bg-gradient-to-br from-[#F4E9D5]/90 via-[#FFF9EF] to-[#E8D2A8]/40 dark:from-[#181824] dark:via-[#14141E] dark:to-[#0F0F16] border border-[#B88A32]/15 dark:border-[#B88A32]/30 flex flex-col items-center justify-center relative overflow-hidden p-1.5 sm:p-3">
           <div className="absolute inset-0 bg-radial from-[#D4AF62]/20 dark:from-[#D4AF62]/15 to-transparent opacity-30 group-hover:opacity-70 transition-opacity duration-500" />
           
           {product.images && product.images[0] ? (
@@ -168,11 +168,11 @@ export default function ProductCard({ product }: ProductProps) {
           )}
           
           <div className="relative z-10 flex items-center gap-1 sm:gap-2 mt-1 sm:mt-2">
-            <span className="text-[8px] sm:text-[10px] font-mono text-[#B88A32] dark:text-[#D4AF62] uppercase tracking-wider truncate max-w-[80px] sm:max-w-none font-bold">
+            <span className="text-xs font-mono text-[#B88A32] dark:text-[#D4AF62] uppercase tracking-wider truncate max-w-[80px] sm:max-w-none font-bold">
               {activeColorName}
             </span>
             {product.weight && (
-              <span className="text-[8px] sm:text-[10px] font-mono text-[#6B5740] dark:text-[#A09383] hidden xs:inline">
+              <span className="text-xs font-mono text-[#6B5740] dark:text-[#A09383] hidden xs:inline">
                 &bull; {product.weight}
               </span>
             )}
@@ -189,7 +189,7 @@ export default function ProductCard({ product }: ProductProps) {
                 {product.name}
               </h3>
             </Link>
-            <div className="flex items-center gap-1 sm:gap-2 mt-0.5 text-[9px] sm:text-[11px] font-mono text-[#6B5740] dark:text-[#A09383]">
+            <div className="flex items-center gap-1 sm:gap-2 mt-0.5 text-xs font-mono text-[#6B5740] dark:text-[#A09383]">
               <span className="capitalize truncate">{product.category ? product.category.replace("-", " ") : "Eyeglasses"}</span>
               {product.caliber && <span className="hidden sm:inline">&bull; {product.caliber}</span>}
             </div>
@@ -201,10 +201,10 @@ export default function ProductCard({ product }: ProductProps) {
             </div>
             {product.originalPrice && (
               <div className="flex items-center gap-1 justify-end">
-                <span className="text-[10px] sm:text-xs text-[#8B7355] dark:text-[#A09383] line-through font-mono hidden xs:inline">
+                <span className="text-xs text-[#8B7355] dark:text-[#A09383] line-through font-mono hidden xs:inline">
                   ₹{product.originalPrice.toLocaleString()}
                 </span>
-                <span className="text-[8px] sm:text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-semibold">
+                <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-semibold">
                   {discount}%
                 </span>
               </div>
@@ -215,7 +215,7 @@ export default function ProductCard({ product }: ProductProps) {
         {/* Color Swatches */}
         {colors.length > 0 && (
           <div className="flex items-center gap-1 sm:gap-2 pt-0.5 sm:pt-1">
-            <span className="text-[8px] sm:text-[10px] font-mono text-[#6B5740] dark:text-[#A09383] uppercase tracking-wider hidden xs:inline">Colors:</span>
+            <span className="text-xs font-mono text-[#6B5740] dark:text-[#A09383] uppercase tracking-wider hidden xs:inline">Colors:</span>
             <div className="flex items-center gap-1">
               {colors.slice(0, 4).map((color, idx) => {
                 const cName = typeof color === "string" ? color : color.name;
@@ -244,7 +244,7 @@ export default function ProductCard({ product }: ProductProps) {
         <div className="grid grid-cols-2 gap-1.5 sm:gap-2 pt-1.5 sm:pt-2.5 border-t border-[#B88A32]/15 dark:border-[#B88A32]/25 mt-0.5 sm:mt-1">
           <button
             onClick={handleAddToCart}
-            className="cursor-pointer w-full flex items-center justify-center gap-1 py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-lg sm:rounded-xl bg-gradient-to-r from-[#B88A32] to-[#D4AF62] hover:brightness-105 text-white text-[10px] sm:text-xs font-semibold shadow-md active:scale-95 transition-all"
+            className="btn-primary btn-sm w-full flex items-center justify-center gap-1 py-2 sm:py-2.5 px-1 sm:px-3 text-xs select-none"
           >
             {isAdded ? (
               <>
@@ -255,7 +255,7 @@ export default function ProductCard({ product }: ProductProps) {
             ) : (
               <>
                 <ShoppingBag className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white shrink-0" />
-                <span className="truncate">Add</span>
+                <span className="truncate">Add to Bag</span>
               </>
             )}
           </button>
@@ -264,9 +264,9 @@ export default function ProductCard({ product }: ProductProps) {
             href={`https://wa.me/917217371499?text=Hi%20ALIGSWARE!%20I'm%20interested%20in%20ordering%20${encodeURIComponent(product.name)}%20(${encodeURIComponent(activeColorName)}).%20Please%20guide%20me.`}
             target="_blank"
             rel="noopener noreferrer"
-            className="cursor-pointer w-full flex items-center justify-center gap-1 py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-lg sm:rounded-xl bg-[#FAF7F0] dark:bg-[#1A1A26] hover:bg-[#F4E9D5] dark:hover:bg-[#252538] text-[#2A2118] dark:text-[#F5EFE6] text-[10px] sm:text-xs font-medium border border-[#B88A32]/25 dark:border-[#B88A32]/40 transition-all"
+            className="btn-secondary btn-sm w-full flex items-center justify-center gap-1 py-2 sm:py-2.5 px-1 sm:px-3 text-xs select-none"
           >
-            <MessageCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-600 shrink-0" />
+            <MessageCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span className="truncate">Enquire</span>
           </a>
         </div>

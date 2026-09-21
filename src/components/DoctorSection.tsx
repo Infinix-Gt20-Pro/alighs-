@@ -48,13 +48,13 @@ export default function DoctorSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12 sm:mb-16"
         >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FFF9EF] dark:bg-[#161622] border border-[#B88A32]/30 dark:border-[#B88A32]/40 text-[10px] sm:text-xs font-mono tracking-[0.28em] text-[#B88A32] dark:text-[#D4AF62] uppercase font-bold mb-3 sm:mb-4 shadow-sm">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFF9EF] dark:bg-[#161622] border border-[#B88A32]/30 dark:border-[#B88A32]/40 text-xs font-mono tracking-[0.2em] text-[#B88A32] dark:text-[#D4AF62] uppercase font-bold mb-3 sm:mb-4 shadow-sm">
             <Stethoscope className="w-3.5 h-3.5 text-[#B88A32] dark:text-[#D4AF62]" />
-            <span>OPTOMETRIC HERITAGE</span>
+            <span>Optometric Heritage</span>
           </div>
 
-          <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-[#2A2118] dark:text-[#F5EFE6] font-cinzel tracking-[0.14em] uppercase mb-3 sm:mb-4 drop-shadow-sm">
-            THE CLINICAL SIDE
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold text-[#2A2118] dark:text-[#F5EFE6] font-cinzel tracking-[0.06em] mb-3 sm:mb-4 drop-shadow-sm">
+            The Clinical Side
           </h2>
 
           <p className="text-sm sm:text-lg text-[#4A3928] dark:text-[#D5C7B5] font-cormorant italic max-w-2xl mx-auto leading-relaxed">
@@ -71,7 +71,7 @@ export default function DoctorSection() {
             whileInView={enableEntranceAnimations ? { opacity: 1, x: 0 } : undefined}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="p-6 sm:p-9 rounded-3xl sm:rounded-[36px] border-2 border-[#B88A32]/35 dark:border-[#B88A32]/50 bg-[#FFF9EF] dark:bg-[#12121A] flex flex-col h-full shadow-[0_15px_45px_rgba(42,33,24,0.08)] dark:shadow-[0_15px_45px_rgba(0,0,0,0.6)] relative overflow-hidden transition-colors duration-300"
+            className="p-6 sm:p-8 rounded-2xl border-2 border-[#B88A32]/35 dark:border-[#B88A32]/50 bg-[#FFF9EF] dark:bg-[#12121A] flex flex-col h-full shadow-[0_15px_45px_rgba(42,33,24,0.08)] dark:shadow-[0_15px_45px_rgba(0,0,0,0.6)] relative overflow-hidden transition-colors duration-300"
           >
             {/* Top Identity Block: Dr. Sheeraz Ahmad */}
             <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-6 mb-6 pb-6 border-b border-[#B88A32]/20 dark:border-[#B88A32]/30">
@@ -90,13 +90,13 @@ export default function DoctorSection() {
                 </p>
 
                 <div className="flex flex-wrap justify-center sm:justify-start gap-2">
-                  <span className="px-3 py-1 rounded-full text-[11px] font-mono font-bold text-[#2A2118] dark:text-[#EAE0D5] bg-[#F4E9D5] dark:bg-[#1C1C2A] border border-[#B88A32]/30 dark:border-[#B88A32]/40">
+                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold text-[#2A2118] dark:text-[#EAE0D5] bg-[#F4E9D5] dark:bg-[#1C1C2A] border border-[#B88A32]/30 dark:border-[#B88A32]/40">
                     AMU Optometry
                   </span>
-                  <span className="px-3 py-1 rounded-full text-[11px] font-mono font-bold text-[#2A2118] dark:text-[#EAE0D5] bg-[#F4E9D5] dark:bg-[#1C1C2A] border border-[#B88A32]/30 dark:border-[#B88A32]/40">
+                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold text-[#2A2118] dark:text-[#EAE0D5] bg-[#F4E9D5] dark:bg-[#1C1C2A] border border-[#B88A32]/30 dark:border-[#B88A32]/40">
                     MBBS
                   </span>
-                  <span className="px-3 py-1 rounded-full text-[11px] font-mono font-bold text-[#2A2118] dark:text-[#EAE0D5] bg-[#F4E9D5] dark:bg-[#1C1C2A] border border-[#B88A32]/30 dark:border-[#B88A32]/40">
+                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold text-[#2A2118] dark:text-[#EAE0D5] bg-[#F4E9D5] dark:bg-[#1C1C2A] border border-[#B88A32]/30 dark:border-[#B88A32]/40">
                     DOMS
                   </span>
                 </div>
@@ -117,7 +117,7 @@ export default function DoctorSection() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mt-auto">
               <a
                 href="tel:+917217371499"
-                className="flex items-center justify-center gap-2 py-3.5 rounded-full bg-[#F4E9D5] dark:bg-[#1A1A26] hover:bg-white dark:hover:bg-[#252538] text-[#2A2118] dark:text-[#F5EFE6] font-bold text-xs font-mono uppercase tracking-wider transition-all border border-[#B88A32]/30 dark:border-[#B88A32]/40 shadow-sm active:scale-95"
+                className="btn-secondary flex items-center justify-center gap-2 py-3 px-4 rounded-full font-bold text-xs font-mono uppercase tracking-wider transition-all"
               >
                 <Phone className="w-4 h-4 text-[#B88A32] dark:text-[#D4AF62]" />
                 Call Clinic
@@ -126,7 +126,7 @@ export default function DoctorSection() {
                 href="https://wa.me/917217371499?text=I'd%20like%20to%20book%20a%20consultation%20with%20Dr.%20Sheeraz%20Ahmad"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 py-3.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs font-mono uppercase tracking-wider transition-all shadow-sm active:scale-95"
+                className="btn-primary flex items-center justify-center gap-2 py-3 px-4 rounded-full font-bold text-xs font-mono uppercase tracking-wider transition-all"
               >
                 <MessageCircle className="w-4 h-4" />
                 WhatsApp Direct
@@ -146,7 +146,7 @@ export default function DoctorSection() {
               {services.map((service, idx) => (
                 <div
                   key={idx}
-                  className="p-5 sm:p-6 rounded-3xl border border-[#B88A32]/25 dark:border-[#B88A32]/30 bg-[#FFF9EF]/90 dark:bg-[#12121A] hover:bg-[#FFF9EF] dark:hover:bg-[#161622] hover:border-[#B88A32]/60 dark:hover:border-[#B88A32]/60 transition-all shadow-[0_8px_30px_rgba(42,33,24,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] hover:shadow-[0_12px_35px_rgba(184,138,50,0.12)] group"
+                  className="p-5 sm:p-6 rounded-2xl border border-[#B88A32]/25 dark:border-[#B88A32]/30 bg-[#FFF9EF]/90 dark:bg-[#12121A] hover:bg-[#FFF9EF] dark:hover:bg-[#161622] hover:border-[#B88A32]/60 dark:hover:border-[#B88A32]/60 transition-all shadow-[0_8px_30px_rgba(42,33,24,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] hover:shadow-[0_12px_35px_rgba(184,138,50,0.12)] group"
                 >
                   <div className="w-12 h-12 rounded-2xl bg-[#F4E9D5] dark:bg-[#1C1C2A] border border-[#B88A32]/30 dark:border-[#B88A32]/40 flex items-center justify-center mb-3.5 group-hover:scale-110 transition-transform duration-300">
                     {service.icon}
@@ -163,9 +163,9 @@ export default function DoctorSection() {
 
             <Link
               href="/appointment"
-              className="w-full py-4 rounded-full text-center font-bold text-xs sm:text-sm font-mono tracking-[0.16em] uppercase text-white bg-gradient-to-r from-[#B88A32] via-[#D4AF62] to-[#B88A32] hover:brightness-105 transition-all shadow-[0_6px_25px_rgba(184,138,50,0.35)] active:scale-98"
+              className="btn-primary inline-flex items-center justify-center w-full py-4 rounded-full text-center font-bold text-sm tracking-wide transition-all shadow-[0_6px_25px_rgba(184,138,50,0.35)] active:scale-98"
             >
-              BOOK CLINICAL TRY-ON &amp; CONSULTATION
+              Book Ophthalmic Consultation
             </Link>
           </motion.div>
 

@@ -128,7 +128,7 @@ export default function TheFrameSection() {
       <div className="max-w-6xl mx-auto flex flex-col items-center">
         {/* Section Header */}
         <div className="text-center mb-10 sm:mb-14">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FFF9EF] dark:bg-[#161622] border border-[#B88A32]/30 dark:border-[#D4AF62]/40 text-[10px] sm:text-xs font-mono tracking-[0.28em] text-[#B88A32] dark:text-[#D4AF62] uppercase font-bold mb-3 sm:mb-4 shadow-sm">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FFF9EF] dark:bg-[#161622] border border-[#B88A32]/30 dark:border-[#D4AF62]/40 text-xs font-mono tracking-[0.24em] text-[#B88A32] dark:text-[#D4AF62] uppercase font-bold mb-3 sm:mb-4 shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-[#B88A32] dark:text-[#D4AF62]" />
             <span>ATELIER BLUEPRINT</span>
           </div>
@@ -137,38 +137,27 @@ export default function TheFrameSection() {
             THE FRAME
           </h2>
 
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm font-mono tracking-[0.2em] text-[#4A3928] dark:text-[#B8ADA0] uppercase font-bold">
-            <span>18.4g ULTRA-LIGHT</span>
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm font-mono tracking-[0.18em] text-[#4A3928] dark:text-[#B8ADA0] font-bold">
+            <span>18.4g Ultra-Light</span>
             <span className="text-[#B88A32] dark:text-[#D4AF62]">&bull;</span>
-            <span>BETA TITANIUM</span>
+            <span>Beta Titanium</span>
             <span className="text-[#B88A32] dark:text-[#D4AF62]">&bull;</span>
-            <span>PRECISION FIT</span>
+            <span>Precision Fit</span>
             <span className="text-[#B88A32] dark:text-[#D4AF62]">&bull;</span>
-            <span>OPTICAL CLARITY</span>
+            <span>Optical Clarity</span>
           </div>
         </div>
 
-        {/* =====================================================================
-            EXACT USER LAYOUT CONSTELLATION:
-                   ┌──────────────┐
-                   │   FRAME 01   │
-                   │      👓      │
-                   └──────────────┘
-
-              FRAME 02                 FRAME 03
-
-                         FRAME 04
-           ===================================================================== */}
+        {/* 1. TOP SPOTLIGHT CARD */}
         <div className="w-full flex flex-col items-center gap-8 sm:gap-12">
           
-          {/* 1. TOP SPOTLIGHT CARD: ┌──────────────┐ │ FRAME 01 👓 │ └──────────────┘ */}
           <motion.div
             layout
             key={activeFrame.id}
             initial={{ opacity: 0, y: 15, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="w-full max-w-2xl rounded-3xl sm:rounded-[36px] bg-[#FFF9EF] dark:bg-[#12121A] border-2 border-[#B88A32] dark:border-[#D4AF62] shadow-[0_20px_60px_rgba(184,138,50,0.22)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.6)] p-6 sm:p-9 relative overflow-hidden"
+            className="w-full max-w-2xl rounded-2xl bg-[#FFF9EF] dark:bg-[#12121A] border-2 border-[#B88A32] dark:border-[#D4AF62] shadow-[0_20px_60px_rgba(184,138,50,0.22)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.6)] p-6 sm:p-9 relative overflow-hidden"
           >
             {/* Top Frame Tag Pill */}
             <div className="flex items-center justify-between border-b border-[#B88A32]/20 dark:border-[#B88A32]/30 pb-4 mb-6">
@@ -178,25 +167,33 @@ export default function TheFrameSection() {
                   <span className="font-cinzel text-base sm:text-xl font-bold tracking-[0.15em] text-[#2A2118] dark:text-[#F5EFE6] block">
                     {activeFrame.tag}
                   </span>
-                  <span className="text-[10px] sm:text-xs font-mono tracking-[0.18em] text-[#B88A32] dark:text-[#D4AF62] uppercase font-semibold">
+                  <span className="text-xs font-mono tracking-[0.16em] text-[#B88A32] dark:text-[#D4AF62] uppercase font-semibold">
                     {activeFrame.finish}
                   </span>
                 </div>
               </div>
 
-              <span className="px-3 py-1 rounded-full bg-[#F4E9D5] dark:bg-[#1C1C28] border border-[#B88A32]/30 text-[10px] sm:text-xs font-mono font-bold text-[#2A2118] dark:text-[#F5EFE6]">
+              <span className="px-3 py-1 rounded-full bg-[#F4E9D5] dark:bg-[#1C1C28] border border-[#B88A32]/30 text-xs font-mono font-bold text-[#2A2118] dark:text-[#F5EFE6]">
                 {activeFrame.weight}
               </span>
             </div>
 
-            {/* Frame Visual Preview */}
-            <div className="relative w-full h-56 sm:h-72 rounded-2xl bg-gradient-to-b from-[#F4E9D5]/60 to-[#E8D2A8]/30 dark:from-[#181824] dark:to-[#101016] flex items-center justify-center overflow-hidden mb-6 p-4 border border-[#B88A32]/10 dark:border-[#B88A32]/20">
+            {/* Frame Visual Preview (Subtle warm background & shadow for Arctic Monobloc) */}
+            <div className={`relative w-full h-56 sm:h-72 rounded-2xl flex items-center justify-center overflow-hidden mb-6 p-4 border border-[#B88A32]/20 ${
+              activeFrame.id === "frame-04"
+                ? "bg-gradient-to-br from-[#E8D2A8]/50 via-[#F4E9D5]/70 to-[#D6B878]/40 dark:from-[#222232] dark:via-[#1A1A26] dark:to-[#14141E] shadow-[inset_0_0_30px_rgba(184,138,50,0.15)]"
+                : "bg-gradient-to-b from-[#F4E9D5]/60 to-[#E8D2A8]/30 dark:from-[#181824] dark:to-[#101016]"
+            }`}>
               <Image
                 src={activeFrame.image}
                 alt={activeFrame.name}
                 fill
                 sizes="(max-width: 768px) 100vw, 672px"
-                className="object-contain p-6 hover:scale-105 transition-transform duration-500 drop-shadow-[0_12px_24px_rgba(42,33,24,0.18)] dark:drop-shadow-[0_12px_24px_rgba(0,0,0,0.8)]"
+                className={`object-contain p-6 hover:scale-105 transition-transform duration-500 ${
+                  activeFrame.id === "frame-04"
+                    ? "drop-shadow-[0_16px_30px_rgba(42,33,24,0.28)] dark:drop-shadow-[0_16px_30px_rgba(0,0,0,0.9)]"
+                    : "drop-shadow-[0_12px_24px_rgba(42,33,24,0.18)] dark:drop-shadow-[0_12px_24px_rgba(0,0,0,0.8)]"
+                }`}
               />
             </div>
 
@@ -216,7 +213,7 @@ export default function TheFrameSection() {
                   <span className="font-mono text-sm text-[#6B5740] dark:text-[#8E8273] line-through">
                     ₹{activeFrame.originalPrice.toLocaleString("en-IN")}
                   </span>
-                  <span className="px-2 py-0.5 rounded-md bg-[#B88A32]/15 dark:bg-[#D4AF62]/20 text-[10px] font-mono text-[#B88A32] dark:text-[#D4AF62] font-bold">
+                  <span className="px-2 py-0.5 rounded-md bg-[#B88A32]/15 dark:bg-[#D4AF62]/20 text-xs font-mono text-[#B88A32] dark:text-[#D4AF62] font-bold">
                     SAVE ₹{(activeFrame.originalPrice - activeFrame.price).toLocaleString("en-IN")}
                   </span>
                 </div>
@@ -226,21 +223,19 @@ export default function TheFrameSection() {
                 <button
                   type="button"
                   onClick={handleAdd}
-                  className={`px-6 sm:px-7 py-3 rounded-full font-bold text-xs tracking-[0.16em] uppercase transition-all duration-300 flex items-center gap-2 shadow-[0_4px_20px_rgba(184,138,50,0.35)] active:scale-95 ${
-                    added
-                      ? "bg-emerald-600 text-white"
-                      : "bg-gradient-to-r from-[#B88A32] via-[#D4AF62] to-[#B88A32] text-white hover:brightness-105"
+                  className={`btn-primary px-6 sm:px-7 py-3 text-xs ${
+                    added ? "bg-emerald-600 text-white" : ""
                   }`}
                 >
                   {added ? (
                     <>
                       <Check className="w-4 h-4" />
-                      <span>ADDED</span>
+                      <span>Added</span>
                     </>
                   ) : (
                     <>
                       <ShoppingBag className="w-4 h-4" />
-                      <span>ADD TO CART</span>
+                      <span>Add to Bag</span>
                     </>
                   )}
                 </button>
@@ -256,27 +251,27 @@ export default function TheFrameSection() {
             </div>
           </motion.div>
 
-          {/* 2. MIDDLE ROW: FRAME 02 (Left) & FRAME 03 (Right) */}
-          <div className="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 px-2">
+          {/* 2. UNIFORM 3-CARD GRID: FRAME 02, FRAME 03, FRAME 04 */}
+          <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 px-2">
             
             {/* FRAME 02 */}
             <button
               type="button"
               onClick={() => setSelectedId(frame02.id)}
-              className={`text-left p-5 sm:p-6 rounded-3xl border transition-all duration-300 flex items-center justify-between group shadow-sm ${
+              className={`text-left p-5 sm:p-6 rounded-2xl border transition-all duration-300 flex items-center justify-between group shadow-sm ${
                 selectedId === frame02.id
                   ? "bg-[#FFF9EF] dark:bg-[#161622] border-2 border-[#B88A32] dark:border-[#D4AF62] shadow-[0_10px_30px_rgba(184,138,50,0.25)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)] scale-[1.02]"
                   : "bg-[#FFF9EF]/80 dark:bg-[#12121A]/80 hover:bg-[#FFF9EF] dark:hover:bg-[#161622] border-[#B88A32]/25 dark:border-[#B88A32]/30 hover:border-[#B88A32]/60 hover:shadow-md"
               }`}
             >
-              <div className="flex items-center gap-4">
-                <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#F4E9D5]/70 dark:bg-[#1C1C28] border border-[#B88A32]/20 flex items-center justify-center p-2 flex-shrink-0">
+              <div className="flex items-center gap-3.5">
+                <div className="relative w-16 h-16 rounded-xl bg-[#F4E9D5]/70 dark:bg-[#1C1C28] border border-[#B88A32]/20 flex items-center justify-center p-2 flex-shrink-0">
                   <Image
                     src={frame02.image}
                     alt={frame02.name}
                     fill
                     sizes="80px"
-                    className="object-contain p-1 group-hover:scale-110 transition-transform duration-300"
+                    className="object-contain p-1 group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_4px_8px_rgba(42,33,24,0.15)]"
                   />
                 </div>
                 <div>
@@ -289,16 +284,16 @@ export default function TheFrameSection() {
                   <div className="text-xs sm:text-sm font-semibold text-[#4A3928] dark:text-[#D1C7BA] line-clamp-1">
                     {frame02.name}
                   </div>
-                  <div className="text-[10px] sm:text-xs font-mono text-[#B88A32] dark:text-[#D4AF62] tracking-wider mt-0.5">
+                  <div className="text-xs font-mono text-[#B88A32] dark:text-[#D4AF62] tracking-wider mt-0.5">
                     {frame02.finish} &bull; ₹{frame02.price.toLocaleString("en-IN")}
                   </div>
                 </div>
               </div>
 
-              <span className={`text-xs font-mono uppercase px-3 py-1 rounded-full border transition-all ${
+              <span className={`text-xs font-mono uppercase px-3 py-1.5 rounded-full border transition-all shrink-0 ml-2 font-bold ${
                 selectedId === frame02.id
-                  ? "bg-[#B88A32] dark:bg-[#D4AF62] text-white dark:text-[#0A0A0E] font-bold border-[#B88A32]"
-                  : "bg-[#F4E9D5] dark:bg-[#1C1C28] text-[#6B5740] dark:text-[#B8ADA0] border-[#B88A32]/20 group-hover:text-[#2A2118] dark:group-hover:text-[#F5EFE6]"
+                  ? "bg-[#B88A32] dark:bg-[#D4AF62] text-white dark:text-[#0A0A0E] border-[#B88A32] dark:border-[#D4AF62] shadow-sm"
+                  : "bg-[#B88A32]/15 dark:bg-[#D4AF62]/20 text-[#B88A32] dark:text-[#D4AF62] border-[#B88A32]/40 dark:border-[#D4AF62]/40 group-hover:bg-[#B88A32] group-hover:text-white dark:group-hover:bg-[#D4AF62] dark:group-hover:text-[#0A0A0E]"
               }`}>
                 {selectedId === frame02.id ? "ACTIVE" : "SELECT"}
               </span>
@@ -308,20 +303,20 @@ export default function TheFrameSection() {
             <button
               type="button"
               onClick={() => setSelectedId(frame03.id)}
-              className={`text-left p-5 sm:p-6 rounded-3xl border transition-all duration-300 flex items-center justify-between group shadow-sm ${
+              className={`text-left p-5 sm:p-6 rounded-2xl border transition-all duration-300 flex items-center justify-between group shadow-sm ${
                 selectedId === frame03.id
                   ? "bg-[#FFF9EF] dark:bg-[#161622] border-2 border-[#B88A32] dark:border-[#D4AF62] shadow-[0_10px_30px_rgba(184,138,50,0.25)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)] scale-[1.02]"
                   : "bg-[#FFF9EF]/80 dark:bg-[#12121A]/80 hover:bg-[#FFF9EF] dark:hover:bg-[#161622] border-[#B88A32]/25 dark:border-[#B88A32]/30 hover:border-[#B88A32]/60 hover:shadow-md"
               }`}
             >
-              <div className="flex items-center gap-4">
-                <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#F4E9D5]/70 dark:bg-[#1C1C28] border border-[#B88A32]/20 flex items-center justify-center p-2 flex-shrink-0">
+              <div className="flex items-center gap-3.5">
+                <div className="relative w-16 h-16 rounded-xl bg-[#F4E9D5]/70 dark:bg-[#1C1C28] border border-[#B88A32]/20 flex items-center justify-center p-2 flex-shrink-0">
                   <Image
                     src={frame03.image}
                     alt={frame03.name}
                     fill
                     sizes="80px"
-                    className="object-contain p-1 group-hover:scale-110 transition-transform duration-300"
+                    className="object-contain p-1 group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_4px_8px_rgba(42,33,24,0.15)]"
                   />
                 </div>
                 <div>
@@ -334,42 +329,39 @@ export default function TheFrameSection() {
                   <div className="text-xs sm:text-sm font-semibold text-[#4A3928] dark:text-[#D1C7BA] line-clamp-1">
                     {frame03.name}
                   </div>
-                  <div className="text-[10px] sm:text-xs font-mono text-[#B88A32] dark:text-[#D4AF62] tracking-wider mt-0.5">
+                  <div className="text-xs font-mono text-[#B88A32] dark:text-[#D4AF62] tracking-wider mt-0.5">
                     {frame03.finish} &bull; ₹{frame03.price.toLocaleString("en-IN")}
                   </div>
                 </div>
               </div>
 
-              <span className={`text-xs font-mono uppercase px-3 py-1 rounded-full border transition-all ${
+              <span className={`text-xs font-mono uppercase px-3 py-1.5 rounded-full border transition-all shrink-0 ml-2 font-bold ${
                 selectedId === frame03.id
-                  ? "bg-[#B88A32] dark:bg-[#D4AF62] text-white dark:text-[#0A0A0E] font-bold border-[#B88A32]"
-                  : "bg-[#F4E9D5] dark:bg-[#1C1C28] text-[#6B5740] dark:text-[#B8ADA0] border-[#B88A32]/20 group-hover:text-[#2A2118] dark:group-hover:text-[#F5EFE6]"
+                  ? "bg-[#B88A32] dark:bg-[#D4AF62] text-white dark:text-[#0A0A0E] border-[#B88A32] dark:border-[#D4AF62] shadow-sm"
+                  : "bg-[#B88A32]/15 dark:bg-[#D4AF62]/20 text-[#B88A32] dark:text-[#D4AF62] border-[#B88A32]/40 dark:border-[#D4AF62]/40 group-hover:bg-[#B88A32] group-hover:text-white dark:group-hover:bg-[#D4AF62] dark:group-hover:text-[#0A0A0E]"
               }`}>
                 {selectedId === frame03.id ? "ACTIVE" : "SELECT"}
               </span>
             </button>
 
-          </div>
-
-          {/* 3. BOTTOM ROW: FRAME 04 (Centered) */}
-          <div className="w-full max-w-md px-2">
+            {/* FRAME 04 (Arctic Monobloc Minimalist with warm tint & drop shadow) */}
             <button
               type="button"
               onClick={() => setSelectedId(frame04.id)}
-              className={`w-full text-left p-5 sm:p-6 rounded-3xl border transition-all duration-300 flex items-center justify-between group shadow-sm ${
+              className={`text-left p-5 sm:p-6 rounded-2xl border transition-all duration-300 flex items-center justify-between group shadow-sm ${
                 selectedId === frame04.id
                   ? "bg-[#FFF9EF] dark:bg-[#161622] border-2 border-[#B88A32] dark:border-[#D4AF62] shadow-[0_10px_30px_rgba(184,138,50,0.25)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)] scale-[1.02]"
                   : "bg-[#FFF9EF]/80 dark:bg-[#12121A]/80 hover:bg-[#FFF9EF] dark:hover:bg-[#161622] border-[#B88A32]/25 dark:border-[#B88A32]/30 hover:border-[#B88A32]/60 hover:shadow-md"
               }`}
             >
-              <div className="flex items-center gap-4">
-                <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#F4E9D5]/70 dark:bg-[#1C1C28] border border-[#B88A32]/20 flex items-center justify-center p-2 flex-shrink-0">
+              <div className="flex items-center gap-3.5">
+                <div className="relative w-16 h-16 rounded-xl bg-gradient-to-br from-[#E8D2A8]/50 via-[#F4E9D5]/70 to-[#D6B878]/40 dark:from-[#222232] dark:via-[#1A1A26] dark:to-[#14141E] border border-[#B88A32]/30 shadow-inner flex items-center justify-center p-2 flex-shrink-0">
                   <Image
                     src={frame04.image}
                     alt={frame04.name}
                     fill
                     sizes="80px"
-                    className="object-contain p-1 group-hover:scale-110 transition-transform duration-300"
+                    className="object-contain p-1 group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_6px_14px_rgba(42,33,24,0.25)] dark:drop-shadow-[0_6px_14px_rgba(0,0,0,0.9)]"
                   />
                 </div>
                 <div>
@@ -382,16 +374,16 @@ export default function TheFrameSection() {
                   <div className="text-xs sm:text-sm font-semibold text-[#4A3928] dark:text-[#D1C7BA] line-clamp-1">
                     {frame04.name}
                   </div>
-                  <div className="text-[10px] sm:text-xs font-mono text-[#B88A32] dark:text-[#D4AF62] tracking-wider mt-0.5">
+                  <div className="text-xs font-mono text-[#B88A32] dark:text-[#D4AF62] tracking-wider mt-0.5">
                     {frame04.finish} &bull; ₹{frame04.price.toLocaleString("en-IN")}
                   </div>
                 </div>
               </div>
 
-              <span className={`text-xs font-mono uppercase px-3 py-1 rounded-full border transition-all ${
+              <span className={`text-xs font-mono uppercase px-3 py-1.5 rounded-full border transition-all shrink-0 ml-2 font-bold ${
                 selectedId === frame04.id
-                  ? "bg-[#B88A32] dark:bg-[#D4AF62] text-white dark:text-[#0A0A0E] font-bold border-[#B88A32]"
-                  : "bg-[#F4E9D5] dark:bg-[#1C1C28] text-[#6B5740] dark:text-[#B8ADA0] border-[#B88A32]/20 group-hover:text-[#2A2118] dark:group-hover:text-[#F5EFE6]"
+                  ? "bg-[#B88A32] dark:bg-[#D4AF62] text-white dark:text-[#0A0A0E] border-[#B88A32] dark:border-[#D4AF62] shadow-sm"
+                  : "bg-[#B88A32]/15 dark:bg-[#D4AF62]/20 text-[#B88A32] dark:text-[#D4AF62] border-[#B88A32]/40 dark:border-[#D4AF62]/40 group-hover:bg-[#B88A32] group-hover:text-white dark:group-hover:bg-[#D4AF62] dark:group-hover:text-[#0A0A0E]"
               }`}>
                 {selectedId === frame04.id ? "ACTIVE" : "SELECT"}
               </span>

@@ -7,7 +7,6 @@ import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import CartDrawer from "@/components/CartDrawer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
-import ThemeToggle from "@/components/ThemeToggle";
 import { useDeviceTier } from "@/hooks/useDeviceTier";
 
 const TheFrameSection = dynamic(() => import("@/components/TheFrameSection"));
@@ -67,11 +66,6 @@ export default function Home() {
       {/* Global Overlays */}
       <CartDrawer />
       <WhatsAppFloat />
-
-      {/* Floating Theme Switcher Quick Toggle */}
-      <div className="fixed bottom-6 left-6 z-40">
-        <ThemeToggle variant="floating" />
-      </div>
     </>
   );
 }

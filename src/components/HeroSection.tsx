@@ -22,7 +22,7 @@ const GlassesHeroCanvas = dynamic(() => import("./GlassesHeroCanvas"), {
         />
         <div className="absolute inset-x-0 -bottom-4 flex items-center justify-center gap-2">
           <div className="w-1.5 h-1.5 rounded-full bg-[#B88A32] animate-ping" />
-          <span className="text-[10px] font-mono tracking-[0.24em] text-[#B88A32] dark:text-[#D4AF62] uppercase font-semibold">
+          <span className="text-xs font-mono tracking-[0.2em] text-[#B88A32] dark:text-[#D4AF62] uppercase font-semibold">
             Atelier 3D Loading...
           </span>
         </div>
@@ -102,7 +102,7 @@ export default function HeroSection() {
           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FFF9EF] dark:bg-[#161622] border border-[#B88A32]/25 dark:border-[#D4AF62]/30 shadow-sm mb-4"
         >
           <Sparkles className="w-3.5 h-3.5 text-[#B88A32] dark:text-[#D4AF62]" />
-          <span className="text-[11px] font-mono tracking-[0.28em] text-[#4A3928] dark:text-[#D4AF62] uppercase font-bold">
+          <span className="text-xs font-mono tracking-[0.24em] text-[#4A3928] dark:text-[#D4AF62] uppercase font-bold">
             ALIG&apos;S WARE &bull; FIROZABAD
           </span>
         </motion.div>
@@ -129,6 +129,29 @@ export default function HeroSection() {
         >
           Firozabad &bull; Precision Eyewear
         </motion.p>
+
+        {/* Hero CTAs — Logically Grouped with Hero Presentation */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.3 }}
+          className="flex flex-wrap items-center justify-center gap-3.5 sm:gap-5 mt-5 sm:mt-6"
+        >
+          <Link
+            href="/shop"
+            className="btn-primary px-7 sm:px-9 py-3 sm:py-3.5 text-xs sm:text-sm flex items-center gap-2"
+          >
+            <span>Explore Collection</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+
+          <Link
+            href="/appointment"
+            className="btn-secondary px-7 sm:px-9 py-3 sm:py-3.5 text-xs sm:text-sm"
+          >
+            Book Try-On
+          </Link>
+        </motion.div>
       </div>
 
       {/* =========================================================================
@@ -152,10 +175,10 @@ export default function HeroSection() {
           {/* 1. BETA TITANIUM (Left Arm) */}
           <div className="absolute top-[34%] left-[6%] lg:left-[10%] flex items-center gap-2.5">
             <div className="flex flex-col text-right">
-              <span className="text-[10px] font-mono tracking-[0.24em] font-black text-[#B88A32] dark:text-[#D4AF62] uppercase">
-                BETA TITANIUM
+              <span className="text-xs font-mono tracking-[0.18em] font-bold text-[#B88A32] dark:text-[#D4AF62]">
+                Beta Titanium
               </span>
-              <span className="text-[11px] font-mono text-[#4A3928] dark:text-[#D1C7BA] font-medium">
+              <span className="text-xs font-mono text-[#4A3928] dark:text-[#D1C7BA] font-medium">
                 Japanese Memory Flex
               </span>
             </div>
@@ -163,12 +186,12 @@ export default function HeroSection() {
             <div className="w-2 h-2 rounded-full bg-[#B88A32] dark:bg-[#D4AF62] ring-4 ring-[#B88A32]/25 dark:ring-[#D4AF62]/25 shadow-sm" />
           </div>
 
-          {/* 2. 18.4g ULTRA-LIGHT (Top Bridge) */}
+          {/* 2. 18.4g Ultra-Light (Top Bridge) */}
           <div className="absolute top-[14%] left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5">
             <div className="px-3.5 py-1 rounded-full bg-[#FFF9EF]/95 dark:bg-[#161622]/95 border border-[#B88A32]/35 dark:border-[#D4AF62]/35 shadow-sm flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-[#B88A32] dark:bg-[#D4AF62] animate-pulse" />
-              <span className="text-[10px] font-mono tracking-[0.22em] font-black text-[#2A2118] dark:text-[#F5EFE6] uppercase">
-                18.4g ULTRA-LIGHT
+              <span className="text-xs font-mono tracking-[0.16em] font-bold text-[#2A2118] dark:text-[#F5EFE6]">
+                18.4g Ultra-Light
               </span>
             </div>
             <div className="w-[1px] h-5 bg-[#B88A32]/50 dark:bg-[#D4AF62]/50" />
@@ -177,10 +200,10 @@ export default function HeroSection() {
           {/* 3. PRECISION FIT (Silicone Pads) */}
           <div className="absolute bottom-[24%] left-[12%] lg:left-[16%] flex items-center gap-2.5">
             <div className="flex flex-col text-right">
-              <span className="text-[10px] font-mono tracking-[0.24em] font-black text-[#B88A32] dark:text-[#D4AF62] uppercase">
-                PRECISION FIT
+              <span className="text-xs font-mono tracking-[0.18em] font-bold text-[#B88A32] dark:text-[#D4AF62]">
+                Precision Fit
               </span>
-              <span className="text-[11px] font-mono text-[#4A3928] dark:text-[#D1C7BA] font-medium">
+              <span className="text-xs font-mono text-[#4A3928] dark:text-[#D1C7BA] font-medium">
                 Contoured Silicone Pads
               </span>
             </div>
@@ -193,10 +216,10 @@ export default function HeroSection() {
             <div className="w-2 h-2 rounded-full bg-[#B88A32] dark:bg-[#D4AF62] ring-4 ring-[#B88A32]/25 dark:ring-[#D4AF62]/25 shadow-sm" />
             <div className="w-8 h-[1px] bg-[#B88A32]/60 dark:bg-[#D4AF62]/60" />
             <div className="flex flex-col text-left">
-              <span className="text-[10px] font-mono tracking-[0.24em] font-black text-[#B88A32] dark:text-[#D4AF62] uppercase">
-                OPTICAL CLARITY
+              <span className="text-xs font-mono tracking-[0.18em] font-bold text-[#B88A32] dark:text-[#D4AF62]">
+                Optical Clarity
               </span>
-              <span className="text-[11px] font-mono text-[#4A3928] dark:text-[#D1C7BA] font-medium">
+              <span className="text-xs font-mono text-[#4A3928] dark:text-[#D1C7BA] font-medium">
                 420nm Sapphire Crystal
               </span>
             </div>
@@ -207,14 +230,14 @@ export default function HeroSection() {
         <div className="absolute bottom-2 z-20 pointer-events-auto">
           <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FFF9EF]/95 dark:bg-[#161622]/95 backdrop-blur-md border border-[#B88A32]/35 dark:border-[#D4AF62]/35 shadow-sm text-xs font-mono text-[#4A3928] dark:text-[#D4AF62]">
             <Compass className="w-3.5 h-3.5 text-[#B88A32] dark:text-[#D4AF62] animate-spin" style={{ animationDuration: "12s" }} />
-            <span className="font-semibold text-[11px] tracking-wider uppercase">
-              360&deg; DRAG TO INSPECT
+            <span className="font-semibold text-xs tracking-wider">
+              360&deg; Drag to Inspect
             </span>
             {(dragOffset.x !== 0 || dragOffset.y !== 0) && (
               <button
                 type="button"
                 onClick={() => setDragOffset({ x: 0, y: 0 })}
-                className="ml-1 text-[10px] px-2 py-0.5 rounded-full bg-[#B88A32]/15 dark:bg-[#D4AF62]/20 hover:bg-[#B88A32]/25 dark:hover:bg-[#D4AF62]/30 text-[#B88A32] dark:text-[#D4AF62] font-semibold transition-colors"
+                className="ml-1 text-xs px-2 py-0.5 rounded-full bg-[#B88A32]/15 dark:bg-[#D4AF62]/20 hover:bg-[#B88A32]/25 dark:hover:bg-[#D4AF62]/30 text-[#B88A32] dark:text-[#D4AF62] font-semibold transition-colors"
               >
                 Reset
               </button>
@@ -223,32 +246,11 @@ export default function HeroSection() {
         </div>
       </div>
 
-      {/* =========================================================================
-          BOTTOM: CTA ACTION BUTTONS & SCROLL PROMPT
-         ========================================================================= */}
+      {/* BOTTOM: SCROLL PROMPT */}
       <div className="relative z-20 w-full max-w-3xl mx-auto flex flex-col items-center text-center mt-3 sm:mt-5">
-        {/* Action Buttons */}
-        <div className="flex flex-wrap items-center justify-center gap-3.5 sm:gap-5 mb-4">
-          <Link
-            href="/shop"
-            className="cursor-pointer px-8 sm:px-10 py-3.5 rounded-full bg-gradient-to-r from-[#B88A32] via-[#D4AF62] to-[#B88A32] hover:brightness-105 text-white font-bold text-xs sm:text-sm tracking-[0.16em] uppercase transition-all duration-300 shadow-[0_6px_25px_rgba(184,138,50,0.35)] active:scale-[0.98] flex items-center gap-2"
-          >
-            <span>EXPLORE COLLECTION</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-
-          <Link
-            href="/appointment"
-            className="cursor-pointer px-8 sm:px-10 py-3.5 rounded-full bg-[#FFF9EF] dark:bg-[#161622] hover:bg-white dark:hover:bg-[#1E1E2C] border border-[#B88A32]/35 dark:border-[#D4AF62]/40 text-[#2A2118] dark:text-[#F5EFE6] font-bold text-xs sm:text-sm tracking-[0.16em] uppercase transition-all duration-300 shadow-sm active:scale-[0.98]"
-          >
-            BOOK TRY-ON
-          </Link>
-        </div>
-
-        {/* Scroll Indicator Prompt */}
-        <div className="flex items-center justify-center gap-1.5 text-[11px] font-mono tracking-[0.24em] text-[#6B5740] dark:text-[#B8ADA0] uppercase font-bold">
+        <div className="flex items-center justify-center gap-1.5 text-xs font-mono tracking-[0.2em] text-[#6B5740] dark:text-[#B8ADA0] uppercase font-bold">
           <span className="text-sm animate-bounce">&darr;</span>
-          <span>SCROLL TO INSPECT</span>
+          <span>Scroll to Inspect</span>
         </div>
       </div>
     </section>

@@ -140,16 +140,16 @@ export default function InstagramPage() {
   });
 
   return (
-    <div className="relative min-h-screen bg-[#F4E9D5] text-[#2A2118] flex flex-col selection:bg-[#B88A32]/30 selection:text-[#2A2118]">
+    <div className="relative min-h-screen bg-[#F4E9D5] dark:bg-[#0A0A0E] text-[#2A2118] dark:text-[#F5EFE6] flex flex-col selection:bg-[#B88A32]/30 selection:text-[#2A2118] dark:selection:text-[#F5EFE6] transition-colors duration-300">
       <Navbar />
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-36 pb-20 w-full relative">
         {/* Ambient Warmth Glows */}
-        <div className="absolute top-20 left-10 w-[500px] h-[500px] bg-[#E8D2A8]/30 rounded-full blur-[140px] -z-10 pointer-events-none" />
-        <div className="absolute bottom-10 right-10 w-[600px] h-[600px] bg-[#D4AF62]/20 rounded-full blur-[160px] -z-10 pointer-events-none" />
+        <div className="absolute top-20 left-10 w-[500px] h-[500px] bg-[#E8D2A8]/30 dark:bg-[#B88A32]/10 rounded-full blur-[140px] -z-10 pointer-events-none" />
+        <div className="absolute bottom-10 right-10 w-[600px] h-[600px] bg-[#D4AF62]/20 dark:bg-[#B88A32]/10 rounded-full blur-[160px] -z-10 pointer-events-none" />
 
         {/* INSTAGRAM PROFILE HEADER HERO CARD */}
-        <div className="relative rounded-3xl bg-[#FFF9EF] border border-[#B88A32]/25 p-6 sm:p-10 mb-12 shadow-xl shadow-[#2A2118]/5 overflow-hidden">
+        <div className="relative rounded-3xl bg-[#FFF9EF] dark:bg-[#121218] border border-[#B88A32]/25 dark:border-[#B88A32]/35 p-6 sm:p-10 mb-12 shadow-xl shadow-[#2A2118]/5 dark:shadow-black/50 overflow-hidden">
           {/* Subtle Ambient Accent */}
           <div className="absolute -top-24 -right-24 w-80 h-80 bg-gradient-to-br from-[#f09433]/15 via-[#dc2743]/15 to-[#bc1888]/15 rounded-full blur-[90px] pointer-events-none" />
           <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-[#B88A32]/10 rounded-full blur-[90px] pointer-events-none" />
@@ -172,22 +172,22 @@ export default function InstagramPage() {
             {/* Profile Bio & Handle Info */}
             <div className="flex-1 flex flex-col justify-center">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-3 justify-center md:justify-start">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold tracking-wider text-[#2A2118]">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold tracking-wider text-[#2A2118] dark:text-[#F5EFE6]">
                   ALIGSWARE
                 </h1>
                 <div className="flex items-center gap-2 justify-center">
-                  <span className="text-xs font-mono font-bold text-[#B88A32] bg-[#B88A32]/15 border border-[#B88A32]/30 px-3 py-1 rounded-full">
+                  <span className="text-xs font-mono font-bold text-[#B88A32] dark:text-[#E5C178] bg-[#B88A32]/15 dark:bg-[#B88A32]/25 border border-[#B88A32]/30 dark:border-[#B88A32]/40 px-3 py-1 rounded-full">
                     @aligsware
                   </span>
-                  <span className="inline-flex items-center gap-1 text-[11px] font-mono text-[#4A7C59] bg-[#4A7C59]/15 border border-[#4A7C59]/30 px-2.5 py-1 rounded-full font-semibold">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-mono text-[#4A7C59] dark:text-emerald-400 bg-[#4A7C59]/15 dark:bg-emerald-500/20 border border-[#4A7C59]/30 dark:border-emerald-500/30 px-2.5 py-1 rounded-full font-semibold">
                     <CheckCircle2 className="w-3.5 h-3.5" /> Verified Atelier
                   </span>
                 </div>
               </div>
 
               {/* Bio Highlights */}
-              <div className="text-[#6B5740] text-xs sm:text-sm leading-relaxed max-w-2xl font-sans mb-5 space-y-1">
-                <p className="font-semibold text-[#2A2118]">
+              <div className="text-[#6B5740] dark:text-[#C4B59E] text-xs sm:text-sm leading-relaxed max-w-2xl font-sans mb-5 space-y-1">
+                <p className="font-semibold text-[#2A2118] dark:text-[#F5EFE6]">
                   👓 Firozabad&apos;s trusted heritage craftsmanship, now online.
                 </p>
                 <p>
@@ -196,7 +196,7 @@ export default function InstagramPage() {
                 <p>
                   ✨ Japanese Beta-Titanium frames &bull; 420nm Sapphire Blue-Cut Lenses.
                 </p>
-                <p className="text-[#B88A32] font-mono text-[11px] font-medium">
+                <p className="text-[#B88A32] dark:text-[#E5C178] font-mono text-[11px] font-medium">
                   📍 Firozabad, Uttar Pradesh &bull; 📞 +91 72173 71499 &bull; Pan-India Insured Dispatch
                 </p>
               </div>
@@ -251,7 +251,7 @@ export default function InstagramPage() {
                 className={`cursor-pointer px-4 py-2 rounded-full text-xs font-mono uppercase tracking-wider transition-all duration-200 shrink-0 ${
                   activeTab === tab.id
                     ? "bg-[#B88A32] text-[#FFF9EF] font-bold shadow-sm"
-                    : "bg-[#FFF9EF] text-[#6B5740] hover:text-[#2A2118] border border-[#B88A32]/20 hover:bg-[#E8D2A8]/40"
+                    : "bg-[#FFF9EF] dark:bg-[#121218] text-[#6B5740] dark:text-[#C4B59E] hover:text-[#2A2118] dark:hover:text-[#F5EFE6] border border-[#B88A32]/20 dark:border-[#B88A32]/35 hover:bg-[#E8D2A8]/40 dark:hover:bg-[#1A1A24]"
                 }`}
               >
                 {tab.label}
@@ -263,7 +263,7 @@ export default function InstagramPage() {
             href="https://www.instagram.com/aligsware/"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono text-[#B88A32] hover:text-[#A07828] transition-colors"
+            className="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono text-[#B88A32] hover:text-[#A07828] dark:text-[#D4AF62] dark:hover:text-[#E5C178] transition-colors"
           >
             <span>instagram.com/aligsware</span>
             <ExternalLink className="w-3.5 h-3.5" />
@@ -281,7 +281,7 @@ export default function InstagramPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.96 }}
                 transition={{ duration: 0.3 }}
-                className="group rounded-3xl overflow-hidden bg-[#FFF9EF] border border-[#B88A32]/25 hover:border-[#B88A32]/60 transition-all duration-500 flex flex-col justify-between shadow-md hover:shadow-xl shadow-[#2A2118]/5"
+                className="group rounded-3xl overflow-hidden bg-[#FFF9EF] dark:bg-[#121218] border border-[#B88A32]/25 dark:border-[#B88A32]/35 hover:border-[#B88A32]/60 dark:hover:border-[#B88A32]/70 transition-all duration-500 flex flex-col justify-between shadow-md hover:shadow-xl shadow-[#2A2118]/5 dark:shadow-black/50"
               >
                 {/* Media Container */}
                 <div className="relative aspect-square w-full overflow-hidden bg-[#2A2118]">
@@ -348,17 +348,17 @@ export default function InstagramPage() {
                 {/* Caption & Product Meta */}
                 <div className="p-6 flex flex-col justify-between flex-1">
                   <div>
-                    <h3 className="font-serif text-base sm:text-lg font-bold text-[#2A2118] group-hover:text-[#B88A32] transition-colors mb-2">
+                    <h3 className="font-serif text-base sm:text-lg font-bold text-[#2A2118] dark:text-[#F5EFE6] group-hover:text-[#B88A32] dark:group-hover:text-[#D4AF62] transition-colors mb-2">
                       {post.title}
                     </h3>
-                    <p className="text-xs text-[#6B5740] leading-relaxed line-clamp-3 mb-4 font-sans">
+                    <p className="text-xs text-[#6B5740] dark:text-[#A89885] leading-relaxed line-clamp-3 mb-4 font-sans">
                       {post.caption}
                     </p>
 
                     {/* Hashtags */}
                     <div className="flex flex-wrap gap-1.5 mb-5">
                       {post.tags.map((tag) => (
-                        <span key={tag} className="text-[10px] font-mono text-[#B88A32] bg-[#B88A32]/10 px-2 py-0.5 rounded-md font-medium">
+                        <span key={tag} className="text-[10px] font-mono text-[#B88A32] dark:text-[#E5C178] bg-[#B88A32]/10 dark:bg-[#B88A32]/20 px-2 py-0.5 rounded-md font-medium">
                           {tag}
                         </span>
                       ))}
@@ -366,7 +366,7 @@ export default function InstagramPage() {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="pt-4 border-t border-[#B88A32]/15 flex items-center gap-2.5">
+                  <div className="pt-4 border-t border-[#B88A32]/15 dark:border-[#B88A32]/25 flex items-center gap-2.5">
                     <Link
                       href={`/shop/${post.productSlug}`}
                       className="cursor-pointer flex-1 py-2.5 rounded-xl bg-[#B88A32] hover:bg-[#A07828] text-[#FFF9EF] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-sm"
@@ -379,7 +379,7 @@ export default function InstagramPage() {
                       href="https://www.instagram.com/aligsware/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="cursor-pointer p-2.5 rounded-xl border border-[#B88A32]/25 hover:border-[#B88A32] hover:text-[#B88A32] text-[#4A3928] transition-colors bg-[#F4E9D5]/40"
+                      className="cursor-pointer p-2.5 rounded-xl border border-[#B88A32]/25 dark:border-[#B88A32]/35 hover:border-[#B88A32] hover:text-[#B88A32] text-[#4A3928] dark:text-[#C4B59E] transition-colors bg-[#F4E9D5]/40 dark:bg-[#161622]"
                       title="View on Instagram"
                     >
                       <ExternalLink className="w-4 h-4" />
@@ -392,14 +392,14 @@ export default function InstagramPage() {
         </div>
 
         {/* BOTTOM CTA: DIRECT WHATSAPP & APPOINTMENT */}
-        <div className="mt-16 rounded-3xl bg-[#FFF9EF] border border-[#B88A32]/25 p-8 sm:p-12 text-center flex flex-col items-center justify-center shadow-xl shadow-[#2A2118]/5">
+        <div className="mt-16 rounded-3xl bg-[#FFF9EF] dark:bg-[#121218] border border-[#B88A32]/25 dark:border-[#B88A32]/35 p-8 sm:p-12 text-center flex flex-col items-center justify-center shadow-xl shadow-[#2A2118]/5 dark:shadow-black/50">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] flex items-center justify-center mb-4 shadow-md">
             <InstagramIcon className="w-7 h-7 text-white" />
           </div>
-          <h2 className="text-2xl sm:text-4xl font-bold font-serif text-[#2A2118] mb-2">
+          <h2 className="text-2xl sm:text-4xl font-bold font-serif text-[#2A2118] dark:text-[#F5EFE6] mb-2">
             Stay Connected with ALIG&apos;S WARE
           </h2>
-          <p className="text-[#6B5740] text-sm max-w-xl mb-6 font-normal">
+          <p className="text-[#6B5740] dark:text-[#A89885] text-sm max-w-xl mb-6 font-normal">
             Follow our daily drops, live spectacles craftsmanship reels, and eye health tips by Dr. Sheeraz Ahmad on Instagram.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
@@ -415,7 +415,7 @@ export default function InstagramPage() {
               href="https://wa.me/917217371499?text=Hi%20ALIGSWARE!%20I'm%20interested%20in%20your%20eyewear."
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3.5 rounded-2xl bg-[#F4E9D5] hover:bg-[#E8D2A8] border border-[#B88A32]/25 text-[#2A2118] font-mono text-sm transition-colors"
+              className="px-6 py-3.5 rounded-2xl bg-[#F4E9D5] dark:bg-[#1A1A26] hover:bg-[#E8D2A8] dark:hover:bg-[#222234] border border-[#B88A32]/25 dark:border-[#B88A32]/35 text-[#2A2118] dark:text-[#F5EFE6] font-mono text-sm transition-colors"
             >
               WhatsApp 7217371499
             </a>

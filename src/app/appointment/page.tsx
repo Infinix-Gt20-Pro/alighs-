@@ -229,7 +229,7 @@ export default function AppointmentPage() {
           <div className="flex flex-wrap items-center justify-between gap-3 mb-8 pt-2">
             <Link
               href="/"
-              className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#FFF9EF] hover:bg-[#E8D2A8]/40 border border-[#B88A32]/25 text-xs font-mono text-[#4A3928] hover:text-[#2A2118] transition-all duration-200 group shadow-sm"
+              className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#FFF9EF] dark:bg-[#121218] hover:bg-[#E8D2A8]/40 dark:hover:bg-[#1A1A24] border border-[#B88A32]/25 dark:border-[#B88A32]/35 text-xs font-mono text-[#4A3928] dark:text-[#C4B59E] hover:text-[#2A2118] dark:hover:text-[#F5EFE6] transition-all duration-200 group shadow-sm"
             >
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform text-[#B88A32]" />
               <span>&larr; Back to Atelier Storefront</span>
@@ -238,7 +238,7 @@ export default function AppointmentPage() {
             <div className="flex items-center gap-2">
               <Link
                 href="/shop"
-                className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#FFF9EF] hover:bg-[#E8D2A8]/40 border border-[#B88A32]/25 text-xs font-mono text-[#4A3928] hover:text-[#2A2118] transition-all duration-200 group shadow-sm"
+                className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#FFF9EF] dark:bg-[#121218] hover:bg-[#E8D2A8]/40 dark:hover:bg-[#1A1A24] border border-[#B88A32]/25 dark:border-[#B88A32]/35 text-xs font-mono text-[#4A3928] dark:text-[#C4B59E] hover:text-[#2A2118] dark:hover:text-[#F5EFE6] transition-all duration-200 group shadow-sm"
               >
                 <span>Explore Collection</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform text-[#B88A32]" />
@@ -248,16 +248,16 @@ export default function AppointmentPage() {
 
           {/* Page Header */}
           <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#B88A32]/30 bg-[#FFF9EF] mb-4 shadow-sm">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#B88A32]/30 bg-[#FFF9EF] dark:bg-[#121218] mb-4 shadow-sm">
               <Sparkles className="w-3.5 h-3.5 text-[#B88A32]" />
               <span className="text-xs font-mono tracking-wider text-[#B88A32] uppercase">
                 Clinical Optometry & Frame Fitting
               </span>
             </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold tracking-tight mb-4 text-[#2A2118]">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold tracking-tight mb-4 text-[#2A2118] dark:text-[#F5EFE6]">
               Consultation with Dr. Sheeraz Ahmad
             </h1>
-            <p className="text-[#6B5740] text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+            <p className="text-[#6B5740] dark:text-[#A89885] text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
               Experience computerized refractive power testing, bespoke frame curvature alignment, and
               prescriptive lens solutions at our Firozabad optical clinic.
             </p>
@@ -269,28 +269,28 @@ export default function AppointmentPage() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="rounded-3xl p-8 border border-[#B88A32]/25 bg-[#FFF9EF] shadow-xl shadow-[#2A2118]/5 relative overflow-hidden"
+                className="rounded-3xl p-8 border border-[#B88A32]/25 dark:border-[#B88A32]/35 bg-[#FFF9EF] dark:bg-[#121218] shadow-xl shadow-[#2A2118]/5 dark:shadow-black/50 relative overflow-hidden"
               >
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#D4AF62] to-[#B88A32] p-0.5 mb-6 flex items-center justify-center shadow-md">
-                  <div className="w-full h-full rounded-[14px] bg-[#FFF9EF] flex items-center justify-center">
+                  <div className="w-full h-full rounded-[14px] bg-[#FFF9EF] dark:bg-[#181824] flex items-center justify-center">
                     <Stethoscope className="w-8 h-8 text-[#B88A32]" />
                   </div>
                 </div>
 
-                <h2 className="text-2xl font-serif font-bold text-[#2A2118] mb-1">Dr. Sheeraz Ahmad</h2>
-                <p className="text-[#B88A32] text-xs font-mono tracking-wider mb-4 uppercase font-semibold">
+                <h2 className="text-2xl font-serif font-bold text-[#2A2118] dark:text-[#F5EFE6] mb-1">Dr. Sheeraz Ahmad</h2>
+                <p className="text-[#B88A32] dark:text-[#D4AF62] text-xs font-mono tracking-wider mb-4 uppercase font-semibold">
                   AMU-Certified Optometrist & Vision Specialist
                 </p>
                 <div className="flex flex-wrap gap-2 mb-6">
-                  <span className="px-2.5 py-1 rounded-full text-[11px] font-mono bg-[#F4E9D5] border border-[#B88A32]/20 text-[#4A3928]">
+                  <span className="px-2.5 py-1 rounded-full text-[11px] font-mono bg-[#F4E9D5] dark:bg-[#1A1A26] border border-[#B88A32]/20 dark:border-[#B88A32]/30 text-[#4A3928] dark:text-[#C4B59E]">
                     B.Optom • D.Optom (AMU)
                   </span>
-                  <span className="px-2.5 py-1 rounded-full text-[11px] font-mono bg-[#B88A32]/10 border border-[#B88A32]/25 text-[#B88A32] font-semibold">
+                  <span className="px-2.5 py-1 rounded-full text-[11px] font-mono bg-[#B88A32]/10 dark:bg-[#B88A32]/20 border border-[#B88A32]/25 dark:border-[#B88A32]/35 text-[#B88A32] dark:text-[#E5C178] font-semibold">
                     12+ Years Clinical Practice
                   </span>
                 </div>
 
-                <div className="space-y-3 text-xs text-[#6B5740]">
+                <div className="space-y-3 text-xs text-[#6B5740] dark:text-[#C4B59E]">
                   <div className="flex items-start gap-3">
                     <CheckCircle2 className="w-4 h-4 text-[#B88A32] shrink-0 mt-0.5" />
                     <span>Computerized Auto-Refractometry & Astigmatism Power Check</span>
@@ -309,14 +309,14 @@ export default function AppointmentPage() {
                   </div>
                 </div>
 
-                <div className="mt-8 pt-6 border-t border-[#B88A32]/15 text-xs">
-                  <div className="flex items-center gap-2 text-[#B88A32] mb-2 font-mono font-semibold">
+                <div className="mt-8 pt-6 border-t border-[#B88A32]/15 dark:border-[#B88A32]/25 text-xs">
+                  <div className="flex items-center gap-2 text-[#B88A32] dark:text-[#D4AF62] mb-2 font-mono font-semibold">
                     <MapPin className="w-3.5 h-3.5" /> CLINIC ADDRESS
                   </div>
-                  <p className="text-[#2A2118] font-medium leading-relaxed">
+                  <p className="text-[#2A2118] dark:text-[#F5EFE6] font-medium leading-relaxed">
                     65, Ghalib Nagar, Near Hali Public School, Firozabad, UP — 283203
                   </p>
-                  <p className="text-[#8B7355] mt-2 font-mono">Mon – Sat: 10:00 AM – 08:30 PM</p>
+                  <p className="text-[#8B7355] dark:text-[#A89885] mt-2 font-mono">Mon – Sat: 10:00 AM – 08:30 PM</p>
                 </div>
               </motion.div>
             </div>
@@ -330,23 +330,23 @@ export default function AppointmentPage() {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="rounded-3xl p-8 sm:p-10 border border-[#B88A32]/25 bg-[#FFF9EF] shadow-xl shadow-[#2A2118]/5"
+                    className="rounded-3xl p-8 sm:p-10 border border-[#B88A32]/25 dark:border-[#B88A32]/35 bg-[#FFF9EF] dark:bg-[#121218] shadow-xl shadow-[#2A2118]/5 dark:shadow-black/50"
                   >
-                    <div className="flex items-center justify-between mb-8 pb-4 border-b border-[#B88A32]/15">
+                    <div className="flex items-center justify-between mb-8 pb-4 border-b border-[#B88A32]/15 dark:border-[#B88A32]/25">
                       <div>
-                        <h3 className="text-2xl font-serif font-bold text-[#2A2118]">Reserve Your Consultation</h3>
-                        <p className="text-xs text-[#6B5740] mt-1">
+                        <h3 className="text-2xl font-serif font-bold text-[#2A2118] dark:text-[#F5EFE6]">Reserve Your Consultation</h3>
+                        <p className="text-xs text-[#6B5740] dark:text-[#A89885] mt-1">
                           Zero wait times. Dedicated 30-minute one-on-one session with Dr. Sheeraz.
                         </p>
                       </div>
-                      <span className="hidden sm:inline-block px-3 py-1 rounded-full bg-[#B88A32]/15 border border-[#B88A32]/25 text-[#B88A32] text-xs font-mono font-semibold">
+                      <span className="hidden sm:inline-block px-3 py-1 rounded-full bg-[#B88A32]/15 dark:bg-[#B88A32]/20 border border-[#B88A32]/25 dark:border-[#B88A32]/35 text-[#B88A32] dark:text-[#E5C178] text-xs font-mono font-semibold">
                         100% Free Consultation
                       </span>
                     </div>
 
                     {!user ? (
-                      <div className="mb-6 p-3.5 rounded-2xl bg-[#B88A32]/10 border border-[#B88A32]/25 flex items-center justify-between gap-3 text-xs">
-                        <span className="text-[#6B5740] font-sans">
+                      <div className="mb-6 p-3.5 rounded-2xl bg-[#B88A32]/10 dark:bg-[#B88A32]/15 border border-[#B88A32]/25 dark:border-[#B88A32]/35 flex items-center justify-between gap-3 text-xs">
+                        <span className="text-[#6B5740] dark:text-[#C4B59E] font-sans">
                           Sign in to link this consultation to your atelier profile and view history.
                         </span>
                         <button
@@ -369,7 +369,7 @@ export default function AppointmentPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Name */}
                         <div className="space-y-2">
-                          <label className="text-xs font-mono uppercase tracking-wider text-[#4A3928] flex items-center gap-2 font-semibold">
+                          <label className="text-xs font-mono uppercase tracking-wider text-[#4A3928] dark:text-[#C4B59E] flex items-center gap-2 font-semibold">
                             <User className="w-3.5 h-3.5 text-[#B88A32]" /> Patient Full Name *
                           </label>
                           <input
@@ -378,18 +378,18 @@ export default function AppointmentPage() {
                             required
                             value={formData.name}
                             onChange={handleInputChange}
-                            className="w-full bg-[#F4E9D5]/50 border border-[#B88A32]/25 rounded-xl px-4 py-3.5 text-[#2A2118] placeholder-[#8B7355]/70 focus:outline-none focus:border-[#B88A32] focus:ring-1 focus:ring-[#B88A32] transition-all text-sm"
+                            className="w-full bg-[#F4E9D5]/50 dark:bg-[#161622] border border-[#B88A32]/25 dark:border-[#B88A32]/35 rounded-xl px-4 py-3.5 text-[#2A2118] dark:text-[#F5EFE6] placeholder-[#8B7355]/70 dark:placeholder-[#8E8272]/70 focus:outline-none focus:border-[#B88A32] focus:ring-1 focus:ring-[#B88A32] transition-all text-sm"
                             placeholder="e.g. Sheeraz Ahmad"
                           />
                         </div>
 
                         {/* Phone */}
                         <div className="space-y-2">
-                          <label className="text-xs font-mono uppercase tracking-wider text-[#4A3928] flex items-center gap-2 font-semibold">
+                          <label className="text-xs font-mono uppercase tracking-wider text-[#4A3928] dark:text-[#C4B59E] flex items-center gap-2 font-semibold">
                             <Phone className="w-3.5 h-3.5 text-[#B88A32]" /> WhatsApp / Contact Phone *
                           </label>
                           <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-mono text-[#8B7355] font-semibold">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-mono text-[#8B7355] dark:text-[#A89885] font-semibold">
                               +91
                             </span>
                             <input
@@ -399,7 +399,7 @@ export default function AppointmentPage() {
                               pattern="[0-9]{10}"
                               value={formData.phone}
                               onChange={handleInputChange}
-                              className="w-full bg-[#F4E9D5]/50 border border-[#B88A32]/25 rounded-xl pl-12 pr-4 py-3.5 text-[#2A2118] placeholder-[#8B7355]/70 focus:outline-none focus:border-[#B88A32] focus:ring-1 focus:ring-[#B88A32] transition-all text-sm font-mono"
+                              className="w-full bg-[#F4E9D5]/50 dark:bg-[#161622] border border-[#B88A32]/25 dark:border-[#B88A32]/35 rounded-xl pl-12 pr-4 py-3.5 text-[#2A2118] dark:text-[#F5EFE6] placeholder-[#8B7355]/70 dark:placeholder-[#8E8272]/70 focus:outline-none focus:border-[#B88A32] focus:ring-1 focus:ring-[#B88A32] transition-all text-sm font-mono"
                               placeholder="7217371499"
                             />
                           </div>
@@ -407,7 +407,7 @@ export default function AppointmentPage() {
 
                         {/* Date */}
                         <div className="space-y-2">
-                          <label className="text-xs font-mono uppercase tracking-wider text-[#4A3928] flex items-center gap-2 font-semibold">
+                          <label className="text-xs font-mono uppercase tracking-wider text-[#4A3928] dark:text-[#C4B59E] flex items-center gap-2 font-semibold">
                             <Calendar className="w-3.5 h-3.5 text-[#B88A32]" /> Preferred Date *
                           </label>
                           <input
@@ -417,13 +417,13 @@ export default function AppointmentPage() {
                             min={today}
                             value={formData.date}
                             onChange={handleInputChange}
-                            className="w-full bg-[#F4E9D5]/50 border border-[#B88A32]/25 rounded-xl px-4 py-3.5 text-[#2A2118] focus:outline-none focus:border-[#B88A32] focus:ring-1 focus:ring-[#B88A32] transition-all text-sm"
+                            className="w-full bg-[#F4E9D5]/50 dark:bg-[#161622] border border-[#B88A32]/25 dark:border-[#B88A32]/35 rounded-xl px-4 py-3.5 text-[#2A2118] dark:text-[#F5EFE6] focus:outline-none focus:border-[#B88A32] focus:ring-1 focus:ring-[#B88A32] transition-all text-sm [color-scheme:light] dark:[color-scheme:dark]"
                           />
                         </div>
 
                         {/* Time */}
                         <div className="space-y-2 relative">
-                          <label className="text-xs font-mono uppercase tracking-wider text-[#4A3928] flex items-center gap-2 font-semibold">
+                          <label className="text-xs font-mono uppercase tracking-wider text-[#4A3928] dark:text-[#C4B59E] flex items-center gap-2 font-semibold">
                             <Clock className="w-3.5 h-3.5 text-[#B88A32]" /> Preferred Time Window *
                           </label>
                           <div className="relative">
@@ -432,25 +432,25 @@ export default function AppointmentPage() {
                               required
                               value={formData.time}
                               onChange={handleInputChange}
-                              className="w-full bg-[#FFF9EF] border border-[#B88A32]/25 rounded-xl px-4 py-3.5 text-[#2A2118] appearance-none focus:outline-none focus:border-[#B88A32] focus:ring-1 focus:ring-[#B88A32] transition-all text-sm pr-10"
+                              className="w-full bg-[#FFF9EF] dark:bg-[#161622] border border-[#B88A32]/25 dark:border-[#B88A32]/35 rounded-xl px-4 py-3.5 text-[#2A2118] dark:text-[#F5EFE6] appearance-none focus:outline-none focus:border-[#B88A32] focus:ring-1 focus:ring-[#B88A32] transition-all text-sm pr-10 [color-scheme:light] dark:[color-scheme:dark]"
                             >
-                              <option value="" disabled>
+                              <option value="" disabled className="bg-[#FFF9EF] dark:bg-[#161622] text-[#2A2118] dark:text-[#F5EFE6]">
                                 Select consultation slot
                               </option>
                               {TIME_SLOTS.map((slot) => (
-                                <option key={slot} value={slot}>
+                                <option key={slot} value={slot} className="bg-[#FFF9EF] dark:bg-[#161622] text-[#2A2118] dark:text-[#F5EFE6]">
                                   {slot}
                                 </option>
                               ))}
                             </select>
-                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8B7355] pointer-events-none" />
+                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8B7355] dark:text-[#A89885] pointer-events-none" />
                           </div>
                         </div>
                       </div>
 
                       {/* Concern */}
                       <div className="space-y-2 relative">
-                        <label className="text-xs font-mono uppercase tracking-wider text-[#4A3928] flex items-center gap-2 font-semibold">
+                        <label className="text-xs font-mono uppercase tracking-wider text-[#4A3928] dark:text-[#C4B59E] flex items-center gap-2 font-semibold">
                           <MessageSquare className="w-3.5 h-3.5 text-[#B88A32]" /> Reason for Visit *
                         </label>
                         <div className="relative">
@@ -459,24 +459,24 @@ export default function AppointmentPage() {
                             required
                             value={formData.concern}
                             onChange={handleInputChange}
-                            className="w-full bg-[#FFF9EF] border border-[#B88A32]/25 rounded-xl px-4 py-3.5 text-[#2A2118] appearance-none focus:outline-none focus:border-[#B88A32] focus:ring-1 focus:ring-[#B88A32] transition-all text-sm pr-10"
+                            className="w-full bg-[#FFF9EF] dark:bg-[#161622] border border-[#B88A32]/25 dark:border-[#B88A32]/35 rounded-xl px-4 py-3.5 text-[#2A2118] dark:text-[#F5EFE6] appearance-none focus:outline-none focus:border-[#B88A32] focus:ring-1 focus:ring-[#B88A32] transition-all text-sm pr-10 [color-scheme:light] dark:[color-scheme:dark]"
                           >
-                            <option value="" disabled>
+                            <option value="" disabled className="bg-[#FFF9EF] dark:bg-[#161622] text-[#2A2118] dark:text-[#F5EFE6]">
                               Select primary consultation purpose
                             </option>
                             {CONCERNS.map((c) => (
-                              <option key={c} value={c}>
+                              <option key={c} value={c} className="bg-[#FFF9EF] dark:bg-[#161622] text-[#2A2118] dark:text-[#F5EFE6]">
                                 {c}
                               </option>
                             ))}
                           </select>
-                          <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8B7355] pointer-events-none" />
+                          <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8B7355] dark:text-[#A89885] pointer-events-none" />
                         </div>
                       </div>
 
                       {/* Additional Details */}
                       <div className="space-y-2">
-                        <label className="text-xs font-mono uppercase tracking-wider text-[#4A3928] font-semibold">
+                        <label className="text-xs font-mono uppercase tracking-wider text-[#4A3928] dark:text-[#C4B59E] font-semibold">
                           Current Power / Symptoms / Previous Rx (Optional)
                         </label>
                         <textarea
@@ -484,41 +484,41 @@ export default function AppointmentPage() {
                           value={formData.details}
                           onChange={handleInputChange}
                           rows={3}
-                          className="w-full bg-[#F4E9D5]/50 border border-[#B88A32]/25 rounded-xl px-4 py-3 text-[#2A2118] placeholder-[#8B7355]/70 focus:outline-none focus:border-[#B88A32] focus:ring-1 focus:ring-[#B88A32] transition-all resize-none text-sm"
+                          className="w-full bg-[#F4E9D5]/50 dark:bg-[#161622] border border-[#B88A32]/25 dark:border-[#B88A32]/35 rounded-xl px-4 py-3 text-[#2A2118] dark:text-[#F5EFE6] placeholder-[#8B7355]/70 dark:placeholder-[#8E8272]/70 focus:outline-none focus:border-[#B88A32] focus:ring-1 focus:ring-[#B88A32] transition-all resize-none text-sm"
                           placeholder="e.g. Eyestrain after 6 hours on laptop, wearing -1.50 spherical both eyes..."
                         />
                       </div>
 
                       {/* File Upload: Eye Prescription / Report */}
                       <div className="space-y-2">
-                        <label className="text-xs font-mono uppercase tracking-wider text-[#4A3928] font-semibold flex items-center justify-between">
+                        <label className="text-xs font-mono uppercase tracking-wider text-[#4A3928] dark:text-[#C4B59E] font-semibold flex items-center justify-between">
                           <span className="flex items-center gap-2">
                             <Paperclip className="w-3.5 h-3.5 text-[#B88A32]" />
                             Attach Prescription / Eye Test Report (Optional)
                           </span>
-                          <span className="text-[10px] text-[#8B7355] font-normal">PNG, JPG, PDF up to 10MB</span>
+                          <span className="text-[10px] text-[#8B7355] dark:text-[#A89885] font-normal">PNG, JPG, PDF up to 10MB</span>
                         </label>
 
                         {!selectedFile ? (
-                          <label className="flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-dashed border-[#B88A32]/35 bg-[#F4E9D5]/30 hover:bg-[#F4E9D5]/60 cursor-pointer transition-all group">
+                          <label className="flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-dashed border-[#B88A32]/35 dark:border-[#B88A32]/45 bg-[#F4E9D5]/30 dark:bg-[#161622]/60 hover:bg-[#F4E9D5]/60 dark:hover:bg-[#161622] cursor-pointer transition-all group">
                             <input
                               type="file"
                               accept="image/*,.pdf"
                               onChange={handleFileSelect}
                               className="hidden"
                             />
-                            <div className="w-10 h-10 rounded-xl bg-[#B88A32]/10 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+                            <div className="w-10 h-10 rounded-xl bg-[#B88A32]/10 dark:bg-[#B88A32]/20 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
                               <Upload className="w-5 h-5 text-[#B88A32]" />
                             </div>
-                            <p className="text-xs font-medium text-[#2A2118]">
+                            <p className="text-xs font-medium text-[#2A2118] dark:text-[#F5EFE6]">
                               Click to browse or drop your prescription file here
                             </p>
-                            <p className="text-[11px] text-[#8B7355] mt-0.5 font-mono">
+                            <p className="text-[11px] text-[#8B7355] dark:text-[#A89885] mt-0.5 font-mono">
                               Stored safely in Dr. Sheeraz&apos;s encrypted clinical archive
                             </p>
                           </label>
                         ) : (
-                          <div className="p-3.5 rounded-2xl bg-[#F4E9D5]/60 border border-[#B88A32]/30 flex items-center justify-between gap-3">
+                          <div className="p-3.5 rounded-2xl bg-[#F4E9D5]/60 dark:bg-[#161622] border border-[#B88A32]/30 dark:border-[#B88A32]/40 flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3 overflow-hidden">
                               {filePreviewUrl ? (
                                 <img
@@ -532,10 +532,10 @@ export default function AppointmentPage() {
                                 </div>
                               )}
                               <div className="min-w-0">
-                                <p className="text-xs font-mono font-bold text-[#2A2118] truncate">
+                                <p className="text-xs font-mono font-bold text-[#2A2118] dark:text-[#F5EFE6] truncate">
                                   {selectedFile.name}
                                 </p>
-                                <p className="text-[10px] font-mono text-[#8B7355]">
+                                <p className="text-[10px] font-mono text-[#8B7355] dark:text-[#A89885]">
                                   {(selectedFile.size / 1024).toFixed(1)} KB • Ready to attach
                                 </p>
                               </div>
@@ -543,7 +543,7 @@ export default function AppointmentPage() {
                             <button
                               type="button"
                               onClick={handleRemoveFile}
-                              className="p-1.5 rounded-lg text-[#8B7355] hover:text-red-600 hover:bg-red-500/10 transition-colors shrink-0"
+                              className="p-1.5 rounded-lg text-[#8B7355] hover:text-red-500 hover:bg-red-500/10 transition-colors shrink-0"
                               title="Remove attached file"
                             >
                               <X className="w-4 h-4" />
@@ -566,7 +566,7 @@ export default function AppointmentPage() {
                           onChange={handleInputChange}
                           className="w-4 h-4 rounded border-[#B88A32]/30 text-[#B88A32] focus:ring-[#B88A32] accent-[#B88A32]"
                         />
-                        <label htmlFor="whatsappConfirm" className="text-xs text-[#6B5740] cursor-pointer">
+                        <label htmlFor="whatsappConfirm" className="text-xs text-[#6B5740] dark:text-[#C4B59E] cursor-pointer">
                           Send automated appointment reminder & clinic map location on WhatsApp
                         </label>
                       </div>
@@ -597,48 +597,48 @@ export default function AppointmentPage() {
                     key="success"
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="rounded-3xl p-10 border border-[#B88A32]/30 bg-[#FFF9EF] flex flex-col items-center text-center shadow-xl shadow-[#2A2118]/5"
+                    className="rounded-3xl p-10 border border-[#B88A32]/30 dark:border-[#B88A32]/40 bg-[#FFF9EF] dark:bg-[#121218] flex flex-col items-center text-center shadow-xl shadow-[#2A2118]/5 dark:shadow-black/50"
                   >
-                    <div className="w-20 h-20 bg-[#B88A32]/15 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+                    <div className="w-20 h-20 bg-[#B88A32]/15 dark:bg-[#B88A32]/25 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
                       <Check className="w-10 h-10 text-[#B88A32] stroke-[2.5]" />
                     </div>
 
-                    <span className="px-3 py-1 rounded-full bg-[#B88A32]/15 border border-[#B88A32]/25 text-[#B88A32] text-xs font-mono font-semibold mb-3">
+                    <span className="px-3 py-1 rounded-full bg-[#B88A32]/15 dark:bg-[#B88A32]/20 border border-[#B88A32]/25 dark:border-[#B88A32]/35 text-[#B88A32] dark:text-[#E5C178] text-xs font-mono font-semibold mb-3">
                       APPOINTMENT SCHEDULED
                     </span>
 
-                    <h2 className="text-3xl font-serif font-bold text-[#2A2118] mb-2">Slot Confirmed, {formData.name}!</h2>
-                    <p className="text-[#6B5740] text-sm mb-6 max-w-md">
+                    <h2 className="text-3xl font-serif font-bold text-[#2A2118] dark:text-[#F5EFE6] mb-2">Slot Confirmed, {formData.name}!</h2>
+                    <p className="text-[#6B5740] dark:text-[#A89885] text-sm mb-6 max-w-md">
                       Dr. Sheeraz Ahmad has reserved your dedicated slot at the ALIGH’S WARE clinic.
                     </p>
 
-                    <div className="bg-[#F4E9D5]/60 border border-[#B88A32]/20 rounded-2xl p-6 w-full max-w-md mb-8 text-left text-xs">
-                      <div className="flex justify-between items-center pb-3 border-b border-[#B88A32]/15 font-mono">
-                        <span className="text-[#8B7355]">APPOINTMENT ID</span>
-                        <span className="text-[#B88A32] font-bold text-sm tracking-wider">
+                    <div className="bg-[#F4E9D5]/60 dark:bg-[#161622] border border-[#B88A32]/20 dark:border-[#B88A32]/35 rounded-2xl p-6 w-full max-w-md mb-8 text-left text-xs">
+                      <div className="flex justify-between items-center pb-3 border-b border-[#B88A32]/15 dark:border-[#B88A32]/25 font-mono">
+                        <span className="text-[#8B7355] dark:text-[#A89885]">APPOINTMENT ID</span>
+                        <span className="text-[#B88A32] dark:text-[#E5C178] font-bold text-sm tracking-wider">
                           {appointmentId}
                         </span>
                       </div>
 
-                      <div className="py-4 space-y-2 border-b border-[#B88A32]/15">
+                      <div className="py-4 space-y-2 border-b border-[#B88A32]/15 dark:border-[#B88A32]/25">
                         <div className="flex justify-between">
-                          <span className="text-[#8B7355]">Date:</span>
-                          <span className="text-[#2A2118] font-medium">{formData.date}</span>
+                          <span className="text-[#8B7355] dark:text-[#A89885]">Date:</span>
+                          <span className="text-[#2A2118] dark:text-[#F5EFE6] font-medium">{formData.date}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-[#8B7355]">Slot:</span>
-                          <span className="text-[#2A2118] font-medium">{formData.time}</span>
+                          <span className="text-[#8B7355] dark:text-[#A89885]">Slot:</span>
+                          <span className="text-[#2A2118] dark:text-[#F5EFE6] font-medium">{formData.time}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-[#8B7355]">Service:</span>
-                          <span className="text-[#B88A32] font-medium text-right max-w-[200px] truncate">
+                          <span className="text-[#8B7355] dark:text-[#A89885]">Service:</span>
+                          <span className="text-[#B88A32] dark:text-[#E5C178] font-medium text-right max-w-[200px] truncate">
                             {formData.concern}
                           </span>
                         </div>
 
                         {uploadedAttachment && (
-                          <div className="pt-2 border-t border-[#B88A32]/10 flex items-center justify-between">
-                            <span className="text-[#8B7355] flex items-center gap-1.5">
+                          <div className="pt-2 border-t border-[#B88A32]/10 dark:border-[#B88A32]/20 flex items-center justify-between">
+                            <span className="text-[#8B7355] dark:text-[#A89885] flex items-center gap-1.5">
                               <Paperclip className="w-3 h-3 text-[#B88A32]" />
                               Attached Rx:
                             </span>
@@ -646,7 +646,7 @@ export default function AppointmentPage() {
                               href={uploadedAttachment.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-[#B88A32] hover:underline font-mono text-[11px] truncate max-w-[180px] flex items-center gap-1 font-semibold"
+                              className="text-[#B88A32] dark:text-[#E5C178] hover:underline font-mono text-[11px] truncate max-w-[180px] flex items-center gap-1 font-semibold"
                             >
                               <Eye className="w-3 h-3" />
                               <span>{uploadedAttachment.name}</span>
@@ -655,7 +655,7 @@ export default function AppointmentPage() {
                         )}
                       </div>
 
-                      <div className="pt-3 text-[#6B5740]">
+                      <div className="pt-3 text-[#6B5740] dark:text-[#C4B59E]">
                         Clinic Location: 65, Ghalib Nagar, Near Hali Public School, Firozabad, UP 283203
                       </div>
                     </div>
@@ -683,7 +683,7 @@ export default function AppointmentPage() {
                             details: ""
                           }));
                         }}
-                        className="w-full sm:flex-1 bg-[#F4E9D5] hover:bg-[#E8D2A8] text-[#2A2118] border border-[#B88A32]/25 py-3.5 rounded-xl font-medium transition-all text-sm"
+                        className="w-full sm:flex-1 bg-[#F4E9D5] dark:bg-[#1A1A26] hover:bg-[#E8D2A8] dark:hover:bg-[#222234] text-[#2A2118] dark:text-[#F5EFE6] border border-[#B88A32]/25 dark:border-[#B88A32]/35 py-3.5 rounded-xl font-medium transition-all text-sm"
                       >
                         Book Another
                       </button>
@@ -691,7 +691,7 @@ export default function AppointmentPage() {
 
                     <Link
                       href="/"
-                      className="mt-6 inline-flex items-center gap-2 text-xs font-mono text-[#6B5740] hover:text-[#B88A32] transition-colors group"
+                      className="mt-6 inline-flex items-center gap-2 text-xs font-mono text-[#6B5740] dark:text-[#C4B59E] hover:text-[#B88A32] dark:hover:text-[#E5C178] transition-colors group"
                     >
                       <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform text-[#B88A32]" />
                       <span>Return to Storefront</span>

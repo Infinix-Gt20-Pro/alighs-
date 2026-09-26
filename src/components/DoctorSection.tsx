@@ -110,7 +110,7 @@ export default function DoctorSection() {
             <div className="flex items-center gap-3 text-xs sm:text-sm text-[#5C4935] dark:text-[#C4B59E] mb-6 p-4 rounded-2xl bg-[#F4E9D5]/80 dark:bg-[#161622] border border-[#B88A32]/25 dark:border-[#B88A32]/35">
               <MapPin className="w-5 h-5 text-[#B88A32] dark:text-[#D4AF62] shrink-0" />
               <span className="font-mono text-xs text-[#2A2118] dark:text-[#F5EFE6]">
-                ALIG&apos;S WARE Flagship Clinic, Firozabad, Uttar Pradesh
+                65, Ghalib Nagar, Near Hali Public School, Firozabad, UP 283203
               </span>
             </div>
 

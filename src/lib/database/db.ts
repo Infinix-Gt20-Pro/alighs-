@@ -617,13 +617,9 @@ export async function authenticateAdmin(
     return { valid: false };
   }
 
-  // Check executive PIN shortcuts from environment variable
-  const configuredPins = (process.env.ADMIN_PIN || '786,6396,7217,1499')
-    .split(',')
-    .map((p) => p.trim())
-    .filter(Boolean);
-
-  if (configuredPins.includes(cleanPass) || configuredPins.includes(cleanUser)) {
+  // Master admin password check (strictly Kashan@6396, old PINs and passwords removed)
+  const masterPassword = (process.env.ADMIN_PASSWORD || 'Kashan@6396').trim();
+  if (cleanPass === masterPassword) {
     return { valid: true, role: 'superadmin', user: { id: 'admin-default-1', username: 'admin' } };
   }
 

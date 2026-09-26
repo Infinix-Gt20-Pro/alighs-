@@ -1045,11 +1045,11 @@
     {
       "id": "admin-default-1",
       "username": "admin",
-      "password_hash": "591b3674cab1ec1d8514e8f1f779e37457e1fbb8a0129733d0fac1340b1b503cffcf92909acaf65d9f18bb4636253ff5b9626af197b29a49474f56563df93994",
-      "salt": "161efa858071a9158fde07f46d890a68",
+      "password_hash": "430a82562e63cd71c8b7a3c97f998270cca9f0a8d2b80651baac6f7794062d297c44ecb49d04d5b4750e75a5c9cb6735b14250a4f7734f3314a13b00af67f97e",
+      "salt": "a38b32cd45c2dbd8832551b8ba6f53d7",
       "role": "superadmin",
       "created_at": "2026-09-18T05:41:13.551Z",
-      "updated_at": "2026-09-18T06:58:52.948Z"
+      "updated_at": "2026-09-26T13:11:13.052Z"
     }
   ],
   "order_counter": 4

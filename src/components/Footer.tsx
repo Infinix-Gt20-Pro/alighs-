@@ -120,14 +120,6 @@ export default function Footer() {
                   <ExternalLink className="w-3.5 h-3.5 opacity-70 shrink-0" />
                 </a>
               </li>
-              <li>
-                <Link
-                  href="/admin"
-                  className="text-[#8E8272] hover:text-white transition-colors text-sm"
-                >
-                  Orders &amp; Admin Portal
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -170,7 +162,7 @@ export default function Footer() {
               </li>
               <li className="flex items-start gap-3 text-[#8E8272] text-sm">
                 <MapPin className="w-4 h-4 text-[#B88A32] shrink-0 mt-0.5" />
-                <span>Firozabad, Uttar Pradesh, India &bull; PIN 283203</span>
+                <span>65, Ghalib Nagar, Near Hali Public School, Firozabad, UP 283203</span>
               </li>
             </ul>
           </div>

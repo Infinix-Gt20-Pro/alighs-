@@ -21,21 +21,25 @@ async function runTests() {
   }
   console.log(`✓ Database initialized with ${db.products.length} products, ${db.orders.length} orders, ${db.customers.length} customers.`);
 
-  // TEST 2: Admin Authentication & PIN shortcuts
-  console.log('\n[TEST 2] Testing Admin Authentication & Security PINs...');
-  const validPins = ['786', '6396', '7217', '1499'];
-  for (const pin of validPins) {
-    const ok = await authenticateAdmin(pin);
-    if (!ok?.valid) throw new Error(`PIN "${pin}" should authenticate successfully.`);
+  // TEST 2: Admin Authentication & Password Verification
+  console.log('\n[TEST 2] Testing Admin Authentication & Security Password...');
+  const ok = await authenticateAdmin('admin', 'Kashan@6396');
+  if (!ok?.valid) throw new Error('Password "Kashan@6396" should authenticate successfully.');
+
+  // Verify old PINs are rejected
+  const oldPins = ['786', '6396', '7217', '1499', 'AligsWare@2026!'];
+  for (const pin of oldPins) {
+    const shouldFail = await authenticateAdmin('admin', pin);
+    if (shouldFail?.valid) throw new Error(`Old credential "${pin}" should NOT authenticate.`);
   }
   const badAuth = await authenticateAdmin('wrong_passcode');
   if (badAuth?.valid) throw new Error('Invalid passcode should not authenticate.');
-  console.log('✓ PIN shortcuts (786, 6396, 7217, 1499) and rejection of invalid passcodes passed.');
+  console.log('✓ Master password (Kashan@6396) verified and all legacy credentials rejected.');
 
   // TEST 3: Admin Password Change Flow
   console.log('\n[TEST 3] Testing Admin Password Change...');
-  const defaultAuth = await authenticateAdmin('admin', 'AligsWare@2026!');
-  if (!defaultAuth?.valid) throw new Error('Default admin password should authenticate.');
+  const defaultAuth = await authenticateAdmin('admin', 'Kashan@6396');
+  if (!defaultAuth?.valid) throw new Error('Admin password should authenticate.');
 
   const changed = await changeAdminPassword('NewTestPassword123!');
   if (!changed) throw new Error('Password change returned false.');
@@ -43,10 +47,10 @@ async function runTests() {
   if (!newAuth?.valid) throw new Error('New password authentication failed.');
 
   // Restore default password
-  await changeAdminPassword('AligsWare@2026!');
-  const restoredAuth = await authenticateAdmin('admin', 'AligsWare@2026!');
+  await changeAdminPassword('Kashan@6396');
+  const restoredAuth = await authenticateAdmin('admin', 'Kashan@6396');
   if (!restoredAuth?.valid) throw new Error('Password restoration failed.');
-  console.log('✓ Admin password change, verification, and restoration verified successfully.');
+  console.log('✓ Admin password change, verification, and restoration to Kashan@6396 verified successfully.');
 
   // TEST 4: Order Transaction & Inventory Decrement
   console.log('\n[TEST 4] Testing Order Transaction & Stock Decrement...');

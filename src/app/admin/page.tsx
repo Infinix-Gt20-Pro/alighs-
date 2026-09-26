@@ -161,6 +161,8 @@ export default function AdminDashboardPage() {
   const [authMode, setAuthMode] = useState<"pin" | "password">("pin");
   const [authError, setAuthError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockoutSecondsRemaining, setLockoutSecondsRemaining] = useState(0);
 
   // Executive Toast Notification State
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
@@ -261,10 +263,56 @@ export default function AdminDashboardPage() {
     if (token && token.startsWith("adm_")) {
       setIsAuthenticated(true);
     }
+
+    const storedLockout = localStorage.getItem("aligs_admin_lockout_until");
+    const storedAttempts = localStorage.getItem("aligs_admin_failed_attempts");
+    if (storedAttempts) {
+      setFailedAttempts(parseInt(storedAttempts, 10) || 0);
+    }
+    if (storedLockout) {
+      const lockUntil = parseInt(storedLockout, 10);
+      const now = Date.now();
+      if (lockUntil > now) {
+        const diff = Math.ceil((lockUntil - now) / 1000);
+        setLockoutSecondsRemaining(diff);
+      } else {
+        localStorage.removeItem("aligs_admin_lockout_until");
+        localStorage.removeItem("aligs_admin_failed_attempts");
+        setLockoutSecondsRemaining(0);
+        setFailedAttempts(0);
+      }
+    }
   }, []);
+
+  useEffect(() => {
+    if (lockoutSecondsRemaining <= 0) return;
+    const timer = setInterval(() => {
+      setLockoutSecondsRemaining((prev) => {
+        if (prev <= 1) {
+          localStorage.removeItem("aligs_admin_lockout_until");
+          localStorage.removeItem("aligs_admin_failed_attempts");
+          setFailedAttempts(0);
+          setAuthError("");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [lockoutSecondsRemaining]);
+
+  const formatRemainingTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
+  };
 
   const handleAdminLogin = async (e: React.FormEvent, identifier: string, secret: string) => {
     e.preventDefault();
+    if (lockoutSecondsRemaining > 0) {
+      setAuthError(`Security timeout active. Please wait ${formatRemainingTime(lockoutSecondsRemaining)}.`);
+      return;
+    }
     setAuthLoading(true);
     setAuthError("");
     try {
@@ -282,9 +330,34 @@ export default function AdminDashboardPage() {
         setIsAuthenticated(true);
         localStorage.setItem("aligs_admin_session_token", data.token);
         localStorage.setItem("aligs_admin_role", data.role || "superadmin");
+        localStorage.removeItem("aligs_admin_failed_attempts");
+        localStorage.removeItem("aligs_admin_lockout_until");
+        setFailedAttempts(0);
+        setLockoutSecondsRemaining(0);
         showToast("Authenticated successfully. Welcome to Executive Atelier OS.", "success");
       } else {
-        setAuthError(data.error || "Invalid executive credentials. Access denied.");
+        if (res.status === 429 || data.isLocked) {
+          const timeoutSec = data.retryAfter || 300;
+          const lockUntil = data.lockedUntil || (Date.now() + timeoutSec * 1000);
+          localStorage.setItem("aligs_admin_lockout_until", String(lockUntil));
+          localStorage.setItem("aligs_admin_failed_attempts", "3");
+          setFailedAttempts(3);
+          setLockoutSecondsRemaining(timeoutSec);
+          setAuthError(data.error || "Security Timeout: 3 failed attempts reached. Access is locked for 5 minutes.");
+        } else {
+          const newFailed = failedAttempts + 1;
+          setFailedAttempts(newFailed);
+          localStorage.setItem("aligs_admin_failed_attempts", String(newFailed));
+          if (newFailed >= 3) {
+            const timeoutSec = 300;
+            const lockUntil = Date.now() + timeoutSec * 1000;
+            localStorage.setItem("aligs_admin_lockout_until", String(lockUntil));
+            setLockoutSecondsRemaining(timeoutSec);
+            setAuthError("Security Timeout: 3 failed attempts reached. Access is locked for 5 minutes.");
+          } else {
+            setAuthError(data.error || `Invalid credentials. (${3 - newFailed} attempt${3 - newFailed > 1 ? "s" : ""} remaining before timeout)`);
+          }
+        }
       }
     } catch {
       setAuthError("Failed to connect to authentication server. Please check your network.");
@@ -794,21 +867,43 @@ export default function AdminDashboardPage() {
                 <input
                   type="password"
                   autoFocus
+                  disabled={lockoutSecondsRemaining > 0 || authLoading}
                   placeholder="Enter Passcode"
                   value={pinInput}
                   onChange={(e) => setPinInput(e.target.value)}
-                  className="w-full bg-white/[0.04] border border-[#B88A32]/30 rounded-xl px-4 py-3 text-center text-lg tracking-widest text-white placeholder-neutral-600 focus:outline-none focus:border-[#B88A32] transition-all font-mono"
+                  className="w-full bg-white/[0.04] border border-[#B88A32]/30 rounded-xl px-4 py-3 text-center text-lg tracking-widest text-white placeholder-neutral-600 focus:outline-none focus:border-[#B88A32] transition-all font-mono disabled:opacity-40 disabled:cursor-not-allowed"
                 />
               </div>
 
-              {authError && <p className="text-xs text-red-400 text-center font-mono">{authError}</p>}
+              {lockoutSecondsRemaining > 0 ? (
+                <div className="p-3 rounded-xl bg-red-950/40 border border-red-500/40 text-center font-mono text-xs text-red-300">
+                  <div className="flex items-center justify-center gap-1.5 font-bold mb-1 text-red-400">
+                    <AlertTriangle className="w-4 h-4" />
+                    <span>SECURITY TIMEOUT ACTIVE</span>
+                  </div>
+                  <p>3 failed attempts detected. Access temporarily locked.</p>
+                  <p className="text-sm font-bold text-red-300 mt-1">Try again in {formatRemainingTime(lockoutSecondsRemaining)}</p>
+                </div>
+              ) : authError ? (
+                <p className="text-xs text-red-400 text-center font-mono">{authError}</p>
+              ) : null}
 
               <button
                 type="submit"
-                disabled={authLoading}
-                className="w-full bg-[#B88A32] hover:bg-[#A07828] text-white font-semibold py-3.5 rounded-xl transition-all shadow-lg shadow-[#B88A32]/25 text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                disabled={authLoading || lockoutSecondsRemaining > 0}
+                className="w-full bg-[#B88A32] hover:bg-[#A07828] text-white font-semibold py-3.5 rounded-xl transition-all shadow-lg shadow-[#B88A32]/25 text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Lock className="w-4 h-4" /> {authLoading ? "Verifying..." : "Enter Command Center"}
+                {lockoutSecondsRemaining > 0 ? (
+                  <>
+                    <Lock className="w-4 h-4" /> Locked ({formatRemainingTime(lockoutSecondsRemaining)})
+                  </>
+                ) : authLoading ? (
+                  "Verifying..."
+                ) : (
+                  <>
+                    <Lock className="w-4 h-4" /> Enter Command Center
+                  </>
+                )}
               </button>
             </form>
           ) : (
@@ -820,9 +915,10 @@ export default function AdminDashboardPage() {
                 <input
                   type="text"
                   placeholder="admin"
+                  disabled={lockoutSecondsRemaining > 0 || authLoading}
                   value={usernameInput}
                   onChange={(e) => setUsernameInput(e.target.value)}
-                  className="w-full bg-white/[0.04] border border-[#B88A32]/30 rounded-xl px-4 py-2.5 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-[#B88A32] transition-all font-mono"
+                  className="w-full bg-white/[0.04] border border-[#B88A32]/30 rounded-xl px-4 py-2.5 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-[#B88A32] transition-all font-mono disabled:opacity-40 disabled:cursor-not-allowed"
                 />
               </div>
               <div>
@@ -832,20 +928,36 @@ export default function AdminDashboardPage() {
                 <input
                   type="password"
                   placeholder="••••••••••••"
+                  disabled={lockoutSecondsRemaining > 0 || authLoading}
                   value={passwordInput}
                   onChange={(e) => setPasswordInput(e.target.value)}
-                  className="w-full bg-white/[0.04] border border-[#B88A32]/30 rounded-xl px-4 py-2.5 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-[#B88A32] transition-all font-mono"
+                  className="w-full bg-white/[0.04] border border-[#B88A32]/30 rounded-xl px-4 py-2.5 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-[#B88A32] transition-all font-mono disabled:opacity-40 disabled:cursor-not-allowed"
                 />
               </div>
 
-              {authError && <p className="text-xs text-red-400 text-center font-mono">{authError}</p>}
+              {lockoutSecondsRemaining > 0 ? (
+                <div className="p-3 rounded-xl bg-red-950/40 border border-red-500/40 text-center font-mono text-xs text-red-300">
+                  <div className="flex items-center justify-center gap-1.5 font-bold mb-1 text-red-400">
+                    <AlertTriangle className="w-4 h-4" />
+                    <span>SECURITY TIMEOUT ACTIVE</span>
+                  </div>
+                  <p>3 failed attempts detected. Access temporarily locked.</p>
+                  <p className="text-sm font-bold text-red-300 mt-1">Try again in {formatRemainingTime(lockoutSecondsRemaining)}</p>
+                </div>
+              ) : authError ? (
+                <p className="text-xs text-red-400 text-center font-mono">{authError}</p>
+              ) : null}
 
               <button
                 type="submit"
-                disabled={authLoading}
-                className="w-full bg-[#B88A32] hover:bg-[#A07828] text-white font-semibold py-3.5 rounded-xl transition-all shadow-lg shadow-[#B88A32]/25 text-sm flex items-center justify-center gap-2 disabled:opacity-60"
+                disabled={authLoading || lockoutSecondsRemaining > 0}
+                className="w-full bg-[#B88A32] hover:bg-[#A07828] text-white font-semibold py-3.5 rounded-xl transition-all shadow-lg shadow-[#B88A32]/25 text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {authLoading ? (
+                {lockoutSecondsRemaining > 0 ? (
+                  <>
+                    <Lock className="w-4 h-4" /> Locked ({formatRemainingTime(lockoutSecondsRemaining)})
+                  </>
+                ) : authLoading ? (
                   <RefreshCw className="w-4 h-4 animate-spin" />
                 ) : (
                   <>

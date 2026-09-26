@@ -314,7 +314,7 @@ export default function AppointmentPage() {
                     <MapPin className="w-3.5 h-3.5" /> CLINIC ADDRESS
                   </div>
                   <p className="text-[#2A2118] font-medium leading-relaxed">
-                    ALIGH’S WARE Vision Clinic, Station Road, Firozabad, Uttar Pradesh — 283203
+                    65, Ghalib Nagar, Near Hali Public School, Firozabad, UP — 283203
                   </p>
                   <p className="text-[#8B7355] mt-2 font-mono">Mon – Sat: 10:00 AM – 08:30 PM</p>
                 </div>
@@ -656,7 +656,7 @@ export default function AppointmentPage() {
                       </div>
 
                       <div className="pt-3 text-[#6B5740]">
-                        Clinic Location: Station Road, Firozabad (UP)
+                        Clinic Location: 65, Ghalib Nagar, Near Hali Public School, Firozabad, UP 283203
                       </div>
                     </div>
 

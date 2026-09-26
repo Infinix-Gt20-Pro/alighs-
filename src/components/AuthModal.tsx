@@ -19,6 +19,7 @@ import {
   EyeOff,
   CheckCircle2,
   RotateCw,
+  AlertTriangle,
 } from "lucide-react";
 import { useAuth, AuthModalTab } from "@/context/AuthContext";
 
@@ -64,6 +65,54 @@ export default function AuthModal() {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [requiresVerificationPrompt, setRequiresVerificationPrompt] = useState(false);
+  const [clientFailedAttempts, setClientFailedAttempts] = useState(0);
+  const [lockoutSecondsRemaining, setLockoutSecondsRemaining] = useState(0);
+
+  // Check client lockout on mount / modal open
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const storedLockout = localStorage.getItem("aligs_client_lockout_until");
+    const storedAttempts = localStorage.getItem("aligs_client_failed_attempts");
+    if (storedAttempts) {
+      setClientFailedAttempts(parseInt(storedAttempts, 10) || 0);
+    }
+    if (storedLockout) {
+      const lockUntil = parseInt(storedLockout, 10);
+      const now = Date.now();
+      if (lockUntil > now) {
+        setLockoutSecondsRemaining(Math.ceil((lockUntil - now) / 1000));
+      } else {
+        localStorage.removeItem("aligs_client_lockout_until");
+        localStorage.removeItem("aligs_client_failed_attempts");
+        setLockoutSecondsRemaining(0);
+        setClientFailedAttempts(0);
+      }
+    }
+  }, [isAuthModalOpen]);
+
+  // Lockout countdown timer
+  useEffect(() => {
+    if (lockoutSecondsRemaining <= 0) return;
+    const timer = setInterval(() => {
+      setLockoutSecondsRemaining((prev) => {
+        if (prev <= 1) {
+          localStorage.removeItem("aligs_client_lockout_until");
+          localStorage.removeItem("aligs_client_failed_attempts");
+          setClientFailedAttempts(0);
+          setErrorMsg("");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [lockoutSecondsRemaining]);
+
+  const formatRemainingTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
+  };
 
   // Cooldown countdown timer
   useEffect(() => {
@@ -118,13 +167,47 @@ export default function AuthModal() {
     setLoading(true);
 
     if (authModalTab === "signin") {
+      if (lockoutSecondsRemaining > 0) {
+        setErrorMsg(`Security timeout active. Please wait ${formatRemainingTime(lockoutSecondsRemaining)}.`);
+        setLoading(false);
+        return;
+      }
+
       const res = await signIn(email, password);
       if (!res.success) {
-        setErrorMsg(res.error || "Sign in failed. Please check credentials.");
+        const newFailed = clientFailedAttempts + 1;
+        setClientFailedAttempts(newFailed);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("aligs_client_failed_attempts", String(newFailed));
+        }
+
+        if (newFailed >= 3) {
+          const timeoutSec = 300;
+          const lockUntil = Date.now() + timeoutSec * 1000;
+          if (typeof window !== "undefined") {
+            localStorage.setItem("aligs_client_lockout_until", String(lockUntil));
+          }
+          setLockoutSecondsRemaining(timeoutSec);
+          setErrorMsg("Security Timeout: 3 failed attempts reached. Access is locked for 5 minutes.");
+        } else {
+          const remaining = 3 - newFailed;
+          setErrorMsg(
+            res.error
+              ? `${res.error} (${remaining} attempt${remaining > 1 ? "s" : ""} remaining before security timeout)`
+              : `Invalid credentials. (${remaining} attempt${remaining > 1 ? "s" : ""} remaining before security timeout)`
+          );
+        }
+
         if (res.requireVerification) {
           setRequiresVerificationPrompt(true);
         }
       } else {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("aligs_client_failed_attempts");
+          localStorage.removeItem("aligs_client_lockout_until");
+        }
+        setClientFailedAttempts(0);
+        setLockoutSecondsRemaining(0);
         const target = authModalRedirect || (authModalReason ? "/checkout" : null);
         if (target && typeof window !== "undefined") {
           if (window.location.pathname !== target) {
@@ -364,7 +447,20 @@ export default function AuthModal() {
           {/* Feedback: Error Banner */}
           {errorMsg && (
             <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-500 text-xs text-center font-mono">
-              <p>{errorMsg}</p>
+              {authModalTab === "signin" && lockoutSecondsRemaining > 0 ? (
+                <div>
+                  <div className="flex items-center justify-center gap-1.5 font-bold mb-1 text-red-600 dark:text-red-400">
+                    <AlertTriangle className="w-4 h-4" />
+                    <span>SECURITY TIMEOUT ACTIVE</span>
+                  </div>
+                  <p>3 failed attempts detected. Sign in temporarily locked for security.</p>
+                  <p className="text-sm font-bold text-red-600 dark:text-red-400 mt-1">
+                    Try again in {formatRemainingTime(lockoutSecondsRemaining)}
+                  </p>
+                </div>
+              ) : (
+                <p>{errorMsg}</p>
+              )}
               {requiresVerificationPrompt && (
                 <div className="mt-2.5 flex items-center justify-center gap-2">
                   <button
@@ -447,10 +543,11 @@ export default function AuthModal() {
                   <input
                     type="email"
                     required
+                    disabled={loading || (authModalTab === "signin" && lockoutSecondsRemaining > 0)}
                     placeholder="client@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-[#FFF9EF] dark:bg-[#161622] border border-[#B88A32]/30 rounded-lg pl-10 pr-4 py-2.5 text-sm text-[#2A2118] dark:text-[#F5EFE6] placeholder-[#8B7355]/60 dark:placeholder-[#8E8272]/60 focus:outline-none focus:border-[#B88A32] transition-colors font-sans"
+                    className="w-full bg-[#FFF9EF] dark:bg-[#161622] border border-[#B88A32]/30 rounded-lg pl-10 pr-4 py-2.5 text-sm text-[#2A2118] dark:text-[#F5EFE6] placeholder-[#8B7355]/60 dark:placeholder-[#8E8272]/60 focus:outline-none focus:border-[#B88A32] transition-colors font-sans disabled:opacity-40 disabled:cursor-not-allowed"
                   />
                 </div>
               </div>
@@ -475,10 +572,11 @@ export default function AuthModal() {
                   <input
                     type={showPassword ? "text" : "password"}
                     required
+                    disabled={loading || (authModalTab === "signin" && lockoutSecondsRemaining > 0)}
                     placeholder="••••••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-[#FFF9EF] dark:bg-[#161622] border border-[#B88A32]/30 rounded-lg pl-10 pr-10 py-2.5 text-sm text-[#2A2118] dark:text-[#F5EFE6] placeholder-[#8B7355]/60 dark:placeholder-[#8E8272]/60 focus:outline-none focus:border-[#B88A32] transition-colors font-sans"
+                    className="w-full bg-[#FFF9EF] dark:bg-[#161622] border border-[#B88A32]/30 rounded-lg pl-10 pr-10 py-2.5 text-sm text-[#2A2118] dark:text-[#F5EFE6] placeholder-[#8B7355]/60 dark:placeholder-[#8E8272]/60 focus:outline-none focus:border-[#B88A32] transition-colors font-sans disabled:opacity-40 disabled:cursor-not-allowed"
                   />
                   <button
                     type="button"
@@ -492,11 +590,16 @@ export default function AuthModal() {
 
               <button
                 type="submit"
-                disabled={loading || googleLoading}
-                className="btn-primary rounded-full w-full py-3.5 text-xs flex items-center justify-center gap-2 mt-4 disabled:opacity-50"
+                disabled={loading || googleLoading || (authModalTab === "signin" && lockoutSecondsRemaining > 0)}
+                className="btn-primary rounded-full w-full py-3.5 text-xs flex items-center justify-center gap-2 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin text-white" />
+                ) : authModalTab === "signin" && lockoutSecondsRemaining > 0 ? (
+                  <>
+                    <Lock className="w-4 h-4" />
+                    <span>LOCKED ({formatRemainingTime(lockoutSecondsRemaining)})</span>
+                  </>
                 ) : (
                   <>
                     <span>{authModalTab === "signin" ? "SIGN IN WITH EMAIL" : "CREATE ATELIER ACCOUNT"}</span>
@@ -517,9 +620,9 @@ export default function AuthModal() {
               {/* Google OAuth Button */}
               <button
                 type="button"
-                disabled={loading || googleLoading}
+                disabled={loading || googleLoading || (authModalTab === "signin" && lockoutSecondsRemaining > 0)}
                 onClick={handleGoogleSignIn}
-                className="btn-secondary rounded-full w-full py-3 px-4 text-xs flex items-center justify-center gap-3 disabled:opacity-50"
+                className="btn-secondary rounded-full w-full py-3 px-4 text-xs flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {googleLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin text-[#B88A32]" />

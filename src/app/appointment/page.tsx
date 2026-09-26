@@ -283,7 +283,7 @@ export default function AppointmentPage() {
                 </p>
                 <div className="flex flex-wrap gap-2 mb-6">
                   <span className="px-2.5 py-1 rounded-full text-[11px] font-mono bg-[#F4E9D5] border border-[#B88A32]/20 text-[#4A3928]">
-                    MBBS • DOMS (AMU)
+                    B.Optom • D.Optom (AMU)
                   </span>
                   <span className="px-2.5 py-1 rounded-full text-[11px] font-mono bg-[#B88A32]/10 border border-[#B88A32]/25 text-[#B88A32] font-semibold">
                     12+ Years Clinical Practice

@@ -91,13 +91,16 @@ export default function DoctorSection() {
 
                 <div className="flex flex-wrap justify-center sm:justify-start gap-2">
                   <span className="px-3 py-1 rounded-full text-xs font-mono font-bold text-[#2A2118] dark:text-[#F5EFE6] bg-[#F4E9D5] dark:bg-[#1C1C2A] border border-[#B88A32]/30 dark:border-[#B88A32]/40">
+                    B.Optom
+                  </span>
+                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold text-[#2A2118] dark:text-[#F5EFE6] bg-[#F4E9D5] dark:bg-[#1C1C2A] border border-[#B88A32]/30 dark:border-[#B88A32]/40">
+                    D.Optom
+                  </span>
+                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold text-[#2A2118] dark:text-[#F5EFE6] bg-[#F4E9D5] dark:bg-[#1C1C2A] border border-[#B88A32]/30 dark:border-[#B88A32]/40">
                     AMU Optometry
                   </span>
                   <span className="px-3 py-1 rounded-full text-xs font-mono font-bold text-[#2A2118] dark:text-[#F5EFE6] bg-[#F4E9D5] dark:bg-[#1C1C2A] border border-[#B88A32]/30 dark:border-[#B88A32]/40">
-                    MBBS
-                  </span>
-                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold text-[#2A2118] dark:text-[#F5EFE6] bg-[#F4E9D5] dark:bg-[#1C1C2A] border border-[#B88A32]/30 dark:border-[#B88A32]/40">
-                    DOMS
+                    Clinical Refraction
                   </span>
                 </div>
               </div>

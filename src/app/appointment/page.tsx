@@ -286,7 +286,7 @@ export default function AppointmentPage() {
                     B.Optom • D.Optom (AMU)
                   </span>
                   <span className="px-2.5 py-1 rounded-full text-[11px] font-mono bg-[#B88A32]/10 dark:bg-[#B88A32]/20 border border-[#B88A32]/25 dark:border-[#B88A32]/35 text-[#B88A32] dark:text-[#E5C178] font-semibold">
-                    12+ Years Clinical Practice
+                    Ex-Lenskart Senior Optometrist
                   </span>
                 </div>
 

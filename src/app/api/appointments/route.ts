@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import insforge from '@/lib/insforge';
 import { verifyAdminRequest, unauthorizedAdminResponse } from '@/lib/auth/adminAuth';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
 function generateAppointmentId() {
   const date = new Date();
@@ -13,6 +14,20 @@ function generateAppointmentId() {
 
 export async function POST(request: Request) {
   try {
+    const clientIp = getClientIp(request);
+    const rateCheck = checkRateLimit('appointments_post', clientIp, 10, 10 * 60 * 1000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: `Too many appointment requests from this device. Please wait ${rateCheck.retryAfterSeconds} seconds before trying again.`,
+        },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(rateCheck.retryAfterSeconds) },
+        }
+      );
+    }
+
     const body = await request.json();
     const preferredDate = body.preferredDate || body.date;
     const preferredTime = body.preferredTime || body.time;

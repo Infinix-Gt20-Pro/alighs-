@@ -1,19 +1,35 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { trackOrderCustomer } from '@/lib/database/db';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
 export async function POST(request: Request) {
   try {
+    const clientIp = getClientIp(request);
+    const rateCheck = checkRateLimit('track_order_post', clientIp, 15, 5 * 60 * 1000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: `Too many tracking requests. Please wait ${rateCheck.retryAfterSeconds} seconds before trying again.`,
+        },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(rateCheck.retryAfterSeconds) },
+        }
+      );
+    }
+
     const body = await request.json().catch(() => ({}));
     const { orderNumber, phone } = body;
 
-    if (!orderNumber || !phone) {
+    const cleanPhone = String(phone || '').replace(/\D/g, '');
+    if (!orderNumber || !phone || cleanPhone.length < 10) {
       return NextResponse.json(
-        { error: 'Both Order Number and Phone Number are required to track an order.' },
+        { error: 'Valid Order Number and 10-digit Phone Number are required to track an order.' },
         { status: 400 }
       );
     }
 
-    const order = await trackOrderCustomer(String(orderNumber), String(phone));
+    const order = await trackOrderCustomer(String(orderNumber), cleanPhone);
     if (!order) {
       return NextResponse.json(
         {

@@ -24,9 +24,12 @@ export async function GET(
       const queryPhone = searchParams.get('phone')?.replace(/\D/g, '') || '';
       const orderPhone = (order.customer?.phone || '').replace(/\D/g, '');
 
-      if (!queryPhone || !orderPhone || !orderPhone.endsWith(queryPhone.slice(-10))) {
+      const queryLast10 = queryPhone.slice(-10);
+      const orderLast10 = orderPhone.slice(-10);
+
+      if (queryLast10.length !== 10 || orderLast10.length !== 10 || queryLast10 !== orderLast10) {
         return unauthorizedAdminResponse(
-          'Unauthorized: Admin authentication or matching registered phone number required to view order details.'
+          'Unauthorized: Admin authentication or matching 10-digit registered phone number required to view order details.'
         );
       }
     }

@@ -3,6 +3,7 @@ import insforge from '@/lib/insforge';
 import { getFallbackProducts, hydrateProduct, PRODUCTS, ProductItem } from '@/lib/products-data';
 import { readFallbackRdb } from '@/lib/database/db';
 import { Product } from '@/lib/database/schema';
+import { verifyAdminRequest } from '@/lib/auth/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,7 +12,8 @@ export async function GET(request: Request) {
   const category = searchParams.get('category') || undefined;
   const frameShape = searchParams.get('frameShape') || undefined;
   const sort = searchParams.get('sort') || undefined;
-  const includeAll = searchParams.get('includeAll') === 'true';
+  const auth = verifyAdminRequest(request);
+  const includeAll = auth.authorized && searchParams.get('includeAll') === 'true';
 
   let dbProducts: Product[] | null = null;
 

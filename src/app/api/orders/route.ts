@@ -126,17 +126,34 @@ export async function GET(request: Request) {
     let list = db.orders.map((o) => {
       const customer = db.customers.find((c) => c.id === o.customer_id);
       const items = db.order_items.filter((it) => it.order_id === o.id);
+
+      let customerData: any = customer || {
+        full_name: 'Unknown Client',
+        phone: 'N/A',
+        email: '',
+        address: '',
+        city: '',
+        pincode: '',
+      };
+
+      if (!auth.authorized && customer) {
+        const rawPhone = customer.phone || '';
+        const maskedPhone = rawPhone.length > 4 ? rawPhone.slice(-4).padStart(rawPhone.length, '*') : '***';
+        const maskedEmail = customer.email ? customer.email.replace(/^(.)(.*)(@.*)$/, '$1***$3') : '';
+        customerData = {
+          full_name: customer.full_name,
+          phone: maskedPhone,
+          email: maskedEmail,
+          address: `${customer.city || ''} - ${customer.pincode || ''}`,
+          city: customer.city,
+          pincode: customer.pincode,
+        };
+      }
+
       return {
         ...o,
         orderId: o.order_number, // backward compatibility for legacy admin views
-        customer: customer || {
-          full_name: 'Unknown Client',
-          phone: 'N/A',
-          email: '',
-          address: '',
-          city: '',
-          pincode: '',
-        },
+        customer: customerData,
         items: items.map((it) => ({
           productId: it.product_id,
           name: it.product_name_snapshot,

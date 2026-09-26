@@ -478,14 +478,12 @@ export async function trackOrderCustomer(orderNumber: string, phone: string) {
   if (!customers || customers.length === 0) return null;
   const customer = customers[0] as Customer;
 
-  // Verify phone match (last 10 or 4 digits)
+  // Verify phone match (strictly match 10 digits)
   const customerPhone = customer.phone.replace(/[^0-9]/g, '');
-  if (cleanPhone.length >= 4) {
-    const p1 = customerPhone.slice(-10);
-    const p2 = cleanPhone.slice(-10);
-    if (!p1.endsWith(p2) && !p2.endsWith(p1)) {
-      return null; // Phone does not match
-    }
+  const p1 = customerPhone.slice(-10);
+  const p2 = cleanPhone.slice(-10);
+  if (p2.length !== 10 || p1.length !== 10 || p1 !== p2) {
+    return null; // Phone does not match or insufficient digits provided
   }
 
   // Fetch items and history

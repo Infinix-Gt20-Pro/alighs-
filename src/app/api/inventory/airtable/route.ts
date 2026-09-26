@@ -178,6 +178,11 @@ export async function POST(request: Request) {
  */
 export async function PATCH(request: Request) {
   try {
+    const auth = verifyAdminRequest(request);
+    if (!auth.authorized) {
+      return unauthorizedAdminResponse(auth.error);
+    }
+
     const body = await request.json();
     const { recordId, stock } = body;
 
